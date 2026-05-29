@@ -1,0 +1,75 @@
+{
+  "name": "DKM Knowledge Hub - Capture MVP",
+  "source_workflow_id": "mNuGTfF2XFi4Mk8n",
+  "source_instance": "https://n8n.srv775529.hstgr.cloud",
+  "status": {
+    "active": true,
+    "archived": false,
+    "validated": true,
+    "blocking_errors": 0,
+    "warnings": 7
+  },
+  "purpose": "Capture a Telegram/Knowledge Scout learning, structure it with Claude Haiku, store it in Supabase, and notify Telegram topic 2.",
+  "trigger": {
+    "type": "webhook",
+    "method": "POST",
+    "path": "dkm-knowledge-hub-capture"
+  },
+  "flow": [
+    "Manual Trigger",
+    "Webhook Capture",
+    "Normalize Capture Input",
+    "Structure Learning - Claude Haiku",
+    "Parse & Validate JSON",
+    "Learning valide ?",
+    "Prepare Supabase Insert Payload",
+    "Insert Postgres - Knowledge Hub",
+    "Notify Telegram - structured",
+    "Notify Telegram - validation issue"
+  ],
+  "connections_summary": [
+    "Manual Trigger -> Normalize Capture Input",
+    "Webhook Capture -> Normalize Capture Input",
+    "Normalize Capture Input -> Structure Learning - Claude Haiku",
+    "Structure Learning - Claude Haiku -> Parse & Validate JSON",
+    "Parse & Validate JSON -> Learning valide ?",
+    "Learning valide ? true -> Prepare Supabase Insert Payload",
+    "Learning valide ? false -> Notify Telegram - validation issue",
+    "Prepare Supabase Insert Payload -> Insert Postgres - Knowledge Hub",
+    "Insert Postgres - Knowledge Hub -> Notify Telegram - structured"
+  ],
+  "runtime": {
+    "anthropic_model": "claude-haiku-4-5",
+    "supabase_project_ref": "khwogmehrpeiwaemiccx",
+    "supabase_schema": "learning_hub",
+    "supabase_table": "learnings",
+    "telegram_chat_id": "-1003730559236",
+    "telegram_thread_id": 2,
+    "telegram_bot_username": "optiai_dkm_knowledge_hub_bot"
+  },
+  "n8n_credentials_required_by_name": [
+    "Anthropic API Header",
+    "Postgres - Knowledge Hub - Supabase OptiAI OS",
+    "DKM Knowledge Hub Bot"
+  ],
+  "secrets": {
+    "contains_secret_values": false,
+    "notes": "No API keys, tokens, DB passwords, service role keys, or credential secret values are stored here."
+  },
+  "last_end_to_end_test": {
+    "date": "2026-05-29",
+    "result": "pass",
+    "test_message_id": "hermes-full-telegram-test-2026-05-29-001",
+    "supabase_row_id": "2a8b737b-7c88-4277-a3ce-404415194e37",
+    "supabase_row_deleted_after_test": true,
+    "remaining_test_rows": 0,
+    "telegram_message_id": 345
+  },
+  "known_followups": [
+    "Patch non-blocking n8n validation warnings.",
+    "Add a cleaner webhook response/error pattern.",
+    "Decide and apply RLS policy strategy for learning_hub.learnings.",
+    "Fix Supabase function_search_path_mutable advisor warning.",
+    "Consider switching supabase-mcp-2 to read-only after write tasks."
+  ]
+}
