@@ -144,6 +144,21 @@ Important credential note:
 
 A credential named `Supabase Postgres - Knowledge Hub` existed during setup, but its actual n8n type was `supabaseApi`, not `postgres`. It must not be used for the direct Postgres node.
 
+## Operational info — not secrets, but internal
+
+Les éléments suivants ne sont PAS des secrets (aucune action possible sans les
+credentials sous-jacents), mais restent des infos opérationnelles internes à ne
+pas diffuser hors équipe :
+
+- chat_id Telegram et username du bot
+- noms des credentials n8n
+- project ref Supabase
+- hostname de l'instance n8n + chemin du webhook
+
+⚠️ L'instance n8n et le webhook path forment ensemble l'URL de capture. Si le
+webhook n'est pas protégé (header / token d'auth), restreindre l'accès avant la
+mise en usage réelle.
+
 ## Telegram
 
 Target chat:

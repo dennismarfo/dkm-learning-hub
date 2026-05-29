@@ -75,3 +75,22 @@ s'ajoutent ici.
   en français, quelle que soit la langue du message brut.
 - **Conséquence** : cohérence du triage et du contenu ; les messages en d'autres
   langues sont structurés en français.
+
+---
+
+## 2026-05-29 — Décision suite à la mise en place infra (Hermès)
+
+### D-013 — Persistance via credential Postgres direct (pas le node Supabase API)
+- **Contexte** : le node n8n Supabase passe par l'API REST (PostgREST), qui
+  n'expose que les schemas listés. Le schema dédié `learning_hub` (cf. D-011)
+  n'y est pas exposé → l'insert via l'API échoue (`Invalid schema: learning_hub`).
+- **Décision** : écrire dans Supabase via un **credential n8n de type Postgres**
+  (connexion directe au projet `khwogmehrpeiwaemiccx`), et **ne pas** exposer
+  `learning_hub` dans l'API Supabase.
+- **Conséquence** :
+  - Surface API publique inchangée (cohérent avec l'isolation voulue par D-011).
+  - La connexion Postgres directe **contourne la RLS** : en V1, seul n8n
+    (credential dédié) écrit. La RLS reste une question ouverte (cf. `HANDOFF.md`).
+  - Le mot de passe DB est un secret géré dans n8n, **jamais** dans le repo.
+  - Le credential mal typé `Supabase Postgres - Knowledge Hub` (en réalité
+    `supabaseApi`) ne doit pas être utilisé pour le node Postgres.
