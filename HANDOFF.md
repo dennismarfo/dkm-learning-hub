@@ -7,10 +7,12 @@ Journal de coordination entre Dennis, Claude Code et Hermès.
 - Dennis a confirmé que la conversation doit continuer sur le DKM Learning Hub / KnowledgeHub.
 - Clarification importante : `dkm-brand` sert de source de vérité DA / identité, tandis que `dkm-learning-hub` reste le repo produit / backend / coordination du Learning Hub.
 - Création d’un document de reprise durable pour la partie produit/site : `docs/product-website-plan-v1.md`.
-- Ce document consigne : source Drive des 3 tomes + examen, direction produit mini-LMS, lien avec `dkm-brand`, portée MVP, questions ouvertes, et protocole de handoff.
-- Branch courante de cette mise à jour : `docs/learning-hub-product-handoff-2026-06-25`.
+- Création d’un inventaire durable du contenu source : `docs/content-inventory-v1.md`.
+- `docs/content-inventory-v1.md` résume les 3 tomes, 20 modules détectés, les blocs interactifs, les glossaires et les 18 questions de l’examen final.
+- PR #3 mergée : `docs: add DKM Learning Hub product website handoff`.
+- PR #4 mergée : `docs: add DKM KnowledgeHub content inventory`.
 
-Prochaine action recommandée (1 seule) : relire `docs/product-website-plan-v1.md`, puis décider si le frontend du Learning Hub doit vivre dans ce repo ou dans un nouveau repo dédié.
+Prochaine action recommandée (1 seule) : décider si le frontend du Learning Hub vit dans `dkm-learning-hub` ou dans un repo dédié, puis générer le premier squelette frontend.
 
 ---
 
@@ -37,13 +39,13 @@ Prochaine action recommandée : laisser Claude Code bootstrapper la structure co
 > Claude Code n'a pas exécuté d'action infra. Tout ce qui suit est à réaliser
 > par Hermès via MCP, **après review**. L'état réel n'est PAS supposé connu.
 
-## ⏭️ Prochaine action (1 seule)
+## ⏭️ Prochaine action infra (1 seule)
 
 **Relire puis appliquer `supabase/migrations/001_create_learning_hub_schema.sql`
 sur le projet Supabase cible, via Supabase MCP** (`list_tables` avant,
 `get_advisors` après). Le reste (workflow n8n, Notion) vient ensuite.
 
-Note 2026-06-25 : pour la partie site/mini-LMS, voir maintenant `docs/product-website-plan-v1.md`.
+Note 2026-06-25 : pour la partie site/mini-LMS, voir maintenant `docs/product-website-plan-v1.md` et `docs/content-inventory-v1.md`.
 
 ## 0. Cibles à confirmer (non renseignées par Claude Code)
 
