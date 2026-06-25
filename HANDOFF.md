@@ -4,6 +4,22 @@ Journal de coordination entre Dennis, Claude Code et Hermès.
 
 ## 2026-06-25 — Hermès
 
+- Dennis a demandé de continuer le DKM Learning Hub et de passer à la décision / mise en place du frontend MVP dans `dkm-learning-hub`.
+- Relecture effectuée : `HANDOFF.md`, `docs/product-website-plan-v1.md`, `docs/content-inventory-v1.md`.
+- `dennismarfo/dkm-brand` a été utilisé seulement comme source DA : Sand / Ink / Terracotta, DM Serif Display, Inter, JetBrains Mono, ton expert accessible.
+- Décision prise : garder le frontend MVP dans `dkm-learning-hub`, sans créer de repo séparé à ce stade.
+- Implémentation branchée sur `feat/frontend-mvp` : app Vite + React + TypeScript statique avec landing, bibliothèque cours, fiche `Architecture IA`, skeleton module/lesson, page ressources.
+- Nouveau document durable : `docs/frontend-mvp-decision-v1.md`.
+- PR ouverte : #5 `feat: add DKM Learning Hub frontend MVP`.
+- Vérifications locales : `npm install`, `npm run build`, `npm audit --audit-level=moderate` → 0 vulnérabilité ; smoke test navigateur local sur `http://127.0.0.1:4177`.
+- Aucun changement Supabase, n8n, credentials ou secrets.
+
+Prochaine action recommandée (1 seule) : reviewer puis merger la PR #5, ensuite extraire le contenu complet des HTML source en JSON/MDX pour remplacer les placeholders de leçon.
+
+---
+
+## 2026-06-25 — Hermès
+
 - Dennis a confirmé que la conversation doit continuer sur le DKM Learning Hub / KnowledgeHub.
 - Clarification importante : `dkm-brand` sert de source de vérité DA / identité, tandis que `dkm-learning-hub` reste le repo produit / backend / coordination du Learning Hub.
 - Création d’un document de reprise durable pour la partie produit/site : `docs/product-website-plan-v1.md`.
