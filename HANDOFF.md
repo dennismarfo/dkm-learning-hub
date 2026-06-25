@@ -2,6 +2,18 @@
 
 Journal de coordination entre Dennis, Claude Code et Hermès.
 
+## 2026-06-25 — Hermès
+
+- Dennis a confirmé que la conversation doit continuer sur le DKM Learning Hub / KnowledgeHub.
+- Clarification importante : `dkm-brand` sert de source de vérité DA / identité, tandis que `dkm-learning-hub` reste le repo produit / backend / coordination du Learning Hub.
+- Création d’un document de reprise durable pour la partie produit/site : `docs/product-website-plan-v1.md`.
+- Ce document consigne : source Drive des 3 tomes + examen, direction produit mini-LMS, lien avec `dkm-brand`, portée MVP, questions ouvertes, et protocole de handoff.
+- Branch courante de cette mise à jour : `docs/learning-hub-product-handoff-2026-06-25`.
+
+Prochaine action recommandée (1 seule) : relire `docs/product-website-plan-v1.md`, puis décider si le frontend du Learning Hub doit vivre dans ce repo ou dans un nouveau repo dédié.
+
+---
+
 ## 2026-05-26 — Hermès
 
 - Repo privé `dennismarfo/dkm-learning-hub` détecté.
@@ -30,6 +42,8 @@ Prochaine action recommandée : laisser Claude Code bootstrapper la structure co
 **Relire puis appliquer `supabase/migrations/001_create_learning_hub_schema.sql`
 sur le projet Supabase cible, via Supabase MCP** (`list_tables` avant,
 `get_advisors` après). Le reste (workflow n8n, Notion) vient ensuite.
+
+Note 2026-06-25 : pour la partie site/mini-LMS, voir maintenant `docs/product-website-plan-v1.md`.
 
 ## 0. Cibles à confirmer (non renseignées par Claude Code)
 
@@ -91,4 +105,3 @@ sur le projet Supabase cible, via Supabase MCP** (`list_tables` avant,
 - Secrets : ne jamais committer un export n8n contenant des credentials.
 - Sans RLS, toute clé ayant accès au schéma peut lire/écrire — restreindre au
   service role côté n8n.
-
