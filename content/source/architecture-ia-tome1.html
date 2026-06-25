@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comprendre l'architecture de l'IA — parcours pour débutant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EEF0F6;
+    --surface:#FFFFFF;
+    --surface-2:#F6F7FB;
+    --ink:#15131F;
+    --muted:#6A6880;
+    --line:#E0E1EC;
+    --primary:#4B3FD6;
+    --primary-soft:#ECEAFB;
+    --signal:#FF6B4A;
+    --signal-soft:#FFE9E3;
+    --teal:#0F9E8E;
+    --teal-soft:#DDF4F0;
+    --shadow:0 1px 2px rgba(21,19,31,.05),0 10px 30px rgba(21,19,31,.06);
+    --radius:18px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased;
+  }
+  .mono{font-family:'Space Mono',monospace}
+  h1,h2,h3{font-family:'Fraunces',serif;font-weight:600;line-height:1.12;letter-spacing:-.01em}
+
+  /* ---------- LAYOUT ---------- */
+  .shell{display:grid;grid-template-columns:300px 1fr;min-height:100vh}
+  .sidebar{
+    background:var(--ink);color:#EAE8F5;padding:26px 20px;position:sticky;top:0;
+    height:100vh;overflow-y:auto;
+  }
+  .brand{display:flex;align-items:center;gap:11px;margin-bottom:6px}
+  .brand .dot{width:30px;height:30px;border-radius:9px;background:linear-gradient(140deg,var(--primary),var(--signal));flex:none;position:relative}
+  .brand .dot::after{content:"";position:absolute;inset:7px;border-radius:4px;background:#fff;opacity:.92}
+  .brand b{font-family:'Fraunces',serif;font-size:18px;font-weight:600;letter-spacing:-.01em}
+  .brand-sub{font-size:12px;color:#9D9AC0;margin:2px 0 22px 41px}
+
+  .progress-wrap{margin-bottom:22px}
+  .progress-label{display:flex;justify-content:space-between;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:#9D9AC0;margin-bottom:7px}
+  .progress-track{height:6px;background:rgba(255,255,255,.1);border-radius:99px;overflow:hidden}
+  .progress-fill{height:100%;width:0;background:linear-gradient(90deg,var(--primary),var(--signal));border-radius:99px;transition:width .5s cubic-bezier(.2,.8,.2,1)}
+
+  .nav-item{
+    display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:none;cursor:pointer;
+    background:transparent;color:#C9C7E0;font-family:inherit;font-size:14px;
+    padding:11px 12px;border-radius:11px;margin-bottom:3px;transition:.18s;line-height:1.25;
+  }
+  .nav-item:hover{background:rgba(255,255,255,.06);color:#fff}
+  .nav-item.active{background:rgba(255,255,255,.1);color:#fff}
+  .nav-num{
+    width:26px;height:26px;border-radius:8px;flex:none;display:grid;place-items:center;
+    font-family:'Space Mono',monospace;font-size:12px;background:rgba(255,255,255,.08);color:#9D9AC0;transition:.18s;
+  }
+  .nav-item.active .nav-num{background:var(--primary);color:#fff}
+  .nav-item.done .nav-num{background:var(--teal);color:#fff}
+  .nav-item.done .nav-num::after{content:"✓"}
+  .nav-item.done .nav-num span{display:none}
+
+  .glossary-btn{
+    margin-top:18px;width:100%;border:1px solid rgba(255,255,255,.14);background:transparent;color:#EAE8F5;
+    font-family:inherit;font-size:13px;padding:11px;border-radius:11px;cursor:pointer;transition:.18s;
+  }
+  .glossary-btn:hover{background:rgba(255,255,255,.07)}
+
+  /* ---------- MAIN ---------- */
+  main{padding:0;overflow:hidden}
+  .module{display:none;animation:fade .45s ease}
+  .module.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .inner{max-width:760px;margin:0 auto;padding:54px 40px 100px}
+  .eyebrow{font-family:'Space Mono',monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--primary);margin-bottom:14px}
+  .module h1{font-size:clamp(30px,4.6vw,46px);margin-bottom:16px}
+  .lead{font-size:18px;color:var(--muted);margin-bottom:34px;max-width:62ch}
+  .module h2{font-size:25px;margin:42px 0 14px}
+  .module h3{font-size:18px;margin:28px 0 8px}
+  .module p{margin-bottom:15px;color:#2C2A3A}
+  .module p strong{color:var(--ink)}
+  .module ul{margin:0 0 16px 0;padding-left:0;list-style:none}
+  .module li{position:relative;padding-left:24px;margin-bottom:9px;color:#2C2A3A}
+  .module li::before{content:"";position:absolute;left:4px;top:11px;width:7px;height:7px;border-radius:50%;background:var(--signal)}
+
+  /* acronym chip */
+  .acro{display:inline-block;font-family:'Space Mono',monospace;font-size:.92em;background:var(--primary-soft);color:var(--primary);
+    padding:1px 7px;border-radius:6px;font-weight:700;white-space:nowrap}
+  .term{color:var(--primary);border-bottom:1.5px dotted var(--primary);cursor:help;font-weight:600}
+
+  /* callout: acronym definition */
+  .define{
+    display:flex;gap:14px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--signal);
+    border-radius:14px;padding:16px 18px;margin:18px 0;box-shadow:var(--shadow)
+  }
+  .define .ico{font-family:'Space Mono',monospace;font-weight:700;color:var(--signal);font-size:13px;flex:none;padding-top:1px}
+  .define dl{display:grid;gap:7px;font-size:14.5px}
+  .define dt{font-weight:700;font-family:'Space Mono',monospace;color:var(--ink);font-size:13px}
+  .define dd{color:var(--muted)}
+  .define dd b{color:var(--ink)}
+
+  .note{background:var(--teal-soft);border-radius:14px;padding:16px 18px;margin:20px 0;font-size:14.5px;color:#0a5b52;border:1px solid #BEE7E0}
+  .note b{color:#063f39}
+
+  /* interactive panels */
+  .demo{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:24px;margin:26px 0;box-shadow:var(--shadow)}
+  .demo-head{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+  .demo-tag{font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:var(--primary);padding:3px 8px;border-radius:6px}
+  .demo h3{margin:0;font-size:17px}
+  .demo-desc{font-size:13.5px;color:var(--muted);margin:4px 0 18px}
+
+  .slider-row{display:grid;grid-template-columns:90px 1fr 56px;align-items:center;gap:12px;margin-bottom:11px}
+  .slider-row label{font-size:13px;color:var(--muted)}
+  .slider-row label b{color:var(--ink);font-family:'Space Mono',monospace}
+  .slider-row .val{font-family:'Space Mono',monospace;font-size:13px;text-align:right;color:var(--primary);font-weight:700}
+  input[type=range]{-webkit-appearance:none;width:100%;height:6px;border-radius:99px;background:var(--line);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--primary);cursor:pointer;border:3px solid #fff;box-shadow:0 1px 4px rgba(75,63,214,.4)}
+  input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--primary);cursor:pointer;border:3px solid #fff}
+
+  .seg{display:inline-flex;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:3px;gap:3px}
+  .seg button{border:none;background:transparent;font-family:'Space Mono',monospace;font-size:12px;padding:6px 12px;border-radius:7px;cursor:pointer;color:var(--muted)}
+  .seg button.on{background:var(--primary);color:#fff}
+
+  .btn{border:none;background:var(--primary);color:#fff;font-family:inherit;font-weight:600;font-size:14px;padding:10px 18px;border-radius:11px;cursor:pointer;transition:.16s}
+  .btn:hover{filter:brightness(1.08)}
+  .btn.ghost{background:var(--surface-2);color:var(--ink);border:1px solid var(--line)}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+
+  /* perceptron svg readout */
+  .readout{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+  .stat{background:var(--surface-2);border:1px solid var(--line);border-radius:11px;padding:10px 14px;flex:1;min-width:120px}
+  .stat .k{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+  .stat .v{font-family:'Space Mono',monospace;font-size:19px;font-weight:700;color:var(--ink)}
+  .fire-badge{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;padding:5px 11px;border-radius:99px}
+  .fire-on{background:var(--signal-soft);color:#c93d1e}
+  .fire-off{background:var(--surface-2);color:var(--muted)}
+
+  /* token demo */
+  .tokens{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+  .tok{font-family:'Space Mono',monospace;font-size:13px;padding:4px 9px;border-radius:7px;background:var(--primary-soft);color:var(--primary);border:1px solid #d9d5f6}
+  textarea,input[type=text]{width:100%;font-family:inherit;font-size:14px;padding:11px 13px;border:1px solid var(--line);border-radius:11px;background:var(--surface-2);color:var(--ink);resize:vertical}
+  textarea:focus,input:focus{outline:2px solid var(--primary-soft);border-color:var(--primary)}
+
+  /* attention demo */
+  .att-sentence{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}
+  .att-word{font-size:15px;padding:7px 12px;border-radius:9px;border:1px solid var(--line);background:var(--surface-2);cursor:pointer;transition:.2s}
+  .att-word.focus{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+  /* quiz */
+  .quiz{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:24px;margin:30px 0;box-shadow:var(--shadow)}
+  .quiz .q{font-weight:600;font-size:16px;margin-bottom:14px}
+  .opt{display:block;width:100%;text-align:left;border:1px solid var(--line);background:var(--surface-2);font-family:inherit;font-size:14.5px;
+    padding:12px 15px;border-radius:11px;margin-bottom:9px;cursor:pointer;transition:.16s}
+  .opt:hover{border-color:var(--primary)}
+  .opt.correct{background:var(--teal-soft);border-color:var(--teal);color:#0a5b52;font-weight:600}
+  .opt.wrong{background:var(--signal-soft);border-color:var(--signal);color:#c93d1e}
+  .opt:disabled{cursor:default}
+  .feedback{font-size:14px;margin-top:6px;padding:12px 14px;border-radius:11px;display:none}
+  .feedback.show{display:block}
+  .feedback.ok{background:var(--teal-soft);color:#0a5b52}
+  .feedback.no{background:var(--signal-soft);color:#c93d1e}
+
+  .footer-nav{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:24px;border-top:1px solid var(--line)}
+
+  /* glossary modal */
+  .overlay{position:fixed;inset:0;background:rgba(21,19,31,.55);backdrop-filter:blur(3px);display:none;z-index:50;padding:30px;overflow-y:auto}
+  .overlay.show{display:flex;align-items:flex-start;justify-content:center;animation:fade .25s}
+  .glossary-card{background:var(--surface);border-radius:22px;max-width:620px;width:100%;padding:30px;box-shadow:0 30px 80px rgba(0,0,0,.3)}
+  .glossary-card .gh{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+  .glossary-card h2{font-size:24px}
+  .close-x{border:none;background:var(--surface-2);width:36px;height:36px;border-radius:10px;cursor:pointer;font-size:18px;color:var(--muted)}
+  .gloss-search{margin:16px 0 20px}
+  .gloss-item{padding:14px 0;border-bottom:1px solid var(--line)}
+  .gloss-item:last-child{border:none}
+  .gloss-acro{font-family:'Space Mono',monospace;font-weight:700;color:var(--primary);font-size:15px}
+  .gloss-en{font-size:13px;color:var(--muted);font-style:italic}
+  .gloss-fr{font-size:13px;color:var(--ink);font-weight:600;margin:2px 0}
+  .gloss-def{font-size:13.5px;color:var(--muted)}
+
+  /* mobile */
+  .menu-toggle{display:none}
+  @media(max-width:860px){
+    .shell{grid-template-columns:1fr}
+    .sidebar{position:fixed;left:0;top:0;width:280px;z-index:40;transform:translateX(-100%);transition:.3s;box-shadow:0 0 50px rgba(0,0,0,.3)}
+    .sidebar.open{transform:none}
+    .menu-toggle{display:flex;align-items:center;gap:9px;position:sticky;top:0;z-index:30;background:var(--surface);
+      border-bottom:1px solid var(--line);padding:13px 18px;font-family:'Fraunces',serif;font-weight:600;font-size:16px;cursor:pointer}
+    .menu-toggle .bars{display:flex;flex-direction:column;gap:3.5px}
+    .menu-toggle .bars span{width:18px;height:2px;background:var(--ink);border-radius:2px}
+    .inner{padding:34px 22px 90px}
+    .scrim{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:35;display:none}
+    .scrim.show{display:block}
+  }
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+  :focus-visible{outline:3px solid var(--signal);outline-offset:2px;border-radius:6px}
+</style>
+</head>
+<body>
+
+<div class="scrim" id="scrim" onclick="toggleMenu()"></div>
+
+<div class="shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand"><span class="dot"></span><b>Cerveau&nbsp;de&nbsp;silicium</b></div>
+    <p class="brand-sub">L'architecture de l'IA, du neurone aux grands modèles</p>
+
+    <div class="progress-wrap">
+      <div class="progress-label"><span>Progression</span><span id="progPct">0&nbsp;%</span></div>
+      <div class="progress-track"><div class="progress-fill" id="progFill"></div></div>
+    </div>
+
+    <nav id="nav"></nav>
+
+    <button class="glossary-btn" onclick="openGlossary()">📖 Glossaire des acronymes</button>
+  </aside>
+
+  <!-- MAIN -->
+  <main>
+    <div class="menu-toggle" onclick="toggleMenu()">
+      <span class="bars"><span></span><span></span><span></span></span>
+      Menu du parcours
+    </div>
+    <div id="content"></div>
+  </main>
+</div>
+
+<!-- GLOSSARY -->
+<div class="overlay" id="overlay" onclick="if(event.target===this)closeGlossary()">
+  <div class="glossary-card">
+    <div class="gh">
+      <h2>Glossaire</h2>
+      <button class="close-x" onclick="closeGlossary()">✕</button>
+    </div>
+    <p style="color:var(--muted);font-size:14px">Chaque sigle, en entier, en français et en anglais.</p>
+    <input class="gloss-search" type="text" id="glossSearch" placeholder="Filtrer… (ex : réseau, attention, GPT)" oninput="renderGlossary(this.value)">
+    <div id="glossList"></div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   GLOSSAIRE — source unique de vérité pour les acronymes
+   ============================================================ */
+const GLOSSARY = [
+  {a:"IA", en:"Artificial Intelligence (AI)", fr:"Intelligence Artificielle", d:"Domaine qui cherche à faire accomplir par des machines des tâches qui demandent normalement de l'intelligence humaine."},
+  {a:"ML", en:"Machine Learning", fr:"Apprentissage Automatique", d:"Sous-domaine de l'IA où la machine apprend des règles à partir d'exemples, au lieu qu'on les programme à la main."},
+  {a:"DL", en:"Deep Learning", fr:"Apprentissage Profond", d:"Branche du ML qui utilise des réseaux de neurones à plusieurs couches (« profonds »)."},
+  {a:"MLP", en:"Multi-Layer Perceptron", fr:"Perceptron Multicouche", d:"Le réseau de neurones de base : des couches de neurones empilées les unes après les autres."},
+  {a:"ReLU", en:"Rectified Linear Unit", fr:"Unité Linéaire Rectifiée", d:"Fonction d'activation très courante : elle garde les nombres positifs et remplace les négatifs par zéro."},
+  {a:"CNN", en:"Convolutional Neural Network", fr:"Réseau de Neurones Convolutif", d:"Architecture spécialisée pour les images : elle détecte des motifs locaux (bords, formes, textures)."},
+  {a:"RNN", en:"Recurrent Neural Network", fr:"Réseau de Neurones Récurrent", d:"Architecture pour les séquences (texte, son) qui garde une « mémoire » de ce qu'elle a déjà vu."},
+  {a:"LSTM", en:"Long Short-Term Memory", fr:"Mémoire à Court et Long Terme", d:"Un type de RNN doté de « portes » qui l'aident à retenir l'information importante plus longtemps."},
+  {a:"Transformer", en:"Transformer", fr:"Transformeur", d:"Architecture inventée en 2017 qui traite toute une séquence d'un coup grâce à l'attention. C'est la base de l'IA moderne."},
+  {a:"LLM", en:"Large Language Model", fr:"Grand Modèle de Langage", d:"Un très gros Transformer entraîné sur d'immenses quantités de texte pour prédire le mot suivant."},
+  {a:"GPT", en:"Generative Pre-trained Transformer", fr:"Transformeur Génératif Pré-entraîné", d:"Famille de LLM : « génératif » (il produit du texte), « pré-entraîné » (appris d'avance sur du texte), « Transformer » (l'architecture)."},
+  {a:"GPU", en:"Graphics Processing Unit", fr:"Processeur Graphique", d:"Puce conçue pour faire énormément de calculs en parallèle. Indispensable pour entraîner les réseaux de neurones."},
+  {a:"NLP", en:"Natural Language Processing", fr:"Traitement Automatique du Langage Naturel", d:"L'ensemble des techniques qui permettent à une machine de comprendre et produire du langage humain."},
+  {a:"Epoch", en:"Epoch", fr:"Époque", d:"Un passage complet du modèle sur l'ensemble des données d'entraînement."},
+  {a:"Token", en:"Token", fr:"Jeton", d:"Un petit morceau de texte (mot, bout de mot, signe) ; c'est l'unité que lit et produit un LLM."},
+  {a:"Embedding", en:"Embedding", fr:"Plongement / Vecteur", d:"La traduction d'un token en liste de nombres, pour que la machine puisse « calculer » le sens."}
+];
+
+/* ============================================================
+   CONTENU DES MODULES
+   ============================================================ */
+const MODULES = [
+  {
+    id:"intro", nav:"Les poupées russes", title:"Les trois mots qu'on confond tout le temps",
+    eyebrow:"Module 1 — Vue d'ensemble",
+    html:`
+      <p class="lead">Avant de parler d'architecture, mettons de l'ordre dans trois mots qu'on emploie souvent comme synonymes, mais qui sont en réalité emboîtés l'un dans l'autre comme des poupées russes.</p>
+
+      <div class="define"><div class="ico">[def]</div><dl>
+        <div><dt>IA — Intelligence Artificielle</dt><dd>(en anglais <b>AI, Artificial Intelligence</b>) le grand domaine : faire faire à une machine des choses qui demandent normalement de l'intelligence.</dd></div>
+        <div><dt>ML — Apprentissage Automatique</dt><dd>(en anglais <b>Machine Learning</b>) une façon de faire de l'IA : la machine <b>apprend à partir d'exemples</b> au lieu de suivre des règles écrites à la main.</dd></div>
+        <div><dt>DL — Apprentissage Profond</dt><dd>(en anglais <b>Deep Learning</b>) une façon de faire du ML, avec des <b>réseaux de neurones</b> à plusieurs couches. C'est là que vit presque toute l'IA dont on parle aujourd'hui.</dd></div>
+      </dl></div>
+
+      <p>L'image à retenir : <strong>l'IA contient le ML, qui contient le DL.</strong> Quand on dit « l'IA », on parle souvent en réalité d'apprentissage profond.</p>
+
+      <div class="demo">
+        <div class="demo-head"><span class="demo-tag">Interactif</span><h3>Les cercles emboîtés</h3></div>
+        <p class="demo-desc">Survole ou clique chaque cercle pour voir où il se situe.</p>
+        <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:center;justify-content:center">
+          <svg viewBox="0 0 300 300" width="260" height="260" id="nestedSvg">
+            <circle data-k="IA" cx="150" cy="150" r="140" fill="#ECEAFB" stroke="#4B3FD6" stroke-width="2"/>
+            <circle data-k="ML" cx="150" cy="170" r="92" fill="#D9D5F6" stroke="#4B3FD6" stroke-width="2"/>
+            <circle data-k="DL" cx="150" cy="195" r="48" fill="#FF6B4A" stroke="#c93d1e" stroke-width="2"/>
+            <text x="150" y="40" text-anchor="middle" font-family="Space Mono" font-size="15" font-weight="700" fill="#4B3FD6">IA</text>
+            <text x="150" y="110" text-anchor="middle" font-family="Space Mono" font-size="14" font-weight="700" fill="#3a2fb0">ML</text>
+            <text x="150" y="200" text-anchor="middle" font-family="Space Mono" font-size="14" font-weight="700" fill="#fff">DL</text>
+          </svg>
+          <div id="nestedInfo" style="flex:1;min-width:200px;font-size:14.5px;color:var(--muted)">
+            <b style="color:var(--ink)">Clique un cercle</b> pour lire sa définition ici.
+          </div>
+        </div>
+      </div>
+
+      <div class="note"><b>Le fil rouge de ce parcours :</b> on va construire l'IA moderne brique par brique. On commence par <b>un seul neurone</b>, puis on en assemble des millions, on leur apprend à se corriger, et on finit avec les <span class="acro">LLM</span> comme Claude ou GPT.</div>
+    `,
+    quiz:{q:"D'après les « poupées russes », laquelle de ces phrases est correcte ?",
+      opts:["Le ML est plus large que l'IA","Le DL est une forme de ML, qui est une forme d'IA","L'IA et le DL sont deux choses séparées"],
+      correct:1, ok:"Exactement : DL ⊂ ML ⊂ IA. Chaque terme est inclus dans le précédent.", no:"Pas tout à fait — souviens-toi : l'IA contient le ML, qui contient le DL."}
+  },
+
+  {
+    id:"neurone", nav:"Le neurone artificiel", title:"La brique de base : un seul neurone",
+    eyebrow:"Module 2 — L'unité fondamentale",
+    html:`
+      <p class="lead">Tout réseau de neurones, même celui derrière les modèles les plus puissants, est fait de millions de copies d'une seule petite recette. La voici.</p>
+
+      <p>Un <strong>neurone artificiel</strong> est inspiré (de très loin) du neurone du cerveau. Il fait trois choses, dans l'ordre :</p>
+      <ul>
+        <li><strong>Il reçoit des entrées</strong> — des nombres (par ex. : luminosité d'un pixel, fréquence d'un mot).</li>
+        <li><strong>Il leur donne de l'importance</strong> — chaque entrée est multipliée par un <strong>poids</strong>. Un poids élevé = « cette information compte beaucoup ». On ajoute aussi un <strong>biais</strong>, un petit décalage.</li>
+        <li><strong>Il décide quoi transmettre</strong> — la somme passe dans une <strong>fonction d'activation</strong> qui décide de la sortie. Sans elle, le neurone ne ferait qu'additionner ; avec elle, il peut « s'activer » ou rester silencieux.</li>
+      </ul>
+
+      <p>En une ligne : <span class="mono" style="background:var(--surface-2);padding:3px 8px;border-radius:6px;display:inline-block">sortie = activation( x₁·w₁ + x₂·w₂ + x₃·w₃ + biais )</span></p>
+
+      <div class="define"><div class="ico">[def]</div><dl>
+        <div><dt>ReLU — Unité Linéaire Rectifiée</dt><dd>(en anglais <b>Rectified Linear Unit</b>) une fonction d'activation très utilisée : si le nombre est positif, elle le laisse passer ; s'il est négatif, elle renvoie 0.</dd></div>
+        <div><dt>Sigmoïde</dt><dd>une autre fonction d'activation : elle écrase n'importe quel nombre entre 0 et 1 — pratique pour exprimer une probabilité.</dd></div>
+      </dl></div>
+
+      <div class="demo">
+        <div class="demo-head"><span class="demo-tag">Manipule</span><h3>Fais « tirer » un neurone</h3></div>
+        <p class="demo-desc">Règle les entrées, les poids et le biais. Observe la somme, puis la sortie après activation. Le neurone s'illumine quand il s'active fortement.</p>
+        <div style="display:flex;gap:26px;flex-wrap:wrap">
+          <div style="flex:1;min-width:260px">
+            ${[1,2,3].map(i=>`
+            <div class="slider-row"><label>Entrée <b>x${i}</b></label><input type="range" min="0" max="1" step="0.05" value="${i===1?0.8:i===2?0.5:0.3}" oninput="updatePerceptron()" id="px${i}"><span class="val" id="vx${i}"></span></div>
+            <div class="slider-row"><label>Poids <b>w${i}</b></label><input type="range" min="-1" max="1" step="0.05" value="${i===1?0.7:i===2?-0.4:0.6}" oninput="updatePerceptron()" id="pw${i}"><span class="val" id="vw${i}"></span></div>
+            `).join("")}
+            <div class="slider-row"><label>Biais <b>b</b></label><input type="range" min="-1" max="1" step="0.05" value="0" oninput="updatePerceptron()" id="pb"><span class="val" id="vb"></span></div>
+            <div style="margin-top:14px"><span style="font-size:13px;color:var(--muted);margin-right:10px">Activation</span>
+              <span class="seg"><button id="actRelu" class="on" onclick="setAct('relu')">ReLU</button><button id="actSig" onclick="setAct('sig')">Sigmoïde</button></span>
+            </div>
+          </div>
+          <div style="flex:1;min-width:240px;display:flex;flex-direction:column;align-items:center;justify-content:center">
+            <svg viewBox="0 0 240 200" width="240" height="200">
+              <line x1="20" y1="50" x2="120" y2="100" stroke="#c9c7e0" stroke-width="2" id="ln1"/>
+              <line x1="20" y1="100" x2="120" y2="100" stroke="#c9c7e0" stroke-width="2" id="ln2"/>
+              <line x1="20" y1="150" x2="120" y2="100" stroke="#c9c7e0" stroke-width="2" id="ln3"/>
+              <line x1="120" y1="100" x2="215" y2="100" stroke="#c9c7e0" stroke-width="3" id="lnOut"/>
+              <circle cx="20" cy="50" r="9" fill="#4B3FD6"/><circle cx="20" cy="100" r="9" fill="#4B3FD6"/><circle cx="20" cy="150" r="9" fill="#4B3FD6"/>
+              <circle cx="120" cy="100" r="30" fill="#FFE9E3" stroke="#FF6B4A" stroke-width="3" id="neuron"/>
+              <circle cx="215" cy="100" r="9" fill="#0F9E8E"/>
+            </svg>
+            <div id="fireBadge" class="fire-badge fire-off">Au repos</div>
+          </div>
+        </div>
+        <div class="readout">
+          <div class="stat"><div class="k">Somme pondérée (avant activation)</div><div class="v" id="rawSum">—</div></div>
+          <div class="stat"><div class="k">Sortie (après activation)</div><div class="v" id="actOut" style="color:var(--signal)">—</div></div>
+        </div>
+      </div>
+
+      <div class="note"><b>L'idée clé :</b> un neurone tout seul ne sait presque rien faire. Sa puissance vient de l'<b>assemblage</b> — et du fait qu'on peut <b>régler automatiquement</b> ces poids. C'est le sujet des deux prochains modules.</div>
+    `,
+    quiz:{q:"À quoi sert la fonction d'activation dans un neurone ?",
+      opts:["À multiplier les entrées par les poids","À décider, à partir de la somme, ce que le neurone transmet (et lui permettre de ne pas être qu'une addition)","À stocker la mémoire du réseau"],
+      correct:1, ok:"Oui — sans activation, empiler des neurones ne ferait que des additions. C'est elle qui apporte la non-linéarité.", no:"La multiplication, ce sont les poids. L'activation décide de la sortie à partir de la somme."}
+  },
+
+  {
+    id:"reseau", nav:"Le réseau (couches)", title:"On empile les neurones : le réseau",
+    eyebrow:"Module 3 — Des couches",
+    html:`
+      <p class="lead">Un neurone seul ne décide pas grand-chose. Mais quand on les organise en <strong>couches</strong>, on obtient une machine capable de reconnaître un visage ou de traduire une phrase.</p>
+
+      <p>Un réseau classique s'organise en trois types de couches :</p>
+      <ul>
+        <li><strong>La couche d'entrée</strong> — reçoit les données brutes (les pixels d'une image, les mots d'une phrase).</li>
+        <li><strong>Les couches cachées</strong> — au milieu. Chaque couche combine ce qu'a trouvé la précédente pour repérer des motifs de plus en plus abstraits. « Profond » (le <span class="acro">DL</span>) veut simplement dire : beaucoup de couches cachées.</li>
+        <li><strong>La couche de sortie</strong> — donne la réponse finale (« c'est un chat à 92 % »).</li>
+      </ul>
+
+      <div class="define"><div class="ico">[def]</div><dl>
+        <div><dt>MLP — Perceptron Multicouche</dt><dd>(en anglais <b>Multi-Layer Perceptron</b>) le nom du réseau de neurones de base : des couches entièrement connectées, empilées. C'est le squelette dont dérivent les architectures plus avancées.</dd></div>
+      </dl></div>
+
+      <div class="demo">
+        <div class="demo-head"><span class="demo-tag">Animation</span><h3>Le signal traverse le réseau</h3></div>
+        <p class="demo-desc">Clique pour envoyer une donnée à l'entrée et la voir se propager couche par couche jusqu'à la sortie.</p>
+        <svg viewBox="0 0 520 240" width="100%" style="max-width:520px;display:block;margin:0 auto" id="netSvg"></svg>
+        <div style="text-align:center;margin-top:12px"><button class="btn" onclick="fireNetwork()">▶ Propager le signal</button></div>
+        <p style="text-align:center;font-size:12.5px;color:var(--muted);margin-top:12px">Entrée → 2 couches cachées → sortie. Chaque trait est un poids ; chaque rond, un neurone.</p>
+      </div>
+
+      <div class="note"><b>Pourquoi « profond » ?</b> Les premières couches repèrent des choses simples (un bord, un trait). Les suivantes les combinent (un œil, une roue). Les dernières assemblent le tout (un visage, une voiture). La profondeur permet cette montée en abstraction.</div>
+    `,
+    quiz:{q:"Que désigne le mot « profond » dans « apprentissage profond » (DL) ?",
+      opts:["Que le modèle réfléchit longtemps","Que le réseau a beaucoup de couches cachées empilées","Que les données sont stockées en profondeur sur le disque"],
+      correct:1, ok:"C'est ça : profond = beaucoup de couches. Chacune apprend des motifs un peu plus abstraits que la précédente.", no:"« Profond » fait référence au nombre de couches empilées, pas au temps de calcul."}
+  },
+
+  {
+    id:"apprentissage", nav:"Comment ça apprend", title:"La magie : régler des millions de poids tout seul",
+    eyebrow:"Module 4 — L'entraînement",
+    html:`
+      <p class="lead">On a un réseau, mais ses poids sont au départ aléatoires : il répond n'importe quoi. <strong>Apprendre</strong>, c'est ajuster ces poids pour que les réponses deviennent bonnes. Voici comment, sans aucune magie.</p>
+
+      <p>La boucle d'entraînement répète quatre étapes, des millions de fois :</p>
+      <ul>
+        <li><strong>1. Prédire.</strong> On montre un exemple au réseau, il produit une réponse.</li>
+        <li><strong>2. Mesurer l'erreur.</strong> On compare à la bonne réponse avec une <strong>fonction de perte</strong> (en anglais <em>loss</em>) : un nombre qui dit « à quel point tu t'es trompé ».</li>
+        <li><strong>3. Trouver qui blâmer.</strong> La <strong>rétropropagation</strong> (en anglais <em>backpropagation</em>) calcule, pour chaque poids, dans quel sens il a contribué à l'erreur.</li>
+        <li><strong>4. Corriger.</strong> La <strong>descente de gradient</strong> ajuste chaque poids d'un petit pas dans le bon sens. La taille du pas, c'est le <strong>taux d'apprentissage</strong> (en anglais <em>learning rate</em>).</li>
+      </ul>
+
+      <div class="note">Bonne image : tu es dans le brouillard sur une colline et tu veux descendre. Tu sens la pente sous tes pieds (le <b>gradient</b>) et tu fais un pas vers le bas. Tu répètes. Le « bas de la vallée » = l'erreur minimale.</div>
+
+      <div class="demo">
+        <div class="demo-head"><span class="demo-tag">Manipule</span><h3>Descente de gradient : la balle qui cherche le creux</h3></div>
+        <p class="demo-desc">La courbe représente l'erreur. Appuie sur « Un pas » : la balle descend selon la pente. Change le <b>taux d'apprentissage</b> et regarde : trop petit = lent ; trop grand = ça déborde et oscille.</p>
+        <svg viewBox="0 0 460 220" width="100%" style="max-width:460px;display:block;margin:0 auto" id="gradSvg"></svg>
+        <div class="slider-row" style="grid-template-columns:150px 1fr 56px;margin-top:14px">
+          <label>Taux d'apprentissage</label><input type="range" min="0.02" max="1.05" step="0.01" value="0.18" oninput="updateLR()" id="lr"><span class="val" id="lrVal"></span>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">
+          <button class="btn" onclick="gradStep()">Un pas ↓</button>
+          <button class="btn ghost" onclick="gradRun()">Lancer 12 pas</button>
+          <button class="btn ghost" onclick="gradReset()">Réinitialiser</button>
+        </div>
+        <div class="readout">
+          <div class="stat"><div class="k">Erreur actuelle (perte)</div><div class="v" id="lossVal">—</div></div>
+          <div class="stat"><div class="k">Pas effectués</div><div class="v" id="stepVal">0</div></div>
+        </div>
+      </div>
+
+      <div class="define"><div class="ico">[def]</div><dl>
+        <div><dt>Époque (epoch)</dt><dd>un passage complet sur toutes les données d'entraînement. On en fait souvent des dizaines.</dd></div>
+        <div><dt>GPU — Processeur Graphique</dt><dd>(en anglais <b>Graphics Processing Unit</b>) la puce qui fait ces milliards de petits calculs en parallèle. C'est elle qui rend l'entraînement réalisable.</dd></div>
+      </dl></div>
+    `,
+    quiz:{q:"Si le taux d'apprentissage est beaucoup trop grand, que se passe-t-il ?",
+      opts:["Le modèle apprend juste plus vite, sans inconvénient","La balle fait des pas trop grands, dépasse le creux et oscille sans bien converger","Plus rien ne bouge"],
+      correct:1, ok:"Exact — un pas trop grand fait « rebondir » la balle de part et d'autre du minimum. C'est tout l'art de bien régler ce taux.", no:"Un pas trop grand fait dépasser le minimum : la balle oscille au lieu de se poser au fond."}
+  },
+
+  {
+    id:"specialisees", nav:"Architectures spécialisées", title:"Des formes pour chaque type de données",
+    eyebrow:"Module 5 — CNN, RNN, LSTM",
+    html:`
+      <p class="lead">Le réseau de base (le <span class="acro">MLP</span>) marche, mais on peut faire mieux en adaptant sa <strong>forme</strong> au type de données. Trois familles historiques à connaître.</p>
+
+      <h3>Pour les images : le CNN</h3>
+      <div class="define"><div class="ico">[def]</div><dl>
+        <div><dt>CNN — Réseau de Neurones Convolutif</dt><dd>(en anglais <b>Convolutional Neural Network</b>) il fait glisser de petits « filtres » sur l'image pour repérer des motifs locaux : d'abord des bords, puis des formes, puis des objets entiers. Idéal pour la <b>vision</b>.</dd></div>
+      </dl></div>
+      <p>Pourquoi ça marche : un chat est un chat qu'il soit en haut à gauche ou au centre. Le CNN cherche le même motif <strong>partout</strong> dans l'image, ce qu'un MLP ne sait pas faire efficacement.</p>
+
+      <h3>Pour les séquences : le RNN</h3>
+      <div class="define"><div class="ico">[def]</div><dl>
+        <div><dt>RNN — Réseau de Neurones Récurrent</dt><dd>(en anglais <b>Recurrent Neural Network</b>) il lit une séquence (du texte, du son) <b>élément par élément</b> et garde une « mémoire » de ce qu'il a déjà vu pour comprendre la suite.</dd></div>
+      </dl></div>
+      <p>Son défaut : sur de longues phrases, il « oublie » le début. D'où l'invention suivante.</p>
+
+      <h3>Pour la mémoire longue : le LSTM</h3>
+      <div class="define"><div class="ico">[def]</div><dl>
+        <div><dt>LSTM — Mémoire à Court et Long Terme</dt><dd>(en anglais <b>Long Short-Term Memory</b>) un RNN amélioré, doté de « portes » qui décident quoi <b>retenir</b>, quoi <b>oublier</b> et quoi <b>transmettre</b>. Il garde le fil sur de plus longues séquences.</dd></div>
+      </dl></div>
+
+      <div class="note"><b>À retenir :</b> CNN → images (motifs dans l'espace). RNN / LSTM → séquences lues une par une (motifs dans le temps). Mais les RNN restent <b>lents</b> car ils lisent en file indienne… Le prochain module montre la révolution qui a tout changé.</div>
+    `,
+    quiz:{q:"Quelle architecture est la plus naturelle pour analyser une image ?",
+      opts:["Le RNN","Le LSTM","Le CNN"],
+      correct:2, ok:"Oui — le CNN repère les mêmes motifs partout dans l'image, ce qui en fait l'outil de la vision par ordinateur.", no:"Les RNN et LSTM sont faits pour les séquences. Pour les images, c'est le CNN."}
+  },
+
+  {
+    id:"transformer", nav:"Le Transformer", title:"La révolution : l'attention",
+    eyebrow:"Module 6 — L'architecture moderne",
+    html:`
+      <p class="lead">En 2017, une nouvelle architecture, le <span class="acro">Transformer</span>, a balayé les RNN. Son idée géniale tient en un mot : <strong>l'attention</strong>. C'est le socle de Claude, de GPT et de presque toute l'IA actuelle.</p>
+
+      <div class="define"><div class="ico">[def]</div><dl>
+        <div><dt>Transformer — Transformeur</dt><dd>une architecture qui traite <b>toute la séquence d'un seul coup</b> (au lieu de mot par mot comme le RNN), grâce au mécanisme d'attention. Plus rapide, et bien meilleure sur les longs textes.</dd></div>
+      </dl></div>
+
+      <h3>L'attention, en clair</h3>
+      <p>Pour comprendre un mot, il faut regarder les autres mots de la phrase. Dans « la <em>banque</em> est au bord de la rivière », le mot « rivière » t'aide à comprendre que « banque » désigne une berge, pas un établissement financier.</p>
+      <p>Le mécanisme d'<strong>attention</strong> fait exactement ça : pour chaque mot, il calcule <strong>à quel point chacun des autres mots compte</strong> pour le comprendre, et il en tient compte. Et il le fait pour tous les mots <strong>en parallèle</strong> — d'où sa rapidité.</p>
+
+      <div class="demo">
+        <div class="demo-head"><span class="demo-tag">Manipule</span><h3>Sur quoi un mot porte-t-il attention ?</h3></div>
+        <p class="demo-desc">Clique un mot. Les autres s'éclairent selon l'attention qu'il leur porte (plus c'est foncé, plus ça compte). Exemple illustratif simplifié.</p>
+        <div class="att-sentence" id="attSentence"></div>
+        <p style="font-size:12.5px;color:var(--muted)">« il » porte surtout attention à « chat » : c'est ce que le pronom remplace. C'est en résolvant ce genre de liens que le modèle « comprend ».</p>
+      </div>
+
+      <h3>Encodeur et décodeur</h3>
+      <p>Un Transformer complet a deux parties : un <strong>encodeur</strong> qui « lit et comprend » l'entrée, et un <strong>décodeur</strong> qui « écrit » la réponse. Les modèles de type GPT n'utilisent que la partie décodeur — celle qui génère du texte.</p>
+
+      <div class="note"><b>Pourquoi c'est si important :</b> comme tout est traité en parallèle, on peut entraîner ces modèles sur des quantités de texte gigantesques avec beaucoup de GPU. C'est ce passage à l'échelle qui a donné naissance aux grands modèles de langage — le module suivant.</div>
+    `,
+    quiz:{q:"Quelle est l'idée centrale du Transformer ?",
+      opts:["Lire le texte mot par mot en gardant une mémoire","L'attention : pour chaque mot, mesurer combien chaque autre mot compte, le tout en parallèle","Faire glisser des filtres sur l'image"],
+      correct:1, ok:"Voilà — l'attention en parallèle, c'est la rupture avec les RNN qui lisaient en file indienne.", no:"Lire mot par mot, c'est le RNN. Les filtres, c'est le CNN. Le Transformer, c'est l'attention en parallèle."}
+  },
+
+  {
+    id:"llm", nav:"Les grands modèles (LLM)", title:"Tout ça pour… deviner le mot suivant",
+    eyebrow:"Module 7 — Les LLM",
+    html:`
+      <p class="lead">On assemble tout : un très gros Transformer, entraîné sur d'immenses quantités de texte. Le résultat, c'est un <span class="acro">LLM</span>. Et sa tâche, étonnamment simple, est de <strong>prédire le mot suivant</strong>.</p>
+
+      <div class="define"><div class="ico">[def]</div><dl>
+        <div><dt>LLM — Grand Modèle de Langage</dt><dd>(en anglais <b>Large Language Model</b>) un Transformer géant entraîné à prédire la suite d'un texte. « Grand » = des milliards de poids.</dd></div>
+        <div><dt>GPT — Transformeur Génératif Pré-entraîné</dt><dd>(en anglais <b>Generative Pre-trained Transformer</b>) une famille de LLM. Décortiqué : <b>Génératif</b> (produit du texte) · <b>Pré-entraîné</b> (a appris d'avance sur d'énormes textes) · <b>Transformer</b> (l'architecture du module précédent).</dd></div>
+      </dl></div>
+
+      <h3>Étape 1 — Découper le texte en tokens</h3>
+      <div class="define"><div class="ico">[def]</div><dl>
+        <div><dt>Token — Jeton</dt><dd>un petit morceau de texte (souvent un mot ou un bout de mot). Le LLM ne lit pas des lettres ni des phrases : il lit et écrit des <b>tokens</b>.</dd></div>
+        <div><dt>Embedding — Plongement</dt><dd>(en anglais <b>Embedding</b>) la conversion de chaque token en une liste de nombres, pour que le modèle puisse « calculer » avec le sens. Des mots proches ont des nombres proches.</dd></div>
+      </dl></div>
+
+      <div class="demo">
+        <div class="demo-head"><span class="demo-tag">Manipule</span><h3>Découpe un texte en tokens</h3></div>
+        <p class="demo-desc">Écris une phrase : on la découpe en tokens (version simplifiée — les vrais tokenizers coupent aussi à l'intérieur des mots).</p>
+        <input type="text" id="tokInput" value="L'intelligence artificielle apprend vite." oninput="tokenize()">
+        <div class="tokens" id="tokOut"></div>
+        <div class="readout"><div class="stat"><div class="k">Nombre de tokens</div><div class="v" id="tokCount">—</div></div></div>
+      </div>
+
+      <h3>Étape 2 — Prédire, encore et encore</h3>
+      <p>À partir des tokens lus, le modèle calcule une <strong>probabilité pour chaque token possible</strong> comme suite, et en choisit un. Puis il recommence avec ce nouveau token ajouté. C'est en répétant « quel est le prochain token ? » qu'un LLM écrit des phrases entières.</p>
+
+      <div class="demo">
+        <div class="demo-head"><span class="demo-tag">Illustration</span><h3>« Le prochain mot après… »</h3></div>
+        <p class="demo-desc">Voici comment un modèle pourrait répartir ses probabilités pour la suite de la phrase. Clique pour « choisir » et continuer.</p>
+        <div style="font-family:'Space Mono',monospace;font-size:15px;background:var(--surface-2);padding:13px 15px;border-radius:11px;margin-bottom:14px" id="genText">Le chat dort sur le ___</div>
+        <div id="probBars"></div>
+      </div>
+
+      <div class="note"><b>Le grand vertige :</b> il n'y a pas de base de données de réponses cachée. Toute la « connaissance » est encodée dans les milliards de poids, ajustés pendant l'entraînement par la descente de gradient du module 4. Prédire le mot suivant, à très grande échelle, suffit à produire du raisonnement, du code et des explications.</div>
+    `,
+    quiz:{q:"Quelle est, au fond, la tâche d'entraînement d'un LLM comme GPT ?",
+      opts:["Chercher la réponse dans une base de données","Prédire le token (mot) suivant à partir des précédents","Comparer deux images"],
+      correct:1, ok:"C'est tout : prédire le token suivant, des milliards de fois, sur d'immenses textes. Le reste émerge de là.", no:"Pas de base de données : le LLM apprend simplement à prédire le token suivant."}
+  },
+
+  {
+    id:"fin", nav:"Récap & suite", title:"Tu as construit l'IA moderne",
+    eyebrow:"Module 8 — Synthèse",
+    html:`
+      <p class="lead">Reprenons le chemin parcouru. Tu es parti d'une multiplication et tu es arrivé aux modèles qui écrivent du code et des essais. Voici la chaîne complète, d'un bloc.</p>
+
+      <ul>
+        <li><strong>1. Le neurone</strong> — entrées × poids + biais, puis fonction d'activation.</li>
+        <li><strong>2. Le réseau (<span class="acro">MLP</span>)</strong> — des neurones en couches ; la profondeur fait monter l'abstraction.</li>
+        <li><strong>3. L'apprentissage</strong> — fonction de perte, rétropropagation, descente de gradient : régler les poids tout seul.</li>
+        <li><strong>4. Les formes spécialisées</strong> — <span class="acro">CNN</span> pour les images, <span class="acro">RNN</span>/<span class="acro">LSTM</span> pour les séquences.</li>
+        <li><strong>5. Le <span class="acro">Transformer</span></strong> — l'attention, en parallèle : la rupture de 2017.</li>
+        <li><strong>6. Les <span class="acro">LLM</span></strong> — Transformers géants qui prédisent le token suivant.</li>
+      </ul>
+
+      <div class="note"><b>Pour aller plus loin</b>, quelques mots-clés à explorer ensuite : <em>fine-tuning</em> (spécialiser un modèle déjà entraîné), <em>RAG</em> (Retrieval-Augmented Generation — brancher le modèle sur des documents), <em>RLHF</em> (Reinforcement Learning from Human Feedback — aligner le modèle sur les préférences humaines), et la <em>fenêtre de contexte</em> (la quantité de tokens que le modèle peut lire d'un coup).</div>
+
+      <div class="demo" style="text-align:center">
+        <div class="demo-head" style="justify-content:center"><span class="demo-tag">Bilan</span><h3>Ton parcours</h3></div>
+        <p class="demo-desc">Ce que tu as exploré et réussi.</p>
+        <div style="font-family:'Fraunces',serif;font-size:46px;font-weight:600;color:var(--primary)" id="finalScore">—</div>
+        <p style="color:var(--muted);font-size:14px">bonnes réponses aux quiz</p>
+        <button class="btn" style="margin-top:8px" onclick="openGlossary()">Revoir le glossaire complet</button>
+      </div>
+
+      <p style="text-align:center;color:var(--muted);font-size:14px;margin-top:30px">Reviens sur n'importe quel module dans le menu de gauche pour réviser. 🧠</p>
+    `,
+    quiz:null
+  }
+];
+
+/* ============================================================
+   ÉTAT & RENDU
+   ============================================================ */
+let current = 0;
+const visited = new Set();
+const quizResults = {}; // moduleIndex -> bool
+
+function buildNav(){
+  const nav = document.getElementById('nav');
+  nav.innerHTML = MODULES.map((m,i)=>`
+    <button class="nav-item" data-i="${i}" onclick="goTo(${i})">
+      <span class="nav-num"><span>${i+1}</span></span>${m.nav}
+    </button>`).join('');
+}
+
+function buildContent(){
+  const c = document.getElementById('content');
+  c.innerHTML = MODULES.map((m,i)=>`
+    <section class="module" id="mod${i}">
+      <div class="inner">
+        <div class="eyebrow">${m.eyebrow}</div>
+        <h1>${m.title}</h1>
+        ${m.html}
+        ${m.quiz?buildQuiz(i,m.quiz):''}
+        <div class="footer-nav">
+          ${i>0?`<button class="btn ghost" onclick="goTo(${i-1})">← Précédent</button>`:'<span></span>'}
+          ${i<MODULES.length-1?`<button class="btn" onclick="goTo(${i+1})">Continuer →</button>`:'<span></span>'}
+        </div>
+      </div>
+    </section>`).join('');
+}
+
+function buildQuiz(mi,q){
+  return `<div class="quiz" id="quiz${mi}">
+    <div class="q">✦ Mini-quiz — ${q.q}</div>
+    ${q.opts.map((o,oi)=>`<button class="opt" onclick="answer(${mi},${oi})">${o}</button>`).join('')}
+    <div class="feedback" id="fb${mi}"></div>
+  </div>`;
+}
+
+function answer(mi,oi){
+  const q = MODULES[mi].quiz;
+  const quiz = document.getElementById('quiz'+mi);
+  const opts = quiz.querySelectorAll('.opt');
+  const fb = document.getElementById('fb'+mi);
+  opts.forEach((b,bi)=>{
+    b.disabled = true;
+    if(bi===q.correct) b.classList.add('correct');
+    if(bi===oi && oi!==q.correct) b.classList.add('wrong');
+  });
+  const right = oi===q.correct;
+  fb.className = 'feedback show '+(right?'ok':'no');
+  fb.textContent = right?('✓ '+q.ok):('✗ '+q.no);
+  quizResults[mi] = right;
+  updateProgress();
+}
+
+function goTo(i){
+  current = i;
+  document.querySelectorAll('.module').forEach((m,mi)=>m.classList.toggle('active',mi===i));
+  document.querySelectorAll('.nav-item').forEach((n,ni)=>n.classList.toggle('active',ni===i));
+  visited.add(i);
+  updateProgress();
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(window.innerWidth<=860) closeMenu();
+  if(MODULES[i].id==='fin') showFinal();
+}
+
+function updateProgress(){
+  document.querySelectorAll('.nav-item').forEach((n,ni)=>{
+    n.classList.toggle('done', visited.has(ni) && ni!==current);
+  });
+  const pct = Math.round((visited.size/MODULES.length)*100);
+  document.getElementById('progFill').style.width = pct+'%';
+  document.getElementById('progPct').textContent = pct+' %';
+}
+
+function showFinal(){
+  const correct = Object.values(quizResults).filter(Boolean).length;
+  const total = MODULES.filter(m=>m.quiz).length;
+  const el = document.getElementById('finalScore');
+  if(el) el.textContent = correct+' / '+total;
+}
+
+/* ---------- menu mobile ---------- */
+function toggleMenu(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('scrim').classList.toggle('show')}
+function closeMenu(){document.getElementById('sidebar').classList.remove('open');document.getElementById('scrim').classList.remove('show')}
+
+/* ---------- glossaire ---------- */
+function openGlossary(){document.getElementById('overlay').classList.add('show');renderGlossary('')}
+function closeGlossary(){document.getElementById('overlay').classList.remove('show')}
+function renderGlossary(filter){
+  const f = (filter||'').toLowerCase();
+  const list = GLOSSARY.filter(g=>(g.a+g.en+g.fr+g.d).toLowerCase().includes(f));
+  document.getElementById('glossList').innerHTML = list.map(g=>`
+    <div class="gloss-item">
+      <span class="gloss-acro">${g.a}</span>
+      <div class="gloss-en">${g.en}</div>
+      <div class="gloss-fr">${g.fr}</div>
+      <div class="gloss-def">${g.d}</div>
+    </div>`).join('') || '<p style="color:var(--muted)">Aucun résultat.</p>';
+}
+
+/* ============================================================
+   DÉMO 1 — PERCEPTRON
+   ============================================================ */
+let actFn = 'relu';
+function setAct(f){actFn=f;document.getElementById('actRelu').classList.toggle('on',f==='relu');document.getElementById('actSig').classList.toggle('on',f==='sig');updatePerceptron()}
+function updatePerceptron(){
+  const x=[1,2,3].map(i=>+document.getElementById('px'+i).value);
+  const w=[1,2,3].map(i=>+document.getElementById('pw'+i).value);
+  const b=+document.getElementById('pb').value;
+  [1,2,3].forEach(i=>{document.getElementById('vx'+i).textContent=x[i-1].toFixed(2);document.getElementById('vw'+i).textContent=w[i-1].toFixed(2);});
+  document.getElementById('vb').textContent=b.toFixed(2);
+  const z = x[0]*w[0]+x[1]*w[1]+x[2]*w[2]+b;
+  let out = actFn==='relu' ? Math.max(0,z) : 1/(1+Math.exp(-z));
+  document.getElementById('rawSum').textContent = z.toFixed(2);
+  document.getElementById('actOut').textContent = out.toFixed(2);
+  // visual: neuron glow + connection thickness
+  const strength = actFn==='relu' ? Math.min(out/2,1) : out;
+  const neuron = document.getElementById('neuron');
+  neuron.setAttribute('r', 30+strength*14);
+  neuron.setAttribute('fill', strength>0.5?'#FF6B4A':'#FFE9E3');
+  document.getElementById('lnOut').setAttribute('stroke', strength>0.4?'#FF6B4A':'#c9c7e0');
+  document.getElementById('lnOut').setAttribute('stroke-width', 2+strength*5);
+  [1,2,3].forEach(i=>{
+    const contrib = Math.min(Math.abs(x[i-1]*w[i-1]),1);
+    const ln = document.getElementById('ln'+i);
+    ln.setAttribute('stroke', x[i-1]*w[i-1]>=0?'#4B3FD6':'#FF6B4A');
+    ln.setAttribute('stroke-width', 1.5+contrib*4);
+    ln.setAttribute('opacity', .35+contrib*.65);
+  });
+  const badge = document.getElementById('fireBadge');
+  const firing = (actFn==='relu'&&out>1.0)||(actFn==='sig'&&out>0.7);
+  badge.className = 'fire-badge '+(firing?'fire-on':'fire-off');
+  badge.textContent = firing?'⚡ Le neurone s\'active fort !':'Au repos';
+}
+
+/* ============================================================
+   DÉMO 2 — RÉSEAU QUI PROPAGE
+   ============================================================ */
+const layers=[3,5,4,2];
+function buildNetwork(){
+  const svg=document.getElementById('netSvg');
+  const W=520,H=240,padX=40;
+  const colX = layers.map((_,i)=>padX + i*((W-2*padX)/(layers.length-1)));
+  let nodes=[], lines='';
+  layers.forEach((count,li)=>{
+    const arr=[];
+    for(let n=0;n<count;n++){
+      const y = H/2 + (n-(count-1)/2)*44;
+      arr.push({x:colX[li],y});
+    }
+    nodes.push(arr);
+  });
+  for(let li=0;li<layers.length-1;li++){
+    nodes[li].forEach((a,ai)=>nodes[li+1].forEach((b,bi)=>{
+      lines+=`<line class="edge" data-l="${li}" x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="#d9d5f6" stroke-width="1.2"/>`;
+    }));
+  }
+  let circles='';
+  nodes.forEach((arr,li)=>arr.forEach((p,pi)=>{
+    const color = li===0?'#4B3FD6':li===layers.length-1?'#0F9E8E':'#7a6fe0';
+    circles+=`<circle class="node" data-l="${li}" cx="${p.x}" cy="${p.y}" r="10" fill="#fff" stroke="${color}" stroke-width="2.5"/>`;
+  }));
+  svg.innerHTML = lines+circles;
+}
+function fireNetwork(){
+  const svg=document.getElementById('netSvg');
+  for(let li=0;li<layers.length;li++){
+    setTimeout(()=>{
+      svg.querySelectorAll(`.node[data-l="${li}"]`).forEach(n=>{
+        n.setAttribute('fill', li===layers.length-1?'#FF6B4A':'#4B3FD6');
+        setTimeout(()=>n.setAttribute('fill','#fff'),700);
+      });
+      if(li<layers.length-1) svg.querySelectorAll(`.edge[data-l="${li}"]`).forEach(e=>{
+        e.setAttribute('stroke','#FF6B4A');e.setAttribute('stroke-width','2');
+        setTimeout(()=>{e.setAttribute('stroke','#d9d5f6');e.setAttribute('stroke-width','1.2')},700);
+      });
+    }, li*450);
+  }
+}
+
+/* ============================================================
+   DÉMO 3 — DESCENTE DE GRADIENT
+   ============================================================ */
+let ballX = -3.4, steps=0;
+const gW=460,gH=220, gMinX=-4.5, gMaxX=4.5;
+function lossF(x){return 0.06*x*x*x*x*0 + x*x;} // simple parabola y=x^2 (scaled)
+function gradF(x){return 2*x;}
+function gx2px(x){return 30 + (x-gMinX)/(gMaxX-gMinX)*(gW-60);}
+function gy2px(y){return gH-25 - (y/22)*(gH-45);}
+function buildGrad(){
+  const svg=document.getElementById('gradSvg');
+  let path='M';
+  for(let px=30;px<=gW-30;px+=4){
+    const x = gMinX + (px-30)/(gW-60)*(gMaxX-gMinX);
+    path += ` ${px} ${gy2px(lossF(x))}`;
+  }
+  svg.innerHTML = `
+    <path d="${path}" fill="none" stroke="#4B3FD6" stroke-width="2.5"/>
+    <line x1="30" y1="${gH-25}" x2="${gW-30}" y2="${gH-25}" stroke="#E0E1EC" stroke-width="1"/>
+    <circle id="gradBall" cx="${gx2px(ballX)}" cy="${gy2px(lossF(ballX))}" r="9" fill="#FF6B4A" stroke="#fff" stroke-width="2"/>
+    <text x="${gW/2}" y="${gH-6}" text-anchor="middle" font-family="Space Mono" font-size="11" fill="#6A6880">valeur d'un poids →</text>`;
+  updateLR();refreshBall();
+}
+function refreshBall(){
+  const b=document.getElementById('gradBall');
+  if(b){b.setAttribute('cx',gx2px(ballX));b.setAttribute('cy',gy2px(lossF(ballX)));}
+  document.getElementById('lossVal').textContent = lossF(ballX).toFixed(2);
+  document.getElementById('stepVal').textContent = steps;
+}
+function updateLR(){document.getElementById('lrVal').textContent=(+document.getElementById('lr').value).toFixed(2);}
+function gradStep(){
+  const lr=+document.getElementById('lr').value;
+  ballX = ballX - lr*gradF(ballX);
+  ballX = Math.max(gMinX,Math.min(gMaxX,ballX));
+  steps++; refreshBall();
+}
+function gradRun(){let i=0;const t=setInterval(()=>{gradStep();if(++i>=12)clearInterval(t)},160);}
+function gradReset(){ballX=-3.4;steps=0;refreshBall();}
+
+/* ============================================================
+   DÉMO 4 — ATTENTION
+   ============================================================ */
+const attWords = ["Le","chat","noir","dort","car","il","est","fatigué"];
+// attention de la ligne (mot cliqué) vers chaque colonne, valeurs illustratives 0..1
+const attMatrix = {
+  0:[0,.3,.1,.1,0,.1,.1,.1], 1:[.2,0,.5,.4,.1,.6,.2,.3], 2:[.1,.7,0,.2,0,.3,.1,.2],
+  3:[.1,.6,.2,0,.2,.2,.3,.4], 4:[0,.2,.1,.4,0,.3,.2,.4], 5:[.1,.8,.3,.3,.1,0,.4,.5],
+  6:[0,.3,.2,.3,.2,.4,0,.6], 7:[0,.4,.3,.4,.2,.5,.4,0]
+};
+function buildAttention(){
+  document.getElementById('attSentence').innerHTML = attWords.map((w,i)=>`<span class="att-word" data-i="${i}" onclick="focusWord(${i})">${w}</span>`).join('');
+}
+function focusWord(i){
+  const els=document.querySelectorAll('.att-word');
+  els.forEach((el,j)=>{
+    el.classList.remove('focus');
+    el.style.background='';el.style.color='';el.style.borderColor='';
+  });
+  els[i].classList.add('focus');
+  const row=attMatrix[i];
+  els.forEach((el,j)=>{
+    if(j===i)return;
+    const a=row[j];
+    el.style.background=`rgba(255,107,74,${a*0.85})`;
+    el.style.borderColor=a>0.3?'#FF6B4A':'var(--line)';
+    if(a>0.5)el.style.color='#fff';
+  });
+}
+
+/* ============================================================
+   DÉMO 5 — TOKENIZER
+   ============================================================ */
+function tokenize(){
+  const txt=document.getElementById('tokInput').value;
+  // découpage simplifié : mots, apostrophes et ponctuation séparés
+  const raw = txt.match(/[A-Za-zÀ-ÿ]+|'|\d+|[^\sA-Za-zÀ-ÿ\d]/g) || [];
+  document.getElementById('tokOut').innerHTML = raw.map(t=>`<span class="tok">${t}</span>`).join('');
+  document.getElementById('tokCount').textContent = raw.length;
+}
+
+/* ============================================================
+   DÉMO 6 — PRÉDICTION DU MOT SUIVANT
+   ============================================================ */
+const predStates = [
+  {ctx:"Le chat dort sur le ___", opts:[["tapis",42],["canapé",28],["lit",18],["toit",12]]},
+  {ctx:"Le chat dort sur le tapis ___", opts:[[".",55],["du",22],["chaud",14],["et",9]]},
+  {ctx:"Le chat dort sur le tapis. ___", opts:[["Il",38],["Le",24],["Soudain",20],["Dehors",18]]}
+];
+let predIdx=0;
+function buildProb(){
+  const s=predStates[predIdx];
+  document.getElementById('genText').textContent = s.ctx;
+  document.getElementById('probBars').innerHTML = s.opts.map((o,oi)=>`
+    <button class="opt" style="display:flex;justify-content:space-between;align-items:center;gap:12px" onclick="pickNext(${oi})">
+      <span class="mono">${o[0]}</span>
+      <span style="flex:1;height:10px;background:var(--surface-2);border-radius:99px;overflow:hidden;margin:0 8px">
+        <span style="display:block;height:100%;width:${o[1]}%;background:linear-gradient(90deg,var(--primary),var(--signal));border-radius:99px"></span>
+      </span>
+      <span class="mono" style="color:var(--primary);font-weight:700">${o[1]}%</span>
+    </button>`).join('');
+}
+function pickNext(oi){
+  const s=predStates[predIdx];
+  const word=s.opts[oi][0];
+  predIdx = Math.min(predIdx+1, predStates.length-1);
+  if(predIdx<predStates.length){
+    // remplace ___ par le mot choisi puis avance
+    predStates[predIdx].ctx = predStates[predIdx].ctx; // déjà préparé
+  }
+  if(oi!==-1 && predIdx<=predStates.length){
+    buildProb();
+  }
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+buildNav();
+buildContent();
+buildNetwork();
+buildGrad();
+buildAttention();
+focusWord(5);
+tokenize();
+buildProb();
+updatePerceptron();
+goTo(0);
+window.addEventListener('keydown',e=>{
+  if(e.key==='Escape')closeGlossary();
+  if(e.key==='ArrowRight'&&current<MODULES.length-1)goTo(current+1);
+  if(e.key==='ArrowLeft'&&current>0)goTo(current-1);
+});
+</script>
+</body>
+</html>

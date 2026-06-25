@@ -24,3 +24,7 @@ tmp/
 
 # Dépendances (si scripts Node ajoutés plus tard)
 node_modules/
+
+# Artefacts de build frontend (générés, ne pas committer)
+dist/
+*.tsbuildinfo

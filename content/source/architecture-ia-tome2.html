@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Adapter un LLM — Tome 2 : fine-tuning, RAG, RLHF, contexte</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EEF0F6;--surface:#FFFFFF;--surface-2:#F6F7FB;--ink:#15131F;--muted:#6A6880;--line:#E0E1EC;
+    --primary:#4B3FD6;--primary-soft:#ECEAFB;--signal:#FF6B4A;--signal-soft:#FFE9E3;
+    --teal:#0F9E8E;--teal-soft:#DDF4F0;--shadow:0 1px 2px rgba(21,19,31,.05),0 10px 30px rgba(21,19,31,.06);--radius:18px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .mono{font-family:'Space Mono',monospace}
+  h1,h2,h3{font-family:'Fraunces',serif;font-weight:600;line-height:1.12;letter-spacing:-.01em}
+  .shell{display:grid;grid-template-columns:300px 1fr;min-height:100vh}
+  .sidebar{background:var(--ink);color:#EAE8F5;padding:26px 20px;position:sticky;top:0;height:100vh;overflow-y:auto}
+  .brand{display:flex;align-items:center;gap:11px;margin-bottom:6px}
+  .brand .dot{width:30px;height:30px;border-radius:9px;background:linear-gradient(140deg,var(--teal),var(--primary));flex:none;position:relative}
+  .brand .dot::after{content:"2";position:absolute;inset:0;display:grid;place-items:center;font-family:'Fraunces',serif;font-weight:700;color:#fff;font-size:15px}
+  .brand b{font-family:'Fraunces',serif;font-size:18px;font-weight:600;letter-spacing:-.01em}
+  .brand-sub{font-size:12px;color:#9D9AC0;margin:2px 0 22px 41px}
+  .progress-wrap{margin-bottom:22px}
+  .progress-label{display:flex;justify-content:space-between;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:#9D9AC0;margin-bottom:7px}
+  .progress-track{height:6px;background:rgba(255,255,255,.1);border-radius:99px;overflow:hidden}
+  .progress-fill{height:100%;width:0;background:linear-gradient(90deg,var(--teal),var(--primary));border-radius:99px;transition:width .5s cubic-bezier(.2,.8,.2,1)}
+  .nav-item{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:none;cursor:pointer;background:transparent;color:#C9C7E0;font-family:inherit;font-size:14px;padding:11px 12px;border-radius:11px;margin-bottom:3px;transition:.18s;line-height:1.25}
+  .nav-item:hover{background:rgba(255,255,255,.06);color:#fff}
+  .nav-item.active{background:rgba(255,255,255,.1);color:#fff}
+  .nav-num{width:26px;height:26px;border-radius:8px;flex:none;display:grid;place-items:center;font-family:'Space Mono',monospace;font-size:12px;background:rgba(255,255,255,.08);color:#9D9AC0;transition:.18s}
+  .nav-item.active .nav-num{background:var(--primary);color:#fff}
+  .nav-item.done .nav-num{background:var(--teal);color:#fff}
+  .nav-item.done .nav-num::after{content:"✓"}
+  .nav-item.done .nav-num span{display:none}
+  .glossary-btn{margin-top:18px;width:100%;border:1px solid rgba(255,255,255,.14);background:transparent;color:#EAE8F5;font-family:inherit;font-size:13px;padding:11px;border-radius:11px;cursor:pointer;transition:.18s}
+  .glossary-btn:hover{background:rgba(255,255,255,.07)}
+  main{overflow:hidden}
+  .module{display:none;animation:fade .45s ease}
+  .module.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .inner{max-width:760px;margin:0 auto;padding:54px 40px 100px}
+  .eyebrow{font-family:'Space Mono',monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--primary);margin-bottom:14px}
+  .module h1{font-size:clamp(30px,4.6vw,46px);margin-bottom:16px}
+  .lead{font-size:18px;color:var(--muted);margin-bottom:34px;max-width:62ch}
+  .module h2{font-size:25px;margin:42px 0 14px}
+  .module h3{font-size:18px;margin:28px 0 8px}
+  .module p{margin-bottom:15px;color:#2C2A3A}
+  .module p strong{color:var(--ink)}
+  .module ul{margin:0 0 16px 0;padding-left:0;list-style:none}
+  .module li{position:relative;padding-left:24px;margin-bottom:9px;color:#2C2A3A}
+  .module li::before{content:"";position:absolute;left:4px;top:11px;width:7px;height:7px;border-radius:50%;background:var(--signal)}
+  .acro{display:inline-block;font-family:'Space Mono',monospace;font-size:.92em;background:var(--primary-soft);color:var(--primary);padding:1px 7px;border-radius:6px;font-weight:700;white-space:nowrap}
+  .define{display:flex;gap:14px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--signal);border-radius:14px;padding:16px 18px;margin:18px 0;box-shadow:var(--shadow)}
+  .define .ico{font-family:'Space Mono',monospace;font-weight:700;color:var(--signal);font-size:13px;flex:none;padding-top:1px}
+  .define dl{display:grid;gap:7px;font-size:14.5px}
+  .define dt{font-weight:700;font-family:'Space Mono',monospace;color:var(--ink);font-size:13px}
+  .define dd{color:var(--muted)}
+  .define dd b{color:var(--ink)}
+  .note{background:var(--teal-soft);border-radius:14px;padding:16px 18px;margin:20px 0;font-size:14.5px;color:#0a5b52;border:1px solid #BEE7E0}
+  .note b{color:#063f39}
+  .demo{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:24px;margin:26px 0;box-shadow:var(--shadow)}
+  .demo-head{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+  .demo-tag{font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:var(--primary);padding:3px 8px;border-radius:6px}
+  .demo h3{margin:0;font-size:17px}
+  .demo-desc{font-size:13.5px;color:var(--muted);margin:4px 0 18px}
+  .slider-row{display:grid;grid-template-columns:160px 1fr 70px;align-items:center;gap:12px;margin-bottom:11px}
+  .slider-row label{font-size:13px;color:var(--muted)}
+  .slider-row .val{font-family:'Space Mono',monospace;font-size:13px;text-align:right;color:var(--primary);font-weight:700}
+  input[type=range]{-webkit-appearance:none;width:100%;height:6px;border-radius:99px;background:var(--line);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--primary);cursor:pointer;border:3px solid #fff;box-shadow:0 1px 4px rgba(75,63,214,.4)}
+  input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--primary);cursor:pointer;border:3px solid #fff}
+  .seg{display:inline-flex;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:3px;gap:3px}
+  .seg button{border:none;background:transparent;font-family:'Space Mono',monospace;font-size:12px;padding:6px 12px;border-radius:7px;cursor:pointer;color:var(--muted)}
+  .seg button.on{background:var(--primary);color:#fff}
+  .btn{border:none;background:var(--primary);color:#fff;font-family:inherit;font-weight:600;font-size:14px;padding:10px 18px;border-radius:11px;cursor:pointer;transition:.16s}
+  .btn:hover{filter:brightness(1.08)}
+  .btn.ghost{background:var(--surface-2);color:var(--ink);border:1px solid var(--line)}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+  .readout{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+  .stat{background:var(--surface-2);border:1px solid var(--line);border-radius:11px;padding:10px 14px;flex:1;min-width:120px}
+  .stat .k{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+  .stat .v{font-family:'Space Mono',monospace;font-size:19px;font-weight:700;color:var(--ink)}
+  textarea,input[type=text]{width:100%;font-family:inherit;font-size:14px;padding:11px 13px;border:1px solid var(--line);border-radius:11px;background:var(--surface-2);color:var(--ink);resize:vertical}
+  textarea:focus,input:focus{outline:2px solid var(--primary-soft);border-color:var(--primary)}
+  .quiz{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:24px;margin:30px 0;box-shadow:var(--shadow)}
+  .quiz .q{font-weight:600;font-size:16px;margin-bottom:14px}
+  .opt{display:block;width:100%;text-align:left;border:1px solid var(--line);background:var(--surface-2);font-family:inherit;font-size:14.5px;padding:12px 15px;border-radius:11px;margin-bottom:9px;cursor:pointer;transition:.16s}
+  .opt:hover{border-color:var(--primary)}
+  .opt.correct{background:var(--teal-soft);border-color:var(--teal);color:#0a5b52;font-weight:600}
+  .opt.wrong{background:var(--signal-soft);border-color:var(--signal);color:#c93d1e}
+  .opt:disabled{cursor:default}
+  .feedback{font-size:14px;margin-top:6px;padding:12px 14px;border-radius:11px;display:none}
+  .feedback.show{display:block}
+  .feedback.ok{background:var(--teal-soft);color:#0a5b52}
+  .feedback.no{background:var(--signal-soft);color:#c93d1e}
+  .footer-nav{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:24px;border-top:1px solid var(--line)}
+  .overlay{position:fixed;inset:0;background:rgba(21,19,31,.55);backdrop-filter:blur(3px);display:none;z-index:50;padding:30px;overflow-y:auto}
+  .overlay.show{display:flex;align-items:flex-start;justify-content:center;animation:fade .25s}
+  .glossary-card{background:var(--surface);border-radius:22px;max-width:620px;width:100%;padding:30px;box-shadow:0 30px 80px rgba(0,0,0,.3)}
+  .glossary-card .gh{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+  .glossary-card h2{font-size:24px}
+  .close-x{border:none;background:var(--surface-2);width:36px;height:36px;border-radius:10px;cursor:pointer;font-size:18px;color:var(--muted)}
+  .gloss-search{margin:16px 0 20px}
+  .gloss-item{padding:14px 0;border-bottom:1px solid var(--line)}
+  .gloss-item:last-child{border:none}
+  .gloss-acro{font-family:'Space Mono',monospace;font-weight:700;color:var(--primary);font-size:15px}
+  .gloss-en{font-size:13px;color:var(--muted);font-style:italic}
+  .gloss-fr{font-size:13px;color:var(--ink);font-weight:600;margin:2px 0}
+  .gloss-def{font-size:13.5px;color:var(--muted)}
+  .menu-toggle{display:none}
+  @media(max-width:860px){
+    .shell{grid-template-columns:1fr}
+    .sidebar{position:fixed;left:0;top:0;width:280px;z-index:40;transform:translateX(-100%);transition:.3s;box-shadow:0 0 50px rgba(0,0,0,.3)}
+    .sidebar.open{transform:none}
+    .menu-toggle{display:flex;align-items:center;gap:9px;position:sticky;top:0;z-index:30;background:var(--surface);border-bottom:1px solid var(--line);padding:13px 18px;font-family:'Fraunces',serif;font-weight:600;font-size:16px;cursor:pointer}
+    .menu-toggle .bars{display:flex;flex-direction:column;gap:3.5px}
+    .menu-toggle .bars span{width:18px;height:2px;background:var(--ink);border-radius:2px}
+    .inner{padding:34px 22px 90px}
+    .slider-row{grid-template-columns:120px 1fr 60px}
+    .scrim{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:35;display:none}
+    .scrim.show{display:block}
+  }
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+  :focus-visible{outline:3px solid var(--signal);outline-offset:2px;border-radius:6px}
+
+  /* contexte */
+  .ctx-bar{display:flex;height:42px;border-radius:11px;overflow:hidden;border:1px solid var(--line);margin:8px 0 4px}
+  .ctx-seg{display:grid;place-items:center;font-size:11px;color:#fff;font-family:'Space Mono',monospace;transition:.3s;overflow:hidden;white-space:nowrap}
+  .ctx-over{color:var(--signal);font-weight:700;font-size:13px;display:none}
+  .ctx-over.show{display:block}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--muted);margin-top:6px}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .legend i{width:11px;height:11px;border-radius:3px;display:inline-block}
+  /* rag */
+  .pipe{display:flex;flex-direction:column;gap:10px;margin:14px 0}
+  .stage{border:1px solid var(--line);border-radius:12px;padding:13px 15px;background:var(--surface-2);transition:.3s;opacity:.5}
+  .stage.on{opacity:1;border-color:var(--primary);background:#fff;box-shadow:var(--shadow)}
+  .stage .st-h{font-family:'Space Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--primary);margin-bottom:6px}
+  .chunk{font-size:13px;background:var(--primary-soft);border-radius:8px;padding:8px 11px;margin:5px 0;color:#2C2A3A}
+  .chunk .score{font-family:'Space Mono',monospace;font-size:11px;color:var(--primary);float:right}
+  /* rlhf */
+  .ab{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+  .ab-card{border:1px solid var(--line);border-radius:12px;padding:15px;background:var(--surface-2);cursor:pointer;transition:.16s;font-size:14px}
+  .ab-card:hover{border-color:var(--primary)}
+  .ab-card.picked{border-color:var(--teal);background:var(--teal-soft)}
+  .ab-tag{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:7px;display:block}
+  @media(max-width:560px){.ab{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="scrim" id="scrim" onclick="toggleMenu()"></div>
+<div class="shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand"><span class="dot"></span><b>Cerveau&nbsp;de&nbsp;silicium</b></div>
+    <p class="brand-sub">Tome 2 · Adapter, brancher et aligner un LLM</p>
+    <div class="progress-wrap">
+      <div class="progress-label"><span>Progression</span><span id="progPct">0&nbsp;%</span></div>
+      <div class="progress-track"><div class="progress-fill" id="progFill"></div></div>
+    </div>
+    <nav id="nav"></nav>
+    <button class="glossary-btn" onclick="openGlossary()">📖 Glossaire des acronymes</button>
+  </aside>
+  <main>
+    <div class="menu-toggle" onclick="toggleMenu()"><span class="bars"><span></span><span></span><span></span></span>Menu du parcours</div>
+    <div id="content"></div>
+  </main>
+</div>
+<div class="overlay" id="overlay" onclick="if(event.target===this)closeGlossary()">
+  <div class="glossary-card">
+    <div class="gh"><h2>Glossaire</h2><button class="close-x" onclick="closeGlossary()">✕</button></div>
+    <p style="color:var(--muted);font-size:14px">Chaque sigle, en entier, en français et en anglais.</p>
+    <input class="gloss-search" type="text" id="glossSearch" placeholder="Filtrer… (ex : RAG, récompense, contexte)" oninput="renderGlossary(this.value)">
+    <div id="glossList"></div>
+  </div>
+</div>
+
+<script>
+const GLOSSARY=[
+  {a:"LLM",en:"Large Language Model",fr:"Grand Modèle de Langage",d:"Un Transformer géant pré-entraîné à prédire le mot (token) suivant. Le point de départ de tout ce tome."},
+  {a:"Token",en:"Token",fr:"Jeton",d:"Un petit morceau de texte (mot ou bout de mot). C'est l'unité que lit et écrit le modèle, et l'unité dans laquelle se mesure le contexte."},
+  {a:"Fenêtre de contexte",en:"Context Window",fr:"Fenêtre de Contexte",d:"La quantité maximale de tokens que le modèle peut lire d'un seul coup : instructions + historique + documents + question + place pour la réponse."},
+  {a:"Fine-tuning",en:"Fine-Tuning",fr:"Réglage Fin / Spécialisation",d:"Reprendre un modèle déjà pré-entraîné et continuer à l'entraîner sur tes propres exemples pour l'adapter à un style ou une tâche."},
+  {a:"SFT",en:"Supervised Fine-Tuning",fr:"Réglage Fin Supervisé",d:"Fine-tuning à partir d'exemples « question → bonne réponse » fournis par des humains. Première étape pour rendre un modèle utile."},
+  {a:"LoRA",en:"Low-Rank Adaptation",fr:"Adaptation de Bas Rang",d:"Méthode de fine-tuning économique : au lieu de modifier tous les poids, on ajoute de petites matrices entraînables. Rapide et léger."},
+  {a:"RAG",en:"Retrieval-Augmented Generation",fr:"Génération Augmentée par Récupération",d:"Aller chercher les documents pertinents dans une base, les coller dans le contexte, puis laisser le modèle répondre à partir d'eux."},
+  {a:"Embedding",en:"Embedding",fr:"Plongement / Vecteur",d:"La conversion d'un texte en liste de nombres. Des textes au sens proche ont des vecteurs proches — c'est ce qui permet la recherche par similarité du RAG."},
+  {a:"Base vectorielle",en:"Vector Database",fr:"Base de Données Vectorielle",d:"Une base qui stocke des embeddings et sait retrouver très vite les plus proches d'une question. Le moteur de recherche du RAG."},
+  {a:"RL",en:"Reinforcement Learning",fr:"Apprentissage par Renforcement",d:"Apprendre par essais et récompenses : le modèle est encouragé quand il fait bien, découragé sinon."},
+  {a:"RLHF",en:"Reinforcement Learning from Human Feedback",fr:"Apprentissage par Renforcement à partir de Retours Humains",d:"Utiliser les préférences d'humains pour entraîner le modèle à être utile, honnête et inoffensif."},
+  {a:"Modèle de récompense",en:"Reward Model",fr:"Modèle de Récompense",d:"Un modèle entraîné à imiter les préférences humaines : il note les réponses, et cette note guide l'apprentissage."},
+  {a:"PPO",en:"Proximal Policy Optimization",fr:"Optimisation de Politique Proximale",d:"Un algorithme d'apprentissage par renforcement souvent utilisé pour l'étape finale du RLHF."},
+  {a:"DPO",en:"Direct Preference Optimization",fr:"Optimisation Directe des Préférences",d:"Une alternative plus simple au PPO : apprendre directement des préférences, sans modèle de récompense séparé."},
+  {a:"Hallucination",en:"Hallucination",fr:"Hallucination",d:"Quand un modèle invente une information fausse avec assurance. Le RAG sert notamment à réduire ça."},
+  {a:"Prompt",en:"Prompt",fr:"Invite / Consigne",d:"Tout le texte qu'on donne au modèle en entrée : instructions, contexte et question."}
+];
+
+const MODULES=[
+{
+  id:"map",nav:"Où on en est",title:"Le modèle est prêt. Et maintenant ?",eyebrow:"Tome 2 — Module 1",
+  html:`
+    <p class="lead">Au tome&nbsp;1, on a fabriqué un <span class="acro">LLM</span> : un Transformer géant qui prédit le mot suivant. Mais tel quel, il est généraliste, sa connaissance est figée à sa date d'entraînement, et il ne connaît rien de <em>tes</em> données. Ce tome répond à : <strong>comment l'adapter au monde réel ?</strong></p>
+    <p>Quatre leviers, du plus simple au plus profond&nbsp;:</p>
+    <ul>
+      <li><strong>La fenêtre de contexte</strong> — la « mémoire de travail » du modèle. Comprendre sa taille et ses limites conditionne tout le reste.</li>
+      <li><strong>Le <span class="acro">RAG</span></strong> — lui donner accès à <em>tes</em> documents au moment de répondre, sans le réentraîner.</li>
+      <li><strong>Le fine-tuning</strong> — modifier ses poids avec tes propres exemples pour changer son comportement ou son style.</li>
+      <li><strong>Le <span class="acro">RLHF</span></strong> — l'étape qui transforme un « prédicteur de texte » brut en assistant utile et poli.</li>
+    </ul>
+    <div class="note"><b>Un repère utile :</b> on ne choisit pas « l'un OU l'autre ». Un assistant moderne comme Claude combine les quatre : pré-entraînement (tome 1) + RLHF pour le comportement + RAG pour les connaissances fraîches + une grande fenêtre de contexte pour tout faire tenir.</div>
+    <p>On commence par la fenêtre de contexte, parce que c'est la pièce qui éclaire toutes les autres.</p>
+  `,
+  quiz:{q:"Pourquoi un LLM fraîchement pré-entraîné ne suffit-il pas pour la plupart des usages ?",
+    opts:["Il est trop lent","Il est généraliste, sa connaissance est figée et il ignore tes données privées","Il ne sait pas lire le français"],
+    correct:1,ok:"Exact : d'où les quatre leviers de ce tome pour l'adapter.",no:"Le problème n'est pas la vitesse ni la langue : c'est qu'il est généraliste, figé dans le temps et aveugle à tes données."}
+},
+{
+  id:"contexte",nav:"La fenêtre de contexte",title:"La mémoire de travail du modèle",eyebrow:"Tome 2 — Module 2",
+  html:`
+    <p class="lead">Un LLM n'a pas de mémoire entre deux échanges. À chaque réponse, on lui redonne <strong>tout</strong> ce dont il a besoin, d'un seul bloc. Ce bloc a une taille maximale : la fenêtre de contexte.</p>
+    <div class="define"><div class="ico">[def]</div><dl>
+      <div><dt>Fenêtre de contexte</dt><dd>(en anglais <b>Context Window</b>) le nombre maximal de <b>tokens</b> que le modèle peut lire en une fois. Pense à un bureau : tu ne peux y étaler qu'une quantité limitée de feuilles à la fois.</dd></div>
+    </dl></div>
+    <p>Tout entre en concurrence dans cette fenêtre&nbsp;:</p>
+    <ul>
+      <li>les <strong>instructions système</strong> (le rôle, les règles données au modèle) ;</li>
+      <li>l'<strong>historique</strong> de la conversation ;</li>
+      <li>les <strong>documents injectés</strong> (par le RAG, justement) ;</li>
+      <li>ta <strong>question</strong> ;</li>
+      <li>et la <strong>place réservée à la réponse</strong> — car ce qu'il écrit compte aussi dans le budget.</li>
+    </ul>
+    <div class="demo">
+      <div class="demo-head"><span class="demo-tag">Manipule</span><h3>Remplis la fenêtre… jusqu'au débordement</h3></div>
+      <p class="demo-desc">Règle chaque élément. Quand la somme dépasse le budget, ça déborde : il faut couper quelque part (résumer l'historique, garder moins de documents…). Budget réglé à 8&nbsp;000 tokens pour l'exemple — les vrais modèles vont bien plus loin.</p>
+      <div class="slider-row"><label>Instructions système</label><input type="range" min="0" max="2000" step="50" value="600" oninput="updateCtx()" id="cSys"><span class="val" id="vSys"></span></div>
+      <div class="slider-row"><label>Historique</label><input type="range" min="0" max="5000" step="100" value="1500" oninput="updateCtx()" id="cHist"><span class="val" id="vHist"></span></div>
+      <div class="slider-row"><label>Documents (RAG)</label><input type="range" min="0" max="6000" step="100" value="2000" oninput="updateCtx()" id="cDoc"><span class="val" id="vDoc"></span></div>
+      <div class="slider-row"><label>Place pour la réponse</label><input type="range" min="200" max="3000" step="100" value="1000" oninput="updateCtx()" id="cAns"><span class="val" id="vAns"></span></div>
+      <div class="ctx-bar" id="ctxBar"></div>
+      <div class="legend">
+        <span><i style="background:#6A6880"></i>Système</span><span><i style="background:#4B3FD6"></i>Historique</span>
+        <span><i style="background:#0F9E8E"></i>Documents</span><span><i style="background:#7a6fe0"></i>Question</span><span><i style="background:#FF6B4A"></i>Réponse</span>
+      </div>
+      <div class="readout">
+        <div class="stat"><div class="k">Total utilisé</div><div class="v" id="ctxTotal">—</div></div>
+        <div class="stat"><div class="k">Budget (8 000)</div><div class="v" id="ctxFree">—</div></div>
+      </div>
+      <div class="ctx-over" id="ctxOver">⚠ Débordement ! Le modèle ne pourra pas tout lire — il faut élaguer.</div>
+    </div>
+    <div class="note"><b>Un piège connu :</b> même quand tout rentre, les modèles ont parfois tendance à mieux retenir le <b>début</b> et la <b>fin</b> du contexte que le milieu (l'effet « perdu au milieu »). Placer l'essentiel aux extrémités aide.</div>
+  `,
+  quiz:{q:"Qu'est-ce qui compte dans le budget de la fenêtre de contexte ?",
+    opts:["Seulement ta question","L'entrée (instructions + historique + documents + question) ET la réponse que le modèle va écrire","Seulement les documents injectés"],
+    correct:1,ok:"Oui — la réponse générée consomme aussi du budget, il faut lui réserver de la place.",no:"Tout compte, y compris la réponse que le modèle s'apprête à écrire."}
+},
+{
+  id:"rag",nav:"Le RAG",title:"Donner tes documents au modèle, à la volée",eyebrow:"Tome 2 — Module 3",
+  html:`
+    <p class="lead">Le modèle ne connaît pas ta base de connaissances interne, et tu ne veux pas le réentraîner à chaque nouveau document. La solution la plus utilisée : le <span class="acro">RAG</span>.</p>
+    <div class="define"><div class="ico">[def]</div><dl>
+      <div><dt>RAG — Génération Augmentée par Récupération</dt><dd>(en anglais <b>Retrieval-Augmented Generation</b>) au moment de répondre, on va <b>récupérer</b> les passages pertinents dans une base de documents, on les <b>colle dans le contexte</b>, et le modèle <b>génère</b> sa réponse en s'appuyant dessus.</dd></div>
+      <div><dt>Embedding — Plongement</dt><dd>(en anglais <b>Embedding</b>) chaque document est converti en vecteur de nombres. Deux textes au sens proche ont des vecteurs proches.</dd></div>
+      <div><dt>Base vectorielle</dt><dd>(en anglais <b>Vector Database</b>) elle stocke ces vecteurs et retrouve instantanément les plus proches de la question. C'est le moteur de recherche du RAG.</dd></div>
+    </dl></div>
+    <p>Le pipeline, en quatre temps : <strong>question → récupération → augmentation → génération.</strong></p>
+    <div class="demo">
+      <div class="demo-head"><span class="demo-tag">Manipule</span><h3>Un mini-pipeline RAG</h3></div>
+      <p class="demo-desc">Choisis une question. On cherche les passages les plus pertinents dans une petite base d'équipe (illustrative), on les injecte, et on génère la réponse ancrée dessus.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px" id="ragQs"></div>
+      <div class="pipe">
+        <div class="stage" id="rs1"><div class="st-h">1 · Question</div><div id="ragQ" style="font-size:14px">—</div></div>
+        <div class="stage" id="rs2"><div class="st-h">2 · Récupération (passages les plus proches)</div><div id="ragR">—</div></div>
+        <div class="stage" id="rs3"><div class="st-h">3 · Augmentation (contexte envoyé au modèle)</div><div id="ragA" style="font-family:'Space Mono',monospace;font-size:12px;color:var(--muted)">—</div></div>
+        <div class="stage" id="rs4"><div class="st-h">4 · Génération (réponse ancrée)</div><div id="ragG" style="font-size:14px">—</div></div>
+      </div>
+    </div>
+    <div class="note"><b>Pourquoi c'est si utile :</b> tes données restent à jour et privées (rien à réentraîner), et comme le modèle <b>cite ce qu'on lui a fourni</b>, il invente moins (moins d'<span class="acro">hallucination</span>). C'est exactement le mécanisme derrière un assistant branché sur une base de connaissances d'équipe.</div>
+  `,
+  quiz:{q:"En quoi le RAG diffère-t-il du fine-tuning pour ajouter des connaissances ?",
+    opts:["Le RAG réentraîne le modèle sur tes documents","Le RAG laisse les poids intacts et fournit les documents dans le contexte au moment de répondre","Ce sont deux noms pour la même chose"],
+    correct:1,ok:"Exact : RAG = on apporte l'info au moment voulu, sans toucher aux poids. Idéal pour des données qui changent.",no:"Justement, le RAG ne réentraîne rien : il récupère et injecte les documents à la volée."}
+},
+{
+  id:"finetuning",nav:"Le fine-tuning",title:"Modifier les poids avec tes exemples",eyebrow:"Tome 2 — Module 4",
+  html:`
+    <p class="lead">Parfois tu ne veux pas ajouter des <em>connaissances</em>, mais changer un <em>comportement</em> : un ton précis, un format de sortie strict, une expertise de niche. Là, on touche aux poids : c'est le fine-tuning.</p>
+    <div class="define"><div class="ico">[def]</div><dl>
+      <div><dt>Fine-tuning — Spécialisation</dt><dd>reprendre un modèle déjà pré-entraîné et <b>continuer à l'entraîner</b> sur tes propres exemples. On réutilise tout ce qu'il a appris, et on l'oriente.</dd></div>
+      <div><dt>SFT — Réglage Fin Supervisé</dt><dd>(en anglais <b>Supervised Fine-Tuning</b>) la forme la plus courante : on fournit des paires « entrée → bonne réponse » et le modèle apprend à les imiter.</dd></div>
+      <div><dt>LoRA — Adaptation de Bas Rang</dt><dd>(en anglais <b>Low-Rank Adaptation</b>) au lieu de modifier les milliards de poids, on ajoute de petites matrices entraînables. Beaucoup plus rapide et léger — la méthode pratique la plus répandue.</dd></div>
+    </dl></div>
+    <div class="demo">
+      <div class="demo-head"><span class="demo-tag">Compare</span><h3>Avant / après spécialisation</h3></div>
+      <p class="demo-desc">Même question posée à un modèle de base, puis au même modèle fine-tuné sur la documentation interne d'une équipe (exemple illustratif).</p>
+      <div style="margin-bottom:12px"><span class="seg"><button id="ftBase" class="on" onclick="setFt('base')">Modèle de base</button><button id="ftTuned" onclick="setFt('tuned')">Modèle spécialisé</button></span></div>
+      <div style="background:var(--surface-2);border-radius:11px;padding:13px 15px;font-size:14px;margin-bottom:10px"><b>Question :</b> « Comment je valide une fiche avant publication ? »</div>
+      <div id="ftAnswer" style="border-left:3px solid var(--primary);padding:12px 15px;font-size:14.5px;background:#fff;border:1px solid var(--line);border-radius:11px"></div>
+    </div>
+    <div class="note"><b>La bonne question à se poser :</b> ai-je besoin de <b>connaissances</b> (alors → RAG, plus simple et toujours à jour) ou d'un <b>comportement / format</b> (alors → fine-tuning) ? On commence presque toujours par le prompt et le RAG ; on ne fine-tune que si ça ne suffit pas.</div>
+  `,
+  quiz:{q:"Quel cas justifie le mieux un fine-tuning plutôt qu'un simple RAG ?",
+    opts:["Ajouter le PDF d'hier à la base de connaissances","Forcer un ton et un format de sortie très spécifiques de façon fiable","Répondre avec des chiffres mis à jour chaque jour"],
+    correct:1,ok:"Oui — le fine-tuning excelle pour ancrer un comportement/format. Les connaissances fraîches, c'est le terrain du RAG.",no:"Les données fraîches relèvent du RAG. Le fine-tuning brille pour fixer un comportement ou un format."}
+},
+{
+  id:"rlhf",nav:"Le RLHF",title:"De prédicteur de texte à assistant",eyebrow:"Tome 2 — Module 5",
+  html:`
+    <p class="lead">Un modèle qui prédit juste le mot suivant peut être brillant… et complètement inutilisable : il continue ta phrase au lieu de répondre, ou il dit des choses problématiques. Le <span class="acro">RLHF</span> est l'étape qui le rend serviable.</p>
+    <div class="define"><div class="ico">[def]</div><dl>
+      <div><dt>RL — Apprentissage par Renforcement</dt><dd>(en anglais <b>Reinforcement Learning</b>) apprendre par essais et récompenses : on encourage les bons comportements, on décourage les mauvais.</dd></div>
+      <div><dt>RLHF — App. par Renforcement à partir de Retours Humains</dt><dd>(en anglais <b>Reinforcement Learning from Human Feedback</b>) on utilise les <b>préférences d'humains</b> comme source de récompense pour aligner le modèle.</dd></div>
+      <div><dt>Modèle de récompense</dt><dd>(en anglais <b>Reward Model</b>) un modèle entraîné à <b>prédire quelle réponse un humain préférerait</b>. Il sert ensuite de juge automatique.</dd></div>
+    </dl></div>
+    <p>La recette, en trois temps :</p>
+    <ul>
+      <li><strong>1. <span class="acro">SFT</span></strong> — on montre d'abord au modèle des exemples de bonnes réponses écrites par des humains.</li>
+      <li><strong>2. Modèle de récompense</strong> — des humains comparent des paires de réponses et disent laquelle est meilleure. On entraîne un modèle à reproduire ces choix.</li>
+      <li><strong>3. Optimisation</strong> — le modèle s'entraîne à maximiser la note du modèle de récompense (souvent via <span class="acro">PPO</span>, ou plus simplement <span class="acro">DPO</span>).</li>
+    </ul>
+    <div class="demo">
+      <div class="demo-head"><span class="demo-tag">Manipule</span><h3>Sois l'humain qui donne le retour</h3></div>
+      <p class="demo-desc">Pour chaque question, choisis la réponse que tu préfères. Tes choix, répétés des milliers de fois, sont exactement ce qui entraîne le modèle de récompense.</p>
+      <div id="rlhfBox"></div>
+      <div class="readout"><div class="stat"><div class="k">Préférences collectées</div><div class="v" id="rlhfCount">0</div></div></div>
+    </div>
+    <div class="note"><b>Pourquoi ça change tout :</b> sans RLHF, le modèle « sait » écrire mais n'a aucune idée de ce qu'on attend de lui. Avec, il apprend à être <b>utile, honnête et prudent</b> — c'est la différence entre un moteur de texte brut et un assistant avec qui on discute.</div>
+  `,
+  quiz:{q:"À quoi sert le « modèle de récompense » dans le RLHF ?",
+    opts:["À générer les réponses finales à l'utilisateur","À imiter les préférences humaines pour noter automatiquement les réponses pendant l'entraînement","À stocker les documents de l'entreprise"],
+    correct:1,ok:"C'est ça : il devient le juge automatique qui guide l'optimisation, à partir des comparaisons faites par des humains.",no:"Le modèle de récompense ne parle pas à l'utilisateur : il sert de juge appris pour orienter l'entraînement."}
+},
+{
+  id:"fin",nav:"Récap & frontière",title:"La pile complète d'un assistant moderne",eyebrow:"Tome 2 — Module 6",
+  html:`
+    <p class="lead">On peut maintenant assembler toute l'histoire, du tome 1 au tome 2. Un assistant comme ceux que tu utilises n'est aucune de ces techniques isolément — c'est leur empilement.</p>
+    <ul>
+      <li><strong>Pré-entraînement</strong> (tome 1) — un Transformer apprend le langage en prédisant le mot suivant sur d'immenses textes.</li>
+      <li><strong><span class="acro">SFT</span> + <span class="acro">RLHF</span></strong> — on l'aligne pour qu'il réponde de façon utile et sûre.</li>
+      <li><strong><span class="acro">RAG</span></strong> — on le branche sur des connaissances fraîches et privées, sans le réentraîner.</li>
+      <li><strong>Fine-tuning</strong> — au besoin, on ajuste son comportement ou son format avec nos exemples.</li>
+      <li><strong>Fenêtre de contexte</strong> — la contrainte transversale qui décide de ce qu'on peut lui montrer à chaque tour.</li>
+    </ul>
+    <div class="note"><b>La frontière, pour continuer :</b> les <em>agents</em> (un LLM qui planifie et appelle des outils), le <em>tool use</em> et le protocole <em>MCP</em> (Model Context Protocol — brancher le modèle sur des outils et données externes), et l'<em>évaluation</em> (mesurer rigoureusement si tout ça marche). C'est là que l'architecture rencontre concrètement le travail d'ingénierie.</div>
+    <div class="demo" style="text-align:center">
+      <div class="demo-head" style="justify-content:center"><span class="demo-tag">Bilan</span><h3>Ton parcours · Tome 2</h3></div>
+      <div style="font-family:'Fraunces',serif;font-size:46px;font-weight:600;color:var(--primary)" id="finalScore">—</div>
+      <p style="color:var(--muted);font-size:14px">bonnes réponses aux quiz</p>
+      <button class="btn" style="margin-top:8px" onclick="openGlossary()">Revoir le glossaire complet</button>
+    </div>
+    <p style="text-align:center;color:var(--muted);font-size:14px;margin-top:30px">Tu as bouclé les deux tomes : du neurone à l'assistant déployé. 🧠⚙️</p>
+  `,
+  quiz:null
+}
+];
+
+/* ====== ÉTAT & RENDU (identique au tome 1) ====== */
+let current=0;const visited=new Set();const quizResults={};
+function buildNav(){document.getElementById('nav').innerHTML=MODULES.map((m,i)=>`<button class="nav-item" data-i="${i}" onclick="goTo(${i})"><span class="nav-num"><span>${i+1}</span></span>${m.nav}</button>`).join('')}
+function buildContent(){document.getElementById('content').innerHTML=MODULES.map((m,i)=>`<section class="module" id="mod${i}"><div class="inner"><div class="eyebrow">${m.eyebrow}</div><h1>${m.title}</h1>${m.html}${m.quiz?buildQuiz(i,m.quiz):''}<div class="footer-nav">${i>0?`<button class="btn ghost" onclick="goTo(${i-1})">← Précédent</button>`:'<span></span>'}${i<MODULES.length-1?`<button class="btn" onclick="goTo(${i+1})">Continuer →</button>`:'<span></span>'}</div></div></section>`).join('')}
+function buildQuiz(mi,q){return `<div class="quiz" id="quiz${mi}"><div class="q">✦ Mini-quiz — ${q.q}</div>${q.opts.map((o,oi)=>`<button class="opt" onclick="answer(${mi},${oi})">${o}</button>`).join('')}<div class="feedback" id="fb${mi}"></div></div>`}
+function answer(mi,oi){const q=MODULES[mi].quiz,quiz=document.getElementById('quiz'+mi),opts=quiz.querySelectorAll('.opt'),fb=document.getElementById('fb'+mi);opts.forEach((b,bi)=>{b.disabled=true;if(bi===q.correct)b.classList.add('correct');if(bi===oi&&oi!==q.correct)b.classList.add('wrong')});const right=oi===q.correct;fb.className='feedback show '+(right?'ok':'no');fb.textContent=right?('✓ '+q.ok):('✗ '+q.no);quizResults[mi]=right;updateProgress()}
+function goTo(i){current=i;document.querySelectorAll('.module').forEach((m,mi)=>m.classList.toggle('active',mi===i));document.querySelectorAll('.nav-item').forEach((n,ni)=>n.classList.toggle('active',ni===i));visited.add(i);updateProgress();window.scrollTo({top:0,behavior:'smooth'});if(window.innerWidth<=860)closeMenu();if(MODULES[i].id==='fin')showFinal()}
+function updateProgress(){document.querySelectorAll('.nav-item').forEach((n,ni)=>n.classList.toggle('done',visited.has(ni)&&ni!==current));const pct=Math.round((visited.size/MODULES.length)*100);document.getElementById('progFill').style.width=pct+'%';document.getElementById('progPct').textContent=pct+' %'}
+function showFinal(){const c=Object.values(quizResults).filter(Boolean).length,t=MODULES.filter(m=>m.quiz).length,el=document.getElementById('finalScore');if(el)el.textContent=c+' / '+t}
+function toggleMenu(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('scrim').classList.toggle('show')}
+function closeMenu(){document.getElementById('sidebar').classList.remove('open');document.getElementById('scrim').classList.remove('show')}
+function openGlossary(){document.getElementById('overlay').classList.add('show');renderGlossary('')}
+function closeGlossary(){document.getElementById('overlay').classList.remove('show')}
+function renderGlossary(filter){const f=(filter||'').toLowerCase(),list=GLOSSARY.filter(g=>(g.a+g.en+g.fr+g.d).toLowerCase().includes(f));document.getElementById('glossList').innerHTML=list.map(g=>`<div class="gloss-item"><span class="gloss-acro">${g.a}</span><div class="gloss-en">${g.en}</div><div class="gloss-fr">${g.fr}</div><div class="gloss-def">${g.d}</div></div>`).join('')||'<p style="color:var(--muted)">Aucun résultat.</p>'}
+
+/* ====== DÉMO — FENÊTRE DE CONTEXTE ====== */
+const CTX_BUDGET=8000, CTX_Q=120;
+const ctxColors={sys:'#6A6880',hist:'#4B3FD6',doc:'#0F9E8E',q:'#7a6fe0',ans:'#FF6B4A'};
+function updateCtx(){
+  const sys=+cSys.value,hist=+cHist.value,doc=+cDoc.value,ans=+cAns.value,q=CTX_Q;
+  vSys.textContent=sys;vHist.textContent=hist;vDoc.textContent=doc;vAns.textContent=ans;
+  const total=sys+hist+doc+ans+q;
+  const parts=[['sys',sys],['hist',hist],['doc',doc],['q',q],['ans',ans]];
+  const bar=document.getElementById('ctxBar');
+  bar.innerHTML=parts.map(([k,v])=>{const pct=(v/Math.max(total,CTX_BUDGET))*100;return v>0?`<div class="ctx-seg" style="width:${pct}%;background:${ctxColors[k]}">${pct>9?v:''}</div>`:''}).join('');
+  document.getElementById('ctxTotal').textContent=total+' t';
+  document.getElementById('ctxTotal').style.color=total>CTX_BUDGET?'var(--signal)':'var(--ink)';
+  document.getElementById('ctxFree').textContent=(CTX_BUDGET-total)+' t';
+  document.getElementById('ctxOver').classList.toggle('show',total>CTX_BUDGET);
+}
+
+/* ====== DÉMO — RAG ====== */
+const KB=[
+  {id:"A",txt:"Validation : une fiche passe par trois étapes — rédaction, relecture par un pair, puis approbation par un responsable avant publication.",kw:["valide","validation","fiche","publication","approbation","relecture","étapes","avant"]},
+  {id:"B",txt:"Accès : seuls les membres avec le rôle « éditeur » peuvent modifier une fiche ; les autres ont un accès en lecture seule.",kw:["accès","rôle","éditeur","modifier","lecture","droits","membre"]},
+  {id:"C",txt:"Recherche : la base offre une recherche plein texte sur tout le contenu et un historique des modifications par fiche.",kw:["recherche","plein","texte","historique","modifications","contenu"]},
+  {id:"D",txt:"Onboarding : un nouvel arrivant reçoit un compte, est ajouté à l'espace équipe, et suit le guide de démarrage la première semaine.",kw:["onboarding","arrivant","compte","équipe","guide","démarrage","nouveau"]},
+  {id:"E",txt:"Sécurité : les sauvegardes sont quotidiennes et l'authentification à deux facteurs est obligatoire pour tous les comptes.",kw:["sécurité","sauvegarde","authentification","facteurs","obligatoire","compte"]}
+];
+const RAG_QS=[
+  {q:"Comment je valide une fiche avant publication ?",kw:["valide","validation","fiche","publication","avant","étapes"],
+   ans:"D'après la base : la fiche suit trois étapes — rédaction, puis relecture par un pair, puis approbation par un responsable avant la publication."},
+  {q:"Qui a le droit de modifier le contenu ?",kw:["droit","modifier","accès","rôle","contenu","éditeur"],
+   ans:"D'après la base : seuls les membres ayant le rôle « éditeur » peuvent modifier une fiche ; les autres sont en lecture seule."},
+  {q:"Que dois-je faire en arrivant dans l'équipe ?",kw:["arrivant","onboarding","équipe","nouveau","compte","démarrage"],
+   ans:"D'après la base : tu reçois un compte, tu es ajouté à l'espace équipe, et tu suis le guide de démarrage pendant la première semaine."}
+];
+let ragSel=0;
+function buildRagQs(){document.getElementById('ragQs').innerHTML=RAG_QS.map((r,i)=>`<button class="btn ${i===ragSel?'':'ghost'}" style="font-size:12.5px;padding:8px 12px" onclick="runRag(${i})">${r.q}</button>`).join('')}
+function runRag(i){
+  ragSel=i;buildRagQs();
+  const r=RAG_QS[i];
+  ['rs1','rs2','rs3','rs4'].forEach(s=>document.getElementById(s).classList.remove('on'));
+  // score KB
+  const scored=KB.map(k=>{let s=0;r.kw.forEach(w=>{if(k.kw.includes(w))s++});return{...k,s}}).sort((a,b)=>b.s-a.s);
+  const top=scored.filter(k=>k.s>0).slice(0,2);
+  document.getElementById('ragQ').textContent=r.q;
+  document.getElementById('ragR').innerHTML=top.map(k=>`<div class="chunk"><span class="score">score ${k.s}</span>[${k.id}] ${k.txt}</div>`).join('')||'<div class="chunk">Aucun passage trouvé.</div>';
+  document.getElementById('ragA').textContent=`Contexte = ["${top.map(k=>k.id).join('", "')}"] + question utilisateur → envoyé au modèle`;
+  document.getElementById('ragG').textContent=r.ans;
+  // animate stages
+  [0,1,2,3].forEach(n=>setTimeout(()=>document.getElementById('rs'+(n+1)).classList.add('on'),n*450));
+}
+
+/* ====== DÉMO — FINE-TUNING ====== */
+const FT={
+  base:"Cela dépend de votre organisation. En général, une bonne pratique consiste à faire relire votre contenu par quelqu'un, puis à le publier une fois qu'il est approuvé. Vérifiez les règles internes de votre équipe.",
+  tuned:"Tu passes par notre flux en trois étapes : 1) tu rédiges la fiche ; 2) un pair la relit ; 3) un responsable l'approuve. Ce n'est qu'après l'étape 3 que le bouton « Publier » devient actif."
+};
+function setFt(m){document.getElementById('ftBase').classList.toggle('on',m==='base');document.getElementById('ftTuned').classList.toggle('on',m==='tuned');document.getElementById('ftAnswer').textContent=FT[m];document.getElementById('ftAnswer').style.borderLeftColor=m==='tuned'?'var(--teal)':'var(--primary)'}
+
+/* ====== DÉMO — RLHF ====== */
+const RLHF=[
+  {q:"« Explique-moi la photosynthèse. »",a:"La photosynthèse est le processus par lequel les plantes utilisent la lumière pour transformer l'eau et le CO₂ en énergie (sucres), en rejetant de l'oxygène.",b:"photosynthèse processus plante lumière eau dioxyde carbone glucose oxygène chloroplaste..."},
+  {q:"« Donne-moi un mot de passe sûr pour le compte admin. »",a:"Je ne peux pas générer ça à ta place ici, mais voici comment en créer un bon : utilise un gestionnaire de mots de passe, vise 16+ caractères variés et unique par compte.",b:"Bien sûr : admin1234, c'est facile à retenir et ça fera l'affaire."},
+  {q:"« Résume ce paragraphe en une phrase. »",a:"Bien sûr — partage-moi le paragraphe et je le résume en une phrase claire.",b:"Voici un résumé en une phrase : [le modèle continue sans attendre le texte et invente un contenu]."}
+];
+let rlhfIdx=0,rlhfCount=0;
+function buildRlhf(){
+  const r=RLHF[rlhfIdx];
+  document.getElementById('rlhfBox').innerHTML=`
+    <div style="background:var(--surface-2);border-radius:11px;padding:12px 14px;font-size:14px;margin-bottom:10px">${r.q}</div>
+    <div class="ab">
+      <div class="ab-card" onclick="pickRlhf('a')"><span class="ab-tag">Réponse A</span>${r.a}</div>
+      <div class="ab-card" onclick="pickRlhf('b')"><span class="ab-tag">Réponse B</span>${r.b}</div>
+    </div>
+    <div id="rlhfFb" style="font-size:13.5px;color:var(--muted);min-height:20px"></div>`;
+}
+function pickRlhf(c){
+  rlhfCount++;document.getElementById('rlhfCount').textContent=rlhfCount;
+  const cards=document.querySelectorAll('.ab-card');cards.forEach(x=>x.style.pointerEvents='none');
+  cards[c==='a'?0:1].classList.add('picked');
+  document.getElementById('rlhfFb').textContent="✓ Préférence enregistrée. Multipliée par des milliers, elle entraîne le modèle de récompense à juger comme toi.";
+  setTimeout(()=>{rlhfIdx=(rlhfIdx+1)%RLHF.length;buildRlhf()},1400);
+}
+
+/* ====== INIT ====== */
+buildNav();buildContent();updateCtx();buildRagQs();runRag(0);setFt('base');buildRlhf();goTo(0);
+window.addEventListener('keydown',e=>{if(e.key==='Escape')closeGlossary();if(e.key==='ArrowRight'&&current<MODULES.length-1)goTo(current+1);if(e.key==='ArrowLeft'&&current>0)goTo(current-1)});
+</script>
+</body>
+</html>
