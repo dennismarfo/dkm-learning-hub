@@ -4,6 +4,9 @@
 import content from './content/architecture-ia.json';
 
 export type Quiz = { question: string; options: string[]; answer: number; ok: string; no: string };
+export type Block =
+  | { type: 'html'; html: string }
+  | { type: 'demo'; key: string; title: string; intro: string };
 export type Module = {
   id: string;
   tome: string;
@@ -12,6 +15,7 @@ export type Module = {
   nav: string;
   eyebrow: string;
   bodyHtml: string;
+  body: Block[];
   minutes: number;
   quiz: Quiz | null;
 };

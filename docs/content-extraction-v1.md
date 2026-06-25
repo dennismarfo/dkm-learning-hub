@@ -75,20 +75,30 @@ d'émettre du JSON silencieusement faux.
 - Les classes du corps source (`.lead`, `.define`, `.demo`, `.note`, `.acro`, etc.)
   sont stylées dans `src/styles.css` avec la DA DKM (Sand / Ink / Terracotta).
 
-## Suivi : démos interactives à reconstruire
+## Démos interactives
 
-Les démos source reposent sur du JS inline non réimporté. Elles s'affichent en
-**visuel statique fidèle** (SVG + contrôles inertes). À reconstruire en composants
-React fonctionnels (14 démos) :
+Architecture : pour le Tome 1, l'extraction découpe le corps en **blocs** ordonnés
+(`{type:'html'}` | `{type:'demo', key, title, intro}` — cf.
+`docs/superpowers/specs/2026-06-25-demos-interactives-tome1-design.md`). Le rendu
+mappe chaque clé de démo vers un composant React via `src/demos/registry.tsx`. Les
+Tomes 2/3 restent en un seul bloc html (démos statiques inline).
+
+### ✅ Tome 1 — reconstruites en React (`src/demos/`)
+
+| Clé | Composant |
+|---|---|
+| tome1-intro#0 | `NestedCircles` — cercles IA/ML/DL, clic → définition |
+| tome1-neurone#0 | `Perceptron` — sliders, ReLU/Sigmoïde, neurone qui s'illumine |
+| tome1-reseau#0 | `NetworkSignal` — propagation animée couche par couche |
+| tome1-apprentissage#0 | `GradientDescent` — balle, taux d'apprentissage, pas/auto |
+| tome1-transformer#0 | `Attention` — clic mot → poids d'attention |
+| tome1-llm#0 | `Tokenizer` — découpe en jetons + compte |
+| tome1-llm#1 | `NextWord` — barres de probabilité, génération pas à pas |
+
+### ⏳ Tomes 2 & 3 — à reconstruire (statiques pour l'instant)
 
 | Module | Démo |
 |---|---|
-| tome1-intro | Les cercles emboîtés (IA/ML/DL) |
-| tome1-neurone | Fais « tirer » un neurone |
-| tome1-reseau | Le signal traverse le réseau |
-| tome1-apprentissage | Descente de gradient |
-| tome1-transformer | Sur quoi un mot porte-t-il attention ? |
-| tome1-llm | Découpe un texte en tokens · « Le prochain mot après… » |
 | tome2-contexte | Remplis la fenêtre jusqu'au débordement |
 | tome2-rag | Un mini-pipeline RAG |
 | tome2-finetuning | Avant / après spécialisation |

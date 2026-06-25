@@ -2,6 +2,27 @@
 
 Journal de coordination entre Dennis, Claude Code et Hermès.
 
+## 2026-06-25 — Claude Code (démos interactives Tome 1)
+
+- Reconstruction des **7 démos interactives du Tome 1** en composants React
+  (`src/demos/`), à partir des littéraux source, en DA DKM. Brainstorm + spec :
+  `docs/superpowers/specs/2026-06-25-demos-interactives-tome1-design.md`.
+- Architecture : l'extraction découpe le corps des leçons Tome 1 en **blocs**
+  (`html` | `demo`) ; rendu via registre `src/demos/registry.tsx`. Tomes 2/3
+  inchangés (un seul bloc html, démos statiques).
+- Démos : NestedCircles, Perceptron, NetworkSignal, GradientDescent, Attention,
+  Tokenizer, NextWord. Logique fidèle aux originaux (math, matrices, états).
+- Vérifs : `npm run extract:content` (idempotent, 20 modules, 7 blocs démo),
+  `npm run build`, 0 vuln, smoke test navigateur des 7 démos (interaction réelle)
+  + non-régression Tomes 2/3, console sans erreur. Bug corrigé au passage : les
+  labels SVG des cercles interceptaient le clic (`pointer-events:none`).
+- **Aucune action infra / Hermès. Aucun secret.**
+
+Prochaine action recommandée (1 seule) : reconstruire les démos du **Tome 2**
+(fenêtre de contexte, RAG, fine-tuning, RLHF) sur le même modèle.
+
+---
+
 ## 2026-06-25 — Claude Code (extraction du contenu réel des cours)
 
 - Dennis a fourni les 4 HTML source (zip déposé dans le repo) ; extraits dans

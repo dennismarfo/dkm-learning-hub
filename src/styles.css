@@ -79,4 +79,46 @@
 .review-yours{color:#8f3322;margin:4px 0}
 .review-exp{color:var(--ink-70);margin:8px 0 0;line-height:1.5}
 
-@media(max-width:860px){.grid2,.grid3,.sidebar-layout{grid-template-columns:1fr}.links{display:none}.module{grid-template-columns:44px 1fr}.module .pill{display:none}.side{position:static}.h1{font-size:56px}.lesson h1{font-size:44px}.modules.mini{display:grid;grid-template-columns:1fr 1fr}}
+/* ===== Interactive demos (React) ===== */
+.demo-live{border-style:solid;border-color:rgba(200,85,61,.35)}
+.demo-row{display:flex;gap:26px;flex-wrap:wrap;align-items:center}
+.demo-col{flex:1;min-width:260px}
+.demo-col-center{display:flex;flex-direction:column;align-items:center;justify-content:center}
+.demo-svg{max-width:100%;height:auto}
+.demo-svg-wide{width:100%}
+.demo-svg-tag{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700}
+.demo-svg-axis{font-family:'JetBrains Mono',monospace;font-size:11px}
+.demo-info{flex:1;min-width:200px;font-size:15px;color:var(--ink-70)}
+.demo-info strong{color:var(--ink)}
+.demo-muted{color:var(--ink-70);font-size:14px;margin:10px 0 0}
+.demo-slider{display:grid;grid-template-columns:140px 1fr 52px;align-items:center;gap:10px;margin:8px 0}
+.demo-slider-label{font-size:14px;color:var(--ink-70)}
+.demo-slider-label b{color:var(--ink)}
+.demo-slider input[type=range]{width:100%;accent-color:var(--terracotta)}
+.demo-slider-val{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--ink);text-align:right}
+.seg{display:inline-flex;gap:0;border:1px solid var(--rule);border-radius:999px;overflow:hidden;margin-top:12px}
+.seg button{border:0;background:transparent;color:var(--ink-70);font-weight:700;padding:8px 16px;cursor:pointer;font:inherit}
+.seg button.on{background:var(--ink);color:var(--sand)}
+.demo-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px}
+.demo-btn{display:inline-flex;align-items:center;border-radius:999px;padding:10px 16px;background:var(--ink);color:var(--sand);font-weight:700;border:1px solid var(--ink);cursor:pointer;font:inherit;font-weight:700}
+.demo-btn.ghost{background:transparent;color:var(--ink)}
+.demo-btn:disabled{opacity:.55;cursor:default}
+.fire-badge{margin-top:12px;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;padding:6px 12px;border-radius:999px}
+.fire-badge.fire-off{background:rgba(42,26,18,.06);color:var(--ink-70)}
+.fire-badge.fire-on{background:var(--terracotta);color:var(--white)}
+.demo-input{width:100%;padding:12px 14px;border:1px solid var(--rule);border-radius:14px;background:var(--white);font:inherit;font-size:15px}
+.tok-out{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+.tok{font-family:'JetBrains Mono',monospace;font-size:14px;background:var(--white);border:1px solid var(--rule);border-radius:10px;padding:6px 10px}
+.att-sentence{display:flex;flex-wrap:wrap;gap:10px;font-size:18px}
+.att-word{padding:8px 12px;border-radius:12px;border:1px solid var(--rule);background:var(--white);cursor:pointer;font:inherit;font-size:18px;transition:background .15s,color .15s,border-color .15s}
+.att-word.focus{background:var(--ink);color:var(--sand);border-color:var(--ink);font-weight:700}
+.gen-text{font-family:'JetBrains Mono',monospace;font-size:15px;background:var(--sand-60);padding:13px 15px;border-radius:11px;margin-bottom:14px}
+.prob-bars{display:grid;gap:10px}
+.prob-bar{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:8px 12px;border:1px solid var(--rule);border-radius:14px;background:var(--white);cursor:pointer}
+.prob-bar:hover{border-color:var(--ink)}
+.prob-word{font-family:'JetBrains Mono',monospace;font-weight:600;min-width:64px}
+.prob-track{flex:1;height:10px;background:rgba(42,26,18,.1);border-radius:99px;overflow:hidden}
+.prob-fill{display:block;height:100%;background:var(--terracotta);border-radius:99px}
+.prob-pct{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--terracotta);min-width:42px;text-align:right}
+
+@media(max-width:860px){.grid2,.grid3,.sidebar-layout{grid-template-columns:1fr}.links{display:none}.module{grid-template-columns:44px 1fr}.module .pill{display:none}.side{position:static}.h1{font-size:56px}.lesson h1{font-size:44px}.modules.mini{display:grid;grid-template-columns:1fr 1fr}.demo-slider{grid-template-columns:110px 1fr 48px}}

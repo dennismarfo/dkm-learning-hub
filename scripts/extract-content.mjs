@@ -74,6 +74,57 @@ function minutesFor(html) {
   return Math.max(4, Math.round(words / 140));
 }
 
+const stripTags = (s) => s.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+
+// Find [start,end] spans of each top-level `<div class="demo">…</div>` by
+// depth-counting div open/close tags (demos contain nested divs).
+function findDemoSpans(html) {
+  const spans = [];
+  const open = /<div class="demo">/g;
+  let m;
+  while ((m = open.exec(html))) {
+    const start = m.index;
+    const tag = /<\/?div\b[^>]*>/g;
+    tag.lastIndex = start;
+    let depth = 0;
+    let t;
+    while ((t = tag.exec(html))) {
+      depth += t[0].startsWith('</') ? -1 : 1;
+      if (depth === 0) {
+        spans.push([start, tag.lastIndex]);
+        open.lastIndex = tag.lastIndex;
+        break;
+      }
+    }
+  }
+  return spans;
+}
+
+// Split a module body into ordered blocks. Demos are split out only for Tome 1
+// (the lot being rebuilt in React); everything else stays a single html block.
+function splitBody(html, keyBase, splitDemos) {
+  const trimmed = html.trim();
+  if (!splitDemos) return [{ type: 'html', html: trimmed }];
+  const spans = findDemoSpans(trimmed);
+  if (!spans.length) return [{ type: 'html', html: trimmed }];
+  const blocks = [];
+  let cursor = 0;
+  let di = 0;
+  for (const [s, e] of spans) {
+    const before = trimmed.slice(cursor, s).trim();
+    if (before) blocks.push({ type: 'html', html: before });
+    const demoHtml = trimmed.slice(s, e);
+    const title = (demoHtml.match(/<h3>([\s\S]*?)<\/h3>/) || [, ''])[1];
+    const intro = (demoHtml.match(/<p class="demo-desc">([\s\S]*?)<\/p>/) || [, ''])[1];
+    blocks.push({ type: 'demo', key: `${keyBase}#${di}`, title: stripTags(title), intro: stripTags(intro) });
+    di++;
+    cursor = e;
+  }
+  const after = trimmed.slice(cursor).trim();
+  if (after) blocks.push({ type: 'html', html: after });
+  return blocks;
+}
+
 const TOME_FILES = [
   { n: 1, file: 'architecture-ia-tome1.html' },
   { n: 2, file: 'architecture-ia-tome2.html' },
@@ -94,15 +145,18 @@ for (const { n, file } of TOME_FILES) {
   for (const m of mods) {
     number++;
     const q = m.quiz;
+    const id = `tome${n}-${m.id}`;
+    const bodyHtml = String(m.html).trim();
     modules.push({
-      id: `tome${n}-${m.id}`,
+      id,
       tome: TOME_LABELS[n],
       number,
       title: m.title,
       nav: m.nav,
       eyebrow: m.eyebrow,
-      bodyHtml: String(m.html).trim(),
-      minutes: minutesFor(String(m.html)),
+      bodyHtml,
+      body: splitBody(bodyHtml, id, n === 1),
+      minutes: minutesFor(bodyHtml),
       quiz: q
         ? { question: q.q, options: q.opts, answer: q.correct, ok: q.ok, no: q.no }
         : null,
@@ -159,6 +213,19 @@ for (const e of exam) {
 }
 for (const g of content.glossary) {
   if (!g.def) errors.push(`glossary ${g.term}: empty definition`);
+}
+const demoKeys = modules.flatMap((m) => m.body.filter((b) => b.type === 'demo').map((b) => b.key));
+const EXPECTED_DEMO_KEYS = [
+  'tome1-intro#0',
+  'tome1-neurone#0',
+  'tome1-reseau#0',
+  'tome1-apprentissage#0',
+  'tome1-transformer#0',
+  'tome1-llm#0',
+  'tome1-llm#1',
+];
+if (demoKeys.length !== EXPECTED_DEMO_KEYS.length || EXPECTED_DEMO_KEYS.some((k) => !demoKeys.includes(k))) {
+  errors.push(`expected demo blocks [${EXPECTED_DEMO_KEYS.join(', ')}], got [${demoKeys.join(', ')}]`);
 }
 if (errors.length) {
   console.error('Extraction failed:\n - ' + errors.join('\n - '));
