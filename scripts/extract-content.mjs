@@ -155,7 +155,9 @@ for (const { n, file } of TOME_FILES) {
       nav: m.nav,
       eyebrow: m.eyebrow,
       bodyHtml,
-      body: splitBody(bodyHtml, id, n === 1),
+      // Split demos out for Tomes 1 & 2 (rebuilt in React), except the recap
+      // "fin" modules whose only .demo is a non-interactive bilan.
+      body: splitBody(bodyHtml, id, (n === 1 || n === 2) && m.id !== 'fin'),
       minutes: minutesFor(bodyHtml),
       quiz: q
         ? { question: q.q, options: q.opts, answer: q.correct, ok: q.ok, no: q.no }
@@ -223,6 +225,10 @@ const EXPECTED_DEMO_KEYS = [
   'tome1-transformer#0',
   'tome1-llm#0',
   'tome1-llm#1',
+  'tome2-contexte#0',
+  'tome2-rag#0',
+  'tome2-finetuning#0',
+  'tome2-rlhf#0',
 ];
 if (demoKeys.length !== EXPECTED_DEMO_KEYS.length || EXPECTED_DEMO_KEYS.some((k) => !demoKeys.includes(k))) {
   errors.push(`expected demo blocks [${EXPECTED_DEMO_KEYS.join(', ')}], got [${demoKeys.join(', ')}]`);

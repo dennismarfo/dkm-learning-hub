@@ -2,6 +2,24 @@
 
 Journal de coordination entre Dennis, Claude Code et Hermès.
 
+## 2026-06-27 — Claude Code (démos interactives Tome 2)
+
+- Reconstruction des **4 démos interactives du Tome 2** en composants React
+  (même modèle que le Tome 1) : `ContextWindow` (fenêtre de contexte + débordement),
+  `RagPipeline` (récupération scorée + animation), `FineTuneCompare` (base/spécialisé),
+  `RlhfFeedback` (choix A/B cyclique). Logique fidèle aux littéraux source.
+- Extraction étendue : découpage en blocs pour Tomes 1 **et** 2 (sauf modules `fin`
+  dont le `.demo` est un bilan non interactif). Invariant : 11 blocs démo.
+- Vérifs : `npm run extract:content` (idempotent, 20 modules, 11 blocs démo),
+  `npm run build`, 0 vuln, smoke test navigateur des 4 démos (débordement budget,
+  re-scoring RAG, bascule fine-tuning, cycle RLHF), console sans erreur.
+- **Aucune action infra / Hermès. Aucun secret.**
+
+Prochaine action recommandée (1 seule) : reconstruire les démos du **Tome 3**
+(tool use, boucle ReAct, MCP, prompt injection) sur le même modèle.
+
+---
+
 ## 2026-06-25 — Claude Code (démos interactives Tome 1)
 
 - Reconstruction des **7 démos interactives du Tome 1** en composants React

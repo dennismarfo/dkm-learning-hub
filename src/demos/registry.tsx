@@ -5,6 +5,10 @@ import { GradientDescent } from './GradientDescent';
 import { Attention } from './Attention';
 import { Tokenizer } from './Tokenizer';
 import { NextWord } from './NextWord';
+import { ContextWindow } from './ContextWindow';
+import { RagPipeline } from './RagPipeline';
+import { FineTuneCompare } from './FineTuneCompare';
+import { RlhfFeedback } from './RlhfFeedback';
 
 type DemoProps = { title: string; intro: string };
 const REGISTRY: Record<string, (p: DemoProps) => React.JSX.Element> = {
@@ -15,6 +19,10 @@ const REGISTRY: Record<string, (p: DemoProps) => React.JSX.Element> = {
   'tome1-transformer#0': Attention,
   'tome1-llm#0': Tokenizer,
   'tome1-llm#1': NextWord,
+  'tome2-contexte#0': ContextWindow,
+  'tome2-rag#0': RagPipeline,
+  'tome2-finetuning#0': FineTuneCompare,
+  'tome2-rlhf#0': RlhfFeedback,
 };
 
 export function DemoSlot({ demoKey, title, intro }: { demoKey: string; title: string; intro: string }) {

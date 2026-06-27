@@ -95,14 +95,22 @@ Tomes 2/3 restent en un seul bloc html (démos statiques inline).
 | tome1-llm#0 | `Tokenizer` — découpe en jetons + compte |
 | tome1-llm#1 | `NextWord` — barres de probabilité, génération pas à pas |
 
-### ⏳ Tomes 2 & 3 — à reconstruire (statiques pour l'instant)
+### ✅ Tome 2 — reconstruites en React (`src/demos/`)
+
+| Clé | Composant |
+|---|---|
+| tome2-contexte#0 | `ContextWindow` — sliders, barre empilée, débordement de budget |
+| tome2-rag#0 | `RagPipeline` — question → récupération (score) → augmentation → génération |
+| tome2-finetuning#0 | `FineTuneCompare` — bascule base / spécialisé |
+| tome2-rlhf#0 | `RlhfFeedback` — choix A/B, compteur, question suivante |
+
+Note : `tome2-fin` contient un `.demo` « bilan » non interactif, **exclu** du
+découpage (reste en html statique).
+
+### ⏳ Tome 3 — à reconstruire (statiques pour l'instant)
 
 | Module | Démo |
 |---|---|
-| tome2-contexte | Remplis la fenêtre jusqu'au débordement |
-| tome2-rag | Un mini-pipeline RAG |
-| tome2-finetuning | Avant / après spécialisation |
-| tome2-rlhf | Sois l'humain qui donne le retour |
 | tome3-tooluse | Regarde le modèle choisir un outil |
 | tome3-loop | Une tâche en plusieurs tours |
 | tome3-mcp | Branche des serveurs, vois les outils apparaître |
