@@ -94,3 +94,24 @@ s'ajoutent ici.
   - Le mot de passe DB est un secret géré dans n8n, **jamais** dans le repo.
   - Le credential mal typé `Supabase Postgres - Knowledge Hub` (en réalité
     `supabaseApi`) ne doit pas être utilisé pour le node Postgres.
+
+---
+
+## 2026-06-25 — Décision contenu Learning Hub (Claude Code)
+
+### D-014 — Contenu de cours extrait des littéraux JS source → JSON versionné
+- **Contexte** : le frontend MVP affichait des placeholders. Le vrai contenu vit
+  dans 4 HTML source (3 tomes + examen) fournis par Dennis, où chaque page embarque
+  ses données dans des littéraux JS propres (`MODULES`, `GLOSSARY`, `EXAM`) — prose,
+  démos, quiz avec bonnes réponses + corrections, définitions de glossaire.
+- **Décision** : extraire ces littéraux via `scripts/extract-content.mjs` (parse
+  conscient des chaînes + `vm`, zéro dépendance) vers `src/content/architecture-ia.json`,
+  versionné dans le repo. Aucun contenu inventé (règle #2). Le corps de leçon est
+  rendu en **HTML de confiance** (`dangerouslySetInnerHTML`), issu de nos propres
+  sources. Les HTML source sont conservés sous `content/source/` comme provenance.
+- **Conséquence** :
+  - Régénération idempotente : `npm run extract:content` (ne jamais éditer le JSON).
+  - Le parcours passe de 16 placeholders à **20 modules réels** + examen 18 questions.
+  - Les **widgets interactifs** (démos) restent en visuel statique ; reconstruction
+    React = suivi listé dans `docs/content-extraction-v1.md`.
+  - Travail 100 % frontend : aucune action infra / Hermès, aucun secret.

@@ -2,6 +2,69 @@
 
 Journal de coordination entre Dennis, Claude Code et Hermès.
 
+## 2026-06-27 — Claude Code (démos interactives Tome 2)
+
+- Reconstruction des **4 démos interactives du Tome 2** en composants React
+  (même modèle que le Tome 1) : `ContextWindow` (fenêtre de contexte + débordement),
+  `RagPipeline` (récupération scorée + animation), `FineTuneCompare` (base/spécialisé),
+  `RlhfFeedback` (choix A/B cyclique). Logique fidèle aux littéraux source.
+- Extraction étendue : découpage en blocs pour Tomes 1 **et** 2 (sauf modules `fin`
+  dont le `.demo` est un bilan non interactif). Invariant : 11 blocs démo.
+- Vérifs : `npm run extract:content` (idempotent, 20 modules, 11 blocs démo),
+  `npm run build`, 0 vuln, smoke test navigateur des 4 démos (débordement budget,
+  re-scoring RAG, bascule fine-tuning, cycle RLHF), console sans erreur.
+- **Aucune action infra / Hermès. Aucun secret.**
+
+Prochaine action recommandée (1 seule) : reconstruire les démos du **Tome 3**
+(tool use, boucle ReAct, MCP, prompt injection) sur le même modèle.
+
+---
+
+## 2026-06-25 — Claude Code (démos interactives Tome 1)
+
+- Reconstruction des **7 démos interactives du Tome 1** en composants React
+  (`src/demos/`), à partir des littéraux source, en DA DKM. Brainstorm + spec :
+  `docs/superpowers/specs/2026-06-25-demos-interactives-tome1-design.md`.
+- Architecture : l'extraction découpe le corps des leçons Tome 1 en **blocs**
+  (`html` | `demo`) ; rendu via registre `src/demos/registry.tsx`. Tomes 2/3
+  inchangés (un seul bloc html, démos statiques).
+- Démos : NestedCircles, Perceptron, NetworkSignal, GradientDescent, Attention,
+  Tokenizer, NextWord. Logique fidèle aux originaux (math, matrices, états).
+- Vérifs : `npm run extract:content` (idempotent, 20 modules, 7 blocs démo),
+  `npm run build`, 0 vuln, smoke test navigateur des 7 démos (interaction réelle)
+  + non-régression Tomes 2/3, console sans erreur. Bug corrigé au passage : les
+  labels SVG des cercles interceptaient le clic (`pointer-events:none`).
+- **Aucune action infra / Hermès. Aucun secret.**
+
+Prochaine action recommandée (1 seule) : reconstruire les démos du **Tome 2**
+(fenêtre de contexte, RAG, fine-tuning, RLHF) sur le même modèle.
+
+---
+
+## 2026-06-25 — Claude Code (extraction du contenu réel des cours)
+
+- Dennis a fourni les 4 HTML source (zip déposé dans le repo) ; extraits dans
+  `content/source/` (conservés comme provenance, GitHub = vérité technique).
+- Audit : le contenu vit dans des littéraux JS (`MODULES`, `GLOSSARY`, `EXAM`),
+  déjà structurés (prose, démos, quiz + bonnes réponses/corrections, glossaire).
+- Nouveau script `scripts/extract-content.mjs` (`npm run extract:content`) →
+  `src/content/architecture-ia.json` : **20 modules** (8/6/6), **41 termes** de
+  glossaire (16/16/14), **18 questions** d'examen. Aucun contenu inventé.
+- Frontend câblé sur le JSON : `src/course-data.ts` réécrit ; `App.tsx` rend le
+  corps réel + quiz interactifs + glossaire défini + nouveau flux d'examen
+  (`/courses/architecture-ia/examen`) ; styles ajoutés dans la DA DKM.
+- Vérifs : `npm run build` OK, 0 vulnérabilité, smoke test navigateur (leçon, démo
+  statique, quiz, examen, glossaire) — aucune erreur console.
+- Docs : `docs/content-extraction-v1.md` (schéma + régénération + 14 démos à
+  reconstruire) ; décision `DECISIONS.md` D-014.
+- **Aucune action infra / Hermès. Aucun secret.**
+
+Prochaine action recommandée (1 seule) : reconstruire les **démos interactives** en
+composants React (liste dans `docs/content-extraction-v1.md`), en commençant par
+Tome 1 (cercles emboîtés, neurone, descente de gradient).
+
+---
+
 ## 2026-06-25 — Hermès
 
 - Dennis a demandé de continuer le DKM Learning Hub et de passer à la décision / mise en place du frontend MVP dans `dkm-learning-hub`.
