@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { go } from '../nav';
+import { Brand, Button } from '../components';
 
 /* ============================================================
    Soul Document generator
@@ -232,10 +233,7 @@ export default function SoulDocument() {
 
   return (
     <main className="wrap section soul-shell">
-      <button className="brand reset" onClick={() => go('/')}>
-        <span className="mark">dkm</span>
-        <span>Learning Hub</span>
-      </button>
+      <Brand />
       <button className="reset soul-back" onClick={() => go('/resources')}>
         ← Retour aux ressources
       </button>
@@ -300,17 +298,13 @@ export default function SoulDocument() {
           </div>
 
           <div className="soul-nav">
-            <button className="btn light" disabled={stepIndex === 0} onClick={() => setStepIndex((i) => i - 1)}>
+            <Button variant="light" disabled={stepIndex === 0} onClick={() => setStepIndex((i) => i - 1)}>
               ← Précédent
-            </button>
+            </Button>
             {isLast ? (
-              <button className="btn" onClick={() => setMode('result')}>
-                Générer mon Soul Document →
-              </button>
+              <Button onClick={() => setMode('result')}>Générer mon Soul Document →</Button>
             ) : (
-              <button className="btn" onClick={() => setStepIndex((i) => i + 1)}>
-                Suivant →
-              </button>
+              <Button onClick={() => setStepIndex((i) => i + 1)}>Suivant →</Button>
             )}
           </div>
 
@@ -352,18 +346,10 @@ export default function SoulDocument() {
           </p>
 
           <div className="soul-result-actions">
-            <button className="btn" onClick={copy}>
-              {copied ? 'Copié ✓' : 'Copier le markdown'}
-            </button>
-            <button className="btn light" onClick={download}>
-              Télécharger .md
-            </button>
-            <button className="btn light" onClick={() => setMode('form')}>
-              Modifier les réponses
-            </button>
-            <button className="btn light" onClick={restart}>
-              Recommencer
-            </button>
+            <Button onClick={copy}>{copied ? 'Copié ✓' : 'Copier le markdown'}</Button>
+            <Button variant="light" onClick={download}>Télécharger .md</Button>
+            <Button variant="light" onClick={() => setMode('form')}>Modifier les réponses</Button>
+            <Button variant="light" onClick={restart}>Recommencer</Button>
             {copied && <span className="soul-toast">Copié dans le presse-papier</span>}
           </div>
 
