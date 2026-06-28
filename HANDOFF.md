@@ -2,6 +2,38 @@
 
 Journal de coordination entre Dennis, Claude Code et Hermès.
 
+## 2026-06-28 — Claude Code (ressource Soul Document + redesign premium)
+
+- **Nouvelle ressource phare : Soul Document generator** (`src/resources/SoulDocument.tsx`).
+  Assistant guidé en **6 étapes** (Identité & mission · Audience/ICP · Offre & promesse ·
+  Voix & ton · Règles do/don't/limites · Contexte & ressources) piloté par un tableau de
+  config, state unique. Produit un document `.md` = **mémoire business lisible** +
+  **prompt système prêt à coller**. Export 100 % natif : copie presse-papier
+  (`navigator.clipboard`) + téléchargement `.md` (`Blob`), **aucune dépendance ajoutée**.
+  Validation légère non bloquante (compteur de complétude), navigation Précédent/Suivant +
+  pastilles d'étape, page résultat (Copier / Télécharger / Modifier / Recommencer).
+- **Nouvelle route** `/resources/soul-document` (routeur custom par `pathname`, helper `go`
+  factorisé dans `src/nav.ts`). Page `/resources` refondue : le Soul Document devient
+  l'outil phare (« Génère la mémoire business de ton IA » + CTA « Lancer le générateur »),
+  anciens items en cartes « bientôt ». Bouton retour vers Ressources sur la page outil.
+- **Redesign « editorial cockpit »** (`src/styles.css`, piloté par tokens) : suppression du
+  gradient jaune plein écran (fond ivory neutre), nav ivory à fine bordure, **bandes Ink
+  profondes** (hero + cours vedette + hero ressources) avec halo sand, cartes plus élégantes
+  (surfaces claires, ombres profondes, plus d'espace), **CTA terracotta**, Ink redevient
+  structurant, Sand cantonné aux accents/halos/badges. Sections alternées light/dark, sans
+  toggle. Choix validé par Dennis (cf. `DECISIONS.md` D-015).
+- Vérifs : `npm run build` (TS strict OK), `npm audit --audit-level=moderate` (**0 vuln**),
+  smoke test navigateur de toutes les routes (`/`, `/courses`, `/courses/architecture-ia`,
+  une leçon, `/courses/architecture-ia/examen`, `/resources`, `/resources/soul-document`),
+  flow Soul Document complet (remplir, naviguer, générer, copier, télécharger, recommencer),
+  console **sans erreur**, cours/démos/examen toujours lisibles sur fond clair.
+- **Aucune action infra / Hermès. Aucun secret.** Fonctionnalité 100 % frontend.
+
+Prochaine action recommandée (1 seule) : faire reviewer puis merger la PR
+`feat/soul-document-resource` (Soul Document + redesign premium).
+
+---
+
 ## 2026-06-27 — Claude Code (démos interactives Tome 3 — parcours complet)
 
 - Reconstruction des **4 démos du Tome 3** en React : `ToolUse` (réflexion → appel

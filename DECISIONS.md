@@ -115,3 +115,34 @@ s'ajoutent ici.
   - Les **widgets interactifs** (démos) restent en visuel statique ; reconstruction
     React = suivi listé dans `docs/content-extraction-v1.md`.
   - Travail 100 % frontend : aucune action infra / Hermès, aucun secret.
+
+---
+
+## 2026-06-28 — Frontend : ressource Soul Document + direction artistique (Claude Code)
+
+### D-015 — Direction artistique « editorial cockpit » (réduction du jaune)
+- **Contexte** : la DA MVP était jugée « trop jaune » — fond `body` en gradient sand
+  plein écran, nav sand opaque, cartes teintées sand. Lecture peu premium.
+- **Décision** : passer à une esthétique **hybride fixe « AI Learning Lab / editorial
+  cockpit »** (validée par Dennis) : fond ivory neutre (plus de gradient jaune), **bandes
+  Ink profondes** pour hero / cours vedette / hero ressources (halo sand subtil), nav ivory
+  à fine bordure, cartes claires plus élégantes (ombres profondes, plus d'espace), **CTA en
+  terracotta**, Ink comme couleur structurante, **Sand cantonné aux accents/halos/badges/
+  fines bordures**. Sections alternées light/dark, **sans theme toggle**. Système piloté par
+  tokens CSS (`--bg`, `--surface`, `--ink-deep`, `--halo`…) dans `src/styles.css`.
+- **Conséquence** : le redesign se concentre dans les tokens + quelques règles structurelles ;
+  cours, quiz, examen et démos héritent automatiquement et restent lisibles sur fond clair.
+  Les fonds sand restants sont des accents contenus (notes, chrome de démo « Interactif »),
+  conformes à l'usage « sand = highlight ».
+
+### D-016 — Soul Document : lead magnet 100 % frontend (sans backend)
+- **Contexte** : `/resources` était un placeholder. Besoin d'une ressource phare qui
+  transforme un visiteur en utilisateur engagé.
+- **Décision** : implémenter le **Soul Document generator** comme outil 100 % client
+  (`src/resources/SoulDocument.tsx`) : wizard 6 étapes piloté par config, génération d'un
+  `.md` (mémoire business + prompt système), export par **copie presse-papier et
+  téléchargement Blob natifs**. **Aucune dépendance, aucun backend, aucune API, aucun
+  secret** ; rien n'est envoyé hors du navigateur.
+- **Conséquence** : zéro coût infra et aucune action Hermès pour cette ressource. Si une
+  capture/persistance des Soul Documents devient souhaitable plus tard, elle fera l'objet
+  d'une décision distincte (Supabase = source de vérité, cf. D-001).
