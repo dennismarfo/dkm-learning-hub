@@ -9,6 +9,10 @@ import { ContextWindow } from './ContextWindow';
 import { RagPipeline } from './RagPipeline';
 import { FineTuneCompare } from './FineTuneCompare';
 import { RlhfFeedback } from './RlhfFeedback';
+import { ToolUse } from './ToolUse';
+import { AgentLoop } from './AgentLoop';
+import { McpServers } from './McpServers';
+import { PromptInjection } from './PromptInjection';
 
 type DemoProps = { title: string; intro: string };
 const REGISTRY: Record<string, (p: DemoProps) => React.JSX.Element> = {
@@ -23,12 +27,17 @@ const REGISTRY: Record<string, (p: DemoProps) => React.JSX.Element> = {
   'tome2-rag#0': RagPipeline,
   'tome2-finetuning#0': FineTuneCompare,
   'tome2-rlhf#0': RlhfFeedback,
+  'tome3-tooluse#0': ToolUse,
+  'tome3-loop#0': AgentLoop,
+  'tome3-mcp#0': McpServers,
+  'tome3-garde#0': PromptInjection,
 };
 
 export function DemoSlot({ demoKey, title, intro }: { demoKey: string; title: string; intro: string }) {
   const Component = REGISTRY[demoKey];
   if (!Component) {
-    // Not yet rebuilt (Tomes 2/3) — graceful static fallback.
+    // Defensive fallback for an unknown demo key (all 15 are registered above);
+    // shows the demo's heading/intro as a static card rather than crashing.
     return (
       <div className="demo">
         <div className="demo-head"><span className="demo-tag">Interaction prévue</span><h3>{title}</h3></div>

@@ -50,7 +50,8 @@ npm run extract:content
 
 ```ts
 Quiz         = { question, options[], answer, ok, no }
-Module       = { id, tome, number, title, nav, eyebrow, bodyHtml, minutes, quiz|null }
+Block        = { type:'html', html } | { type:'demo', key, title, intro }
+Module       = { id, tome, number, title, nav, eyebrow, body:Block[], minutes, quiz|null }
 GlossaryTerm = { term, fr, en, def }
 ExamQuestion = { n, tome, question, options[], answer, explain }
 CourseContent= { slug, title, promise, level, duration, glossary[], modules[], exam[] }
@@ -107,14 +108,17 @@ Tomes 2/3 restent en un seul bloc html (démos statiques inline).
 Note : `tome2-fin` contient un `.demo` « bilan » non interactif, **exclu** du
 découpage (reste en html statique).
 
-### ⏳ Tome 3 — à reconstruire (statiques pour l'instant)
+### ✅ Tome 3 — reconstruites en React (`src/demos/`)
 
-| Module | Démo |
+| Clé | Composant |
 |---|---|
-| tome3-tooluse | Regarde le modèle choisir un outil |
-| tome3-loop | Une tâche en plusieurs tours |
-| tome3-mcp | Branche des serveurs, vois les outils apparaître |
-| tome3-garde | Repère le piège (prompt injection) |
+| tome3-tooluse#0 | `ToolUse` — question → réflexion / appel d'outil / observation / réponse |
+| tome3-loop#0 | `AgentLoop` — trace ReAct pas à pas + compteur de tours d'outil |
+| tome3-mcp#0 | `McpServers` — connecter des serveurs → les outils exposés apparaissent |
+| tome3-garde#0 | `PromptInjection` — repérer le piège, choix sûr / dangereux + correction |
+
+Idem `tome3-fin` (bilan) exclu du découpage. **Les 15 démos des 3 tomes sont
+reconstruites.**
 
 ## Régénérer après modification du contenu
 
