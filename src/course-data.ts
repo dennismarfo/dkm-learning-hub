@@ -14,7 +14,6 @@ export type Module = {
   title: string;
   nav: string;
   eyebrow: string;
-  bodyHtml: string;
   body: Block[];
   minutes: number;
   quiz: Quiz | null;

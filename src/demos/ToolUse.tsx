@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import { Demo } from './Demo';
+import { useState } from 'react';
+import { Demo, useStagedReveal } from './Demo';
 
 // Questions + the agent's reasoning trace, verbatim from the source demo.
 const TU = [
@@ -10,15 +10,11 @@ const TU = [
 
 export function ToolUse({ title, intro }: { title: string; intro: string }) {
   const [sel, setSel] = useState(0);
-  const [lit, setLit] = useState(4);
-  const timers = useRef<number[]>([]);
-  useEffect(() => () => timers.current.forEach(clearTimeout), []);
+  const { lit, reveal } = useStagedReveal(4, 500);
 
   const select = (i: number) => {
     setSel(i);
-    setLit(0);
-    timers.current.forEach(clearTimeout);
-    timers.current = [0, 1, 2, 3].map((n) => window.setTimeout(() => setLit(n + 1), n * 500));
+    reveal();
   };
 
   const t = TU[sel];

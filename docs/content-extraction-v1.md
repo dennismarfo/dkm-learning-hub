@@ -50,7 +50,8 @@ npm run extract:content
 
 ```ts
 Quiz         = { question, options[], answer, ok, no }
-Module       = { id, tome, number, title, nav, eyebrow, bodyHtml, minutes, quiz|null }
+Block        = { type:'html', html } | { type:'demo', key, title, intro }
+Module       = { id, tome, number, title, nav, eyebrow, body:Block[], minutes, quiz|null }
 GlossaryTerm = { term, fr, en, def }
 ExamQuestion = { n, tome, question, options[], answer, explain }
 CourseContent= { slug, title, promise, level, duration, glossary[], modules[], exam[] }

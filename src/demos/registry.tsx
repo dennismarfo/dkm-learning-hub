@@ -36,7 +36,8 @@ const REGISTRY: Record<string, (p: DemoProps) => React.JSX.Element> = {
 export function DemoSlot({ demoKey, title, intro }: { demoKey: string; title: string; intro: string }) {
   const Component = REGISTRY[demoKey];
   if (!Component) {
-    // Not yet rebuilt (Tomes 2/3) — graceful static fallback.
+    // Defensive fallback for an unknown demo key (all 15 are registered above);
+    // shows the demo's heading/intro as a static card rather than crashing.
     return (
       <div className="demo">
         <div className="demo-head"><span className="demo-tag">Interaction prévue</span><h3>{title}</h3></div>

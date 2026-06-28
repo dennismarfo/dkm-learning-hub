@@ -51,7 +51,12 @@ function extractArrayLiteral(src, name) {
     }
     // not in a string
     if (c === '/' && next === '/') { i = src.indexOf('\n', i); if (i < 0) i = src.length; continue; }
-    if (c === '/' && next === '*') { i = src.indexOf('*/', i + 2) + 1; continue; }
+    if (c === '/' && next === '*') {
+      const close = src.indexOf('*/', i + 2);
+      if (close < 0) throw new Error(`Unterminated block comment while reading const ${name}`);
+      i = close + 1;
+      continue;
+    }
     if (c === '"' || c === "'" || c === '`') { str = c; continue; }
     if (c === '[') depth++;
     else if (c === ']') { depth--; if (depth === 0) return src.slice(start, i + 1); }
@@ -76,11 +81,13 @@ function minutesFor(html) {
 
 const stripTags = (s) => s.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
 
-// Find [start,end] spans of each top-level `<div class="demo">…</div>` by
+// Find [start,end] spans of each top-level demo div (a div whose class list
+// contains the `demo` token — tolerant of extra classes/attributes like
+// `<div class="demo" style="…">`, but not matching `demo-head` / `demos`) by
 // depth-counting div open/close tags (demos contain nested divs).
 function findDemoSpans(html) {
   const spans = [];
-  const open = /<div class="demo">/g;
+  const open = /<div\b[^>]*\bclass="(?:[^"]*\s)?demo(?:\s[^"]*)?"[^>]*>/g;
   let m;
   while ((m = open.exec(html))) {
     const start = m.index;
@@ -100,8 +107,24 @@ function findDemoSpans(html) {
   return spans;
 }
 
-// Split a module body into ordered blocks. Demos are split out only for Tome 1
-// (the lot being rebuilt in React); everything else stays a single html block.
+// Remove every `<div class="demo">…</div>` span from an html body. Used for the
+// recap "fin" modules whose only demo is a non-interactive bilan (dead score +
+// an openGlossary button with no React handler).
+function stripDemoSpans(html) {
+  const spans = findDemoSpans(html);
+  if (!spans.length) return html.trim();
+  let out = '';
+  let cursor = 0;
+  for (const [s, e] of spans) {
+    out += html.slice(cursor, s);
+    cursor = e;
+  }
+  return (out + html.slice(cursor)).trim();
+}
+
+// Split a module body into ordered blocks: { html } for prose, { demo, key,
+// title, intro } for each interactive demo (rebuilt in React via the registry).
+// When splitDemos is false the whole body stays a single html block.
 function splitBody(html, keyBase, splitDemos) {
   const trimmed = html.trim();
   if (!splitDemos) return [{ type: 'html', html: trimmed }];
@@ -146,7 +169,10 @@ for (const { n, file } of TOME_FILES) {
     number++;
     const q = m.quiz;
     const id = `tome${n}-${m.id}`;
-    const bodyHtml = String(m.html).trim();
+    const isFin = m.id === 'fin';
+    // Other modules split their demos out for the React registry; the recap
+    // "fin" modules keep only prose — their sole demo is a dead bilan widget.
+    const html = isFin ? stripDemoSpans(String(m.html).trim()) : String(m.html).trim();
     modules.push({
       id,
       tome: TOME_LABELS[n],
@@ -154,11 +180,8 @@ for (const { n, file } of TOME_FILES) {
       title: m.title,
       nav: m.nav,
       eyebrow: m.eyebrow,
-      bodyHtml,
-      // Split demos out (all rebuilt in React), except the recap "fin" modules
-      // whose only .demo is a non-interactive bilan.
-      body: splitBody(bodyHtml, id, m.id !== 'fin'),
-      minutes: minutesFor(bodyHtml),
+      body: splitBody(html, id, !isFin),
+      minutes: minutesFor(html),
       quiz: q
         ? { question: q.q, options: q.opts, answer: q.correct, ok: q.ok, no: q.no }
         : null,
@@ -205,7 +228,9 @@ for (const [n, c] of Object.entries(expectGloss)) {
   if (glossaryCounts[n] !== c) errors.push(`tome ${n}: expected ${c} glossary terms, got ${glossaryCounts[n]}`);
 }
 for (const m of modules) {
-  if (!m.bodyHtml) errors.push(`module ${m.id}: empty bodyHtml`);
+  if (!m.body.length || !m.body.some((b) => b.type === 'html' && b.html)) {
+    errors.push(`module ${m.id}: empty body`);
+  }
   if (m.quiz && (m.quiz.answer == null || !m.quiz.options[m.quiz.answer])) {
     errors.push(`module ${m.id}: invalid quiz answer index`);
   }
@@ -216,26 +241,37 @@ for (const e of exam) {
 for (const g of content.glossary) {
   if (!g.def) errors.push(`glossary ${g.term}: empty definition`);
 }
-const demoKeys = modules.flatMap((m) => m.body.filter((b) => b.type === 'demo').map((b) => b.key));
-const EXPECTED_DEMO_KEYS = [
-  'tome1-intro#0',
-  'tome1-neurone#0',
-  'tome1-reseau#0',
-  'tome1-apprentissage#0',
-  'tome1-transformer#0',
-  'tome1-llm#0',
-  'tome1-llm#1',
-  'tome2-contexte#0',
-  'tome2-rag#0',
-  'tome2-finetuning#0',
-  'tome2-rlhf#0',
-  'tome3-tooluse#0',
-  'tome3-loop#0',
-  'tome3-mcp#0',
-  'tome3-garde#0',
+// Demo keys are positional (`<moduleId>#<index>`), and the React registry maps
+// each key to a component by that position. Assert key AND a distinctive title
+// substring so reordering demos within a module (which would keep the same key
+// SET but swap which component renders where) fails loudly instead of silently
+// showing the wrong demo.
+const demoBlocks = modules.flatMap((m) => m.body.filter((b) => b.type === 'demo'));
+const titleByKey = new Map(demoBlocks.map((b) => [b.key, b.title]));
+const EXPECTED_DEMOS = [
+  ['tome1-intro#0', 'cercles emboîtés'],
+  ['tome1-neurone#0', 'tirer'],
+  ['tome1-reseau#0', 'signal traverse'],
+  ['tome1-apprentissage#0', 'Descente de gradient'],
+  ['tome1-transformer#0', 'porte-t-il attention'],
+  ['tome1-llm#0', 'Découpe un texte'],
+  ['tome1-llm#1', 'prochain mot'],
+  ['tome2-contexte#0', 'Remplis la fenêtre'],
+  ['tome2-rag#0', 'mini-pipeline RAG'],
+  ['tome2-finetuning#0', 'après spécialisation'],
+  ['tome2-rlhf#0', 'qui donne le retour'],
+  ['tome3-tooluse#0', 'choisir un outil'],
+  ['tome3-loop#0', 'plusieurs tours'],
+  ['tome3-mcp#0', 'Branche des serveurs'],
+  ['tome3-garde#0', 'Repère le piège'],
 ];
-if (demoKeys.length !== EXPECTED_DEMO_KEYS.length || EXPECTED_DEMO_KEYS.some((k) => !demoKeys.includes(k))) {
-  errors.push(`expected demo blocks [${EXPECTED_DEMO_KEYS.join(', ')}], got [${demoKeys.join(', ')}]`);
+if (demoBlocks.length !== EXPECTED_DEMOS.length) {
+  errors.push(`expected ${EXPECTED_DEMOS.length} demo blocks, got ${demoBlocks.length} [${demoBlocks.map((b) => b.key).join(', ')}]`);
+}
+for (const [key, needle] of EXPECTED_DEMOS) {
+  const title = titleByKey.get(key);
+  if (title == null) errors.push(`missing demo block ${key}`);
+  else if (!title.includes(needle)) errors.push(`demo ${key}: title "${title}" does not contain "${needle}" (demos reordered?)`);
 }
 if (errors.length) {
   console.error('Extraction failed:\n - ' + errors.join('\n - '));
