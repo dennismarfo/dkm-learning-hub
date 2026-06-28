@@ -2,6 +2,25 @@
 
 Journal de coordination entre Dennis, Claude Code et Hermès.
 
+## 2026-06-27 — Claude Code (démos interactives Tome 3 — parcours complet)
+
+- Reconstruction des **4 démos du Tome 3** en React : `ToolUse` (réflexion → appel
+  d'outil → observation → réponse), `AgentLoop` (trace ReAct pas à pas + compteur de
+  tours), `McpServers` (connexion de serveurs → outils exposés), `PromptInjection`
+  (repérer le piège, choix sûr/dangereux). Le piège d'injection est reproduit
+  **verbatim** comme donnée pédagogique (rendu comme donnée, jamais exécuté).
+- Extraction : découpage en blocs pour les **3 tomes** (sauf modules `fin`).
+  Invariant : **15 blocs démo**. Les 15 démos des 3 tomes sont désormais en React.
+- Vérifs : `npm run extract:content` (idempotent), `npm run build`, 0 vuln, smoke
+  test navigateur des 4 démos (changement de question, trace pas à pas, connexion
+  serveurs, choix injection), console sans erreur.
+- **Aucune action infra / Hermès. Aucun secret.**
+
+Prochaine action recommandée (1 seule) : faire reviewer puis merger la PR #6
+(contenu réel + 15 démos interactives des 3 tomes).
+
+---
+
 ## 2026-06-27 — Claude Code (démos interactives Tome 2)
 
 - Reconstruction des **4 démos interactives du Tome 2** en composants React
