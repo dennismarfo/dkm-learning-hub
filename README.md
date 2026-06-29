@@ -1,7 +1,8 @@
 # dkm-learning-hub
 
 Knowledge Hub MVP pour **DKM / OptiAI**. Ce repo est la **source de vérité
-technique** du projet (migrations, prompts, contrats, workflows exportés, docs).
+technique** du projet (migrations, prompts, contrats, workflows exportés, docs)
+et héberge le **frontend du Learning Hub** (mini-LMS Vite + React).
 
 ---
 
@@ -20,6 +21,7 @@ de les **transformer** en contenus, décisions business, offres ou actions.
 | **n8n** | Capture, orchestration, transformation |
 | **Telegram** | Capture / validation / notification |
 | **Notion** | Miroir léger de triage mobile (pas source de vérité) |
+| **Frontend** (Vite + React) | Learning Hub : site d'apprentissage (cours, démos, ressources comme le Soul Document) |
 
 Détails : [`docs/architecture.md`](docs/architecture.md).
 
@@ -33,6 +35,23 @@ Knowledge Scout (Telegram) → n8n → Claude Haiku (haiku-structure-v1)
 
 Le flux automatisé s'arrête à `status = 'structured'` + notification. La suite
 (`content_ready`, `published`) est **manuelle** en V1.
+
+## Frontend (Learning Hub)
+
+Le repo héberge aussi le **Learning Hub** : un mini-LMS (Vite + React + TS, **sans
+backend**) qui sert le cours **Architecture IA** (3 tomes, 20 modules, 15 démos
+interactives, examen) et des ressources comme le **Soul Document** (générateur de
+mémoire business pour une IA, export markdown, 100 % côté navigateur).
+
+```bash
+npm install
+npm run dev               # serveur de dev (Vite)
+npm run build             # build de production (tsc + vite)
+npm run extract:content   # régénère src/content/*.json depuis les sources
+```
+
+Conventions frontend : voir [`CLAUDE.md`](CLAUDE.md). Décisions produit/design :
+[`DECISIONS.md`](DECISIONS.md) (D-014 contenu, D-015 design, D-016 Soul Document).
 
 ## Rôles
 
@@ -64,8 +83,19 @@ Le flux automatisé s'arrête à `status = 'structured'` + notification. La suit
 │       └── 001_create_learning_hub_schema.sql
 ├── workflows/                 # exports JSON des workflows n8n
 │   └── README.md
-└── scripts/
-    └── README.md
+├── scripts/
+│   └── extract-content.mjs    # extraction du contenu de cours → JSON
+├── src/                        # frontend Learning Hub (Vite + React + TS)
+│   ├── App.tsx                 # router maison (pathname) + pages
+│   ├── nav.ts                  # helper de navigation
+│   ├── components/             # primitives UI (Brand, Button, Nav, ...)
+│   ├── demos/                  # démos interactives (15)
+│   ├── resources/              # Soul Document generator
+│   ├── content/                # cours en JSON (généré — ne pas éditer)
+│   └── styles.css              # DA pilotée par tokens
+├── index.html
+├── vite.config.ts
+└── package.json
 ```
 
 ## Limites de la V1
@@ -86,5 +116,7 @@ Le flux automatisé s'arrête à `status = 'structured'` + notification. La suit
 ## État actuel
 
 - ✅ Structure du repo bootstrappée par Claude Code.
+- ✅ Frontend Learning Hub en ligne : cours Architecture IA (20 modules, 15 démos,
+  examen), ressource Soul Document, DA premium « editorial cockpit ».
 - ⏳ Migration `001` **rédigée, non appliquée** — en attente d'Hermès.
 - ⏳ Workflow n8n **spécifié, non créé** — en attente d'Hermès.
