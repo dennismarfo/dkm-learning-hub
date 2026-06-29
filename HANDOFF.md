@@ -2,6 +2,32 @@
 
 Journal de coordination entre Dennis, Claude Code et Hermès.
 
+## 2026-06-29 — Claude Code (refactor primitives UI + nouveau logo)
+
+- **Extraction de primitives UI** dans `src/components/` (réutilisées partout, allège
+  `src/App.tsx` et supprime le bloc logo dupliqué ~7×) : atomes `Brand`, `Button`, `Pill` ;
+  molécules `ModuleLink`, `QuizBlock` ; organisme `Nav` ; barrel `index.ts`. `App.tsx`
+  passe des one-liners denses à du JSX multi-ligne lisible ; `SoulDocument` consomme aussi
+  les atomes partagés. **Comportement strictement identique** (JSX transcrit fidèlement).
+  Structure volontairement **plate** (pas de dossiers atoms/molecules/organisms imbriqués)
+  pour ne pas sur-architecturer le MVP (règle #4) ; layering Atomic Design complet reporté
+  à plus tard si l'UI grossit.
+- **Nouveau traitement du logo** : « dkm » reste la **signature serif italique terracotta** ;
+  « Learning Hub » est rétrogradé en **label discret JetBrains Mono majuscules espacé
+  (ink-70)**, séparé par un fin trait vertical. Hiérarchie plus claire, raccord avec les
+  eyebrows « editorial cockpit ». Remplace l'ancien Inter 800 trop lourd. (Sidebar leçon :
+  label « Hub ».)
+- Vérifs : `npm run build` (TS strict OK, 57 modules). Smoke test navigateur **non rejoué**
+  (extension Chrome déconnectée en fin de session) — refactor sans changement de comportement,
+  build vert.
+- **Aucune action infra / Hermès. Aucun secret.** Travail 100 % frontend, même PR
+  `feat/soul-document-resource`.
+
+Prochaine action recommandée (1 seule) : faire reviewer puis merger la PR
+`feat/soul-document-resource` (Soul Document + redesign + refactor + logo).
+
+---
+
 ## 2026-06-28 — Claude Code (ressource Soul Document + redesign premium)
 
 - **Nouvelle ressource phare : Soul Document generator** (`src/resources/SoulDocument.tsx`).
