@@ -57,6 +57,22 @@ permettre de les transformer en contenus, décisions, offres ou actions.
 - `supabase/migrations/` — migrations SQL idempotentes.
 - `workflows/` — exports JSON des workflows n8n.
 - `scripts/` — utilitaires.
+- `src/` — frontend du Learning Hub (Vite + React + TS, SPA) : `App.tsx`
+  (router custom par `pathname`), `components/` (primitives UI réutilisables),
+  `demos/` (démos interactives), `resources/` (Soul Document), `content/`
+  (cours en JSON **généré**), `styles.css` (DA pilotée par tokens).
+- `index.html`, `vite.config.ts`, `package.json` — config frontend.
+
+## Conventions frontend (Learning Hub)
+
+- Stack **Vite + React 19 + TypeScript strict**, **zéro dépendance lourde**
+  (clipboard, téléchargement… via API natives). `npm run build` doit rester vert.
+- **Routing maison** basé sur `window.location.pathname` (helper `go` dans
+  `src/nav.ts`) — pas de lib de routing.
+- **Style** : DA pilotée par tokens CSS dans `src/styles.css` (Sand en accent,
+  Ink structurant, Terracotta pour les CTA). Cf. `DECISIONS.md` D-015.
+- **Contenu de cours** : généré via `npm run extract:content` vers
+  `src/content/*.json` — **ne jamais éditer le JSON à la main** (cf. D-014).
 
 ## Quand une action infra est nécessaire
 
