@@ -4,9 +4,10 @@ import { DemoSlot } from './demos/registry';
 import { Brand, Button, Nav, Pill, ModuleLink, QuizBlock } from './components';
 import { go } from './nav';
 import SoulDocument from './resources/SoulDocument';
+import Projects from './Projects';
 import './styles.css';
 
-type View = 'home' | 'courses' | 'course' | 'resources' | 'soul' | 'lesson' | 'exam';
+type View = 'home' | 'courses' | 'course' | 'resources' | 'soul' | 'lesson' | 'exam' | 'projects';
 
 function parseRoute() {
   const path = window.location.pathname.replace(/\/+$/, '') || '/';
@@ -17,6 +18,7 @@ function parseRoute() {
   if (path === '/courses') return { view: 'courses' as View };
   if (parts[0] === 'resources' && parts[1] === 'soul-document') return { view: 'soul' as View };
   if (path === '/resources') return { view: 'resources' as View };
+  if (path === '/projects') return { view: 'projects' as View };
   return { view: 'home' as View };
 }
 
@@ -385,6 +387,7 @@ export default function App() {
   if (route.view === 'courses') return <Courses />;
   if (route.view === 'course') return <CourseDetail />;
   if (route.view === 'resources') return <Resources />;
+  if (route.view === 'projects') return <Projects />;
   if (route.view === 'soul') return <SoulDocument />;
   if (route.view === 'exam') return <ExamFlow />;
   if (route.view === 'lesson') return <Lesson moduleId={route.moduleId} />;
