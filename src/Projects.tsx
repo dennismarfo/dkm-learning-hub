@@ -1,6 +1,6 @@
 import { Button, Nav, Pill } from './components';
 import { go } from './nav';
-import { projects } from './projects';
+import { projects } from './projects-data';
 
 export default function Projects() {
   return (
@@ -48,19 +48,19 @@ export default function Projects() {
                 <div className="tags"><Pill>{project.status}</Pill></div>
                 <div className="grid grid2">
                   <div>
-                    <h4>Problème</h4>
+                    <div className="eyebrow">Problème</div>
                     <p>{project.problem}</p>
                   </div>
                   <div>
-                    <h4>Objectif</h4>
+                    <div className="eyebrow">Objectif</div>
                     <p>{project.goal}</p>
                   </div>
                   <div>
-                    <h4>Ce que j’apprends</h4>
+                    <div className="eyebrow">Ce que j’apprends</div>
                     <p>{project.learning}</p>
                   </div>
                   <div>
-                    <h4>Prochaine étape</h4>
+                    <div className="eyebrow">Prochaine étape</div>
                     <p>{project.nextStep}</p>
                   </div>
                 </div>
