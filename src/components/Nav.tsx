@@ -10,7 +10,7 @@ export function Nav() {
         <nav className="links">
           <button onClick={() => go('/courses')}>Cours</button>
           <button onClick={() => go('/resources')}>Ressources</button>
-          <button onClick={() => go('/courses/architecture-ia')}>Architecture IA</button>
+          <button className="nav-extra" onClick={() => go('/courses/architecture-ia')}>Architecture IA</button>
         </nav>
       </div>
     </header>
