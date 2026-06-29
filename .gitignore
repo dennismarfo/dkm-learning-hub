@@ -28,3 +28,4 @@ node_modules/
 # Artefacts de build frontend (générés, ne pas committer)
 dist/
 *.tsbuildinfo
+.vercel
