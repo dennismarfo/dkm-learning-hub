@@ -3,7 +3,7 @@
   "title": "Architecture IA : du neurone à l’agent",
   "promise": "Comprends l’IA moderne depuis les bases, puis relie chaque concept aux workflows, agents et décisions business.",
   "level": "Débutant → builder",
-  "duration": "3 tomes · 20 modules · examen final",
+  "duration": "4 tomes · 26 modules · examen final",
   "glossary": [
     {
       "term": "IA",
@@ -250,6 +250,114 @@
       "fr": "Humain dans la Boucle",
       "en": "Human-in-the-Loop",
       "def": "Le principe de demander une confirmation humaine avant qu'un agent n'exécute une action sensible ou irréversible."
+    },
+    {
+      "term": "Mise en production",
+      "fr": "Mise en Production",
+      "en": "Production / Deployment",
+      "def": "Faire passer un agent de « ça marche quand je le lance » à « ça tourne tout seul, de façon fiable, pour de vrais utilisateurs »."
+    },
+    {
+      "term": "VPS",
+      "fr": "Serveur Privé Virtuel",
+      "en": "Virtual Private Server",
+      "def": "Une machine que l'on loue, allumée en permanence, où le code d'un agent peut s'exécuter en continu."
+    },
+    {
+      "term": "Conteneur (Docker)",
+      "fr": "Conteneur",
+      "en": "Container / Docker",
+      "def": "Un emballage qui fige le code et son environnement (versions, dépendances) pour qu'il s'exécute de façon identique partout."
+    },
+    {
+      "term": "Variable d'environnement",
+      "fr": "Variable d'Environnement",
+      "en": "Environment Variable",
+      "def": "Un réglage stocké hors du code, notamment pour les secrets (clés d'API, mots de passe), afin de ne jamais les écrire dans le dépôt."
+    },
+    {
+      "term": "Orchestration",
+      "fr": "Orchestration",
+      "en": "Orchestration",
+      "def": "La couche qui coordonne tout autour du modèle : déclencheurs, données, état persistant et destinations des résultats."
+    },
+    {
+      "term": "État persistant",
+      "fr": "État Persistant",
+      "en": "Persistent State",
+      "def": "Les informations qu'un agent retient entre deux exécutions, stockées hors de sa fenêtre de contexte, typiquement en base de données."
+    },
+    {
+      "term": "Idempotence",
+      "fr": "Idempotence",
+      "en": "Idempotence",
+      "def": "Propriété d'une opération qu'on peut rejouer sans dégât : la lancer deux fois produit le même résultat qu'une seule. Essentielle pour réessayer après un échec."
+    },
+    {
+      "term": "Retry",
+      "fr": "Réessai",
+      "en": "Retry",
+      "def": "Relancer automatiquement une opération qui a échoué pour une raison passagère (réseau, surcharge), un nombre de fois limité."
+    },
+    {
+      "term": "Dégradation gracieuse",
+      "fr": "Dégradation Gracieuse",
+      "en": "Graceful Degradation",
+      "def": "Réduire proprement la voilure en cas d'échec (réponse partielle, repli, message clair) au lieu de planter ou d'inventer."
+    },
+    {
+      "term": "Latence",
+      "fr": "Latence",
+      "en": "Latency",
+      "def": "Le temps écoulé entre une demande et sa réponse. Une faible latence rend l'expérience fluide."
+    },
+    {
+      "term": "Mise en cache",
+      "fr": "Mise en Cache",
+      "en": "Caching",
+      "def": "Réutiliser un calcul ou un contexte déjà traité au lieu de le refaire, pour réduire le coût et la latence."
+    },
+    {
+      "term": "Traitement par lots",
+      "fr": "Traitement par Lots",
+      "en": "Batching",
+      "def": "Regrouper plusieurs tâches non urgentes en un seul envoi, souvent moins coûteux, quand une réponse immédiate n'est pas requise."
+    },
+    {
+      "term": "Observabilité",
+      "fr": "Observabilité",
+      "en": "Observability",
+      "def": "La capacité de voir ce qu'un agent a fait : journaux de ses décisions, actions et erreurs, pour auditer et corriger."
+    },
+    {
+      "term": "Garde-fou",
+      "fr": "Garde-fou",
+      "en": "Guardrail",
+      "def": "Une règle ou un contrôle qui empêche un agent d'effectuer une action dangereuse ou irréversible sans validation."
+    },
+    {
+      "term": "n8n",
+      "fr": "n8n (orchestrateur)",
+      "en": "n8n",
+      "def": "Outil d'orchestration : il écoute les déclencheurs, appelle le modèle et les outils, enchaîne les étapes et range les résultats. Le « système nerveux » autour du LLM."
+    },
+    {
+      "term": "Supabase",
+      "fr": "Supabase (base de données)",
+      "en": "Supabase",
+      "def": "Base de données (PostgreSQL) qui stocke l'état persistant d'un agent — la source de vérité des données, hors de la fenêtre de contexte."
+    },
+    {
+      "term": "Telegram",
+      "fr": "Telegram (canal)",
+      "en": "Telegram",
+      "def": "Messagerie utilisée comme canal d'entrée / sortie d'un agent : capter une note brute, ou recevoir un résultat."
+    },
+    {
+      "term": "Notion",
+      "fr": "Notion (triage)",
+      "en": "Notion",
+      "def": "Espace de travail utilisé comme miroir de triage pour relire et classer les résultats — jamais la source de vérité."
     }
   ],
   "modules": [
@@ -892,6 +1000,222 @@
       ],
       "minutes": 4,
       "quiz": null
+    },
+    {
+      "id": "tome4-prod",
+      "tome": "Tome 4 · La prod",
+      "number": 21,
+      "title": "Le notebook ne suffit plus : où vit un agent en vrai",
+      "nav": "Où vit un agent ?",
+      "eyebrow": "Tome 4 — Module 1",
+      "body": [
+        {
+          "type": "html",
+          "html": "<p class=\"lead\">Aux tomes 1 à 3, l'agent vivait dans une fenêtre de chat ou un script qu'on relance à la main. Utile pour apprendre — inutilisable en vrai. Un agent qui sert vraiment doit <strong>tourner tout seul</strong>, au bon moment, sans toi devant l'écran. Ce tome répond à la question d'après : comment le mettre en service sans qu'il casse, sans qu'il ruine, et sans qu'il fasse une bêtise.</p>\n    <div class=\"define\"><div class=\"ico\">[def]</div><dl>\n      <div><dt>Mise en production (« prod »)</dt><dd>faire passer un agent de l'état « ça marche sur ma machine quand je le lance » à l'état « ça tourne tout seul, de façon fiable, pour de vrais utilisateurs ».</dd></div>\n      <div><dt>Hébergement</dt><dd>l'endroit où le code de l'agent s'exécute en continu : un serveur que tu loues (<span class=\"acro\">VPS</span>) ou un service qui démarre ton code à la demande (serverless).</dd></div>\n    </dl></div>\n    <p><strong>Le mental model :</strong> un agent en prod, ce n'est pas un stagiaire qu'on rappelle à chaque tâche — c'est un <strong>employé</strong>. Il a un bureau (le serveur), des clés (ses secrets et accès), et des horaires (ses déclencheurs). Tant qu'il n'a pas les trois, il ne travaille pas vraiment ; il attend qu'on le pousse.</p>\n    <p>Trois décisions structurent l'hébergement :</p>\n    <ul>\n      <li><strong>Où ça tourne</strong> — un VPS (une machine à toi, allumée en permanence, prévisible) ou du serverless (ça démarre à chaque appel, tu paies à l'usage, mais « démarrages à froid »).</li>\n      <li><strong>Comment c'est emballé</strong> — un conteneur (Docker) fige le code <em>et</em> son environnement, pour que « ça marche pareil » partout.</li>\n      <li><strong>Où sont les clés</strong> — jamais dans le code. Les secrets (clés d'API, mots de passe) vivent dans des variables d'environnement, séparées du code.</li>\n    </ul>\n    <div class=\"note\"><b>Vu en vrai — Hermès sur VPS.</b> Mon agent de contenu, Hermès, ne vit pas dans un chat : il tourne dans un conteneur Docker sur un VPS Hostinger, à côté de mon instance n8n. Résultat : il est joignable 24/7 par mes workflows, son environnement est figé (mêmes versions partout), et ses clés d'API restent dans des variables d'environnement — hors du dépôt Git. C'est ce qui sépare une démo d'un outil.</div>"
+        },
+        {
+          "type": "demo",
+          "key": "tome4-prod#0",
+          "title": "Assemble l'employé : bureau, clés, horaires",
+          "intro": "Un agent en prod a besoin de trois choses. Active-les et regarde-le passer de prototype à employé qui bosse tout seul."
+        },
+        {
+          "type": "html",
+          "html": "<p><strong>Application :</strong> pour ton prochain agent, réponds aux trois questions <em>avant</em> d'écrire la logique métier — où il tourne, comment il est emballé, où sont ses clés. Si tu n'as pas de réponse, tu as un prototype, pas un système.</p>"
+        }
+      ],
+      "minutes": 4,
+      "quiz": {
+        "question": "Qu'est-ce qui distingue le mieux un agent « en production » d'un agent de démo ?",
+        "options": [
+          "Il utilise un modèle plus gros",
+          "Il tourne tout seul, de façon fiable, déclenché au bon moment — sans qu'on le relance à la main",
+          "Il répond plus vite"
+        ],
+        "answer": 1,
+        "ok": "Exact : la prod, c'est l'autonomie fiable dans le temps, pas la puissance brute du modèle.",
+        "no": "La taille du modèle ou la vitesse ne font pas la prod. Ce qui la fait, c'est qu'il tourne seul et de façon fiable, sans relance manuelle."
+      }
+    },
+    {
+      "id": "tome4-orchestration",
+      "tome": "Tome 4 · La prod",
+      "number": 22,
+      "title": "L'agent n'est qu'une pièce : l'orchestration autour",
+      "nav": "L'orchestration",
+      "eyebrow": "Tome 4 — Module 2",
+      "body": [
+        {
+          "type": "html",
+          "html": "<p class=\"lead\">On croit souvent que « faire un agent », c'est écrire un bon prompt. En vrai, le <span class=\"acro\">LLM</span> ne représente qu'une petite partie d'un système qui marche. Tout autour, il faut quelque chose qui le déclenche, lui passe les bonnes données, garde la mémoire entre deux exécutions, et range les résultats. C'est l'orchestration.</p>\n    <div class=\"define\"><div class=\"ico\">[def]</div><dl>\n      <div><dt>Orchestration</dt><dd>la couche qui coordonne tout autour du modèle : déclencheurs (quand agir), données (quoi lire), état (quoi retenir), et destinations (où envoyer le résultat).</dd></div>\n      <div><dt>État persistant</dt><dd>les informations qu'un agent doit retenir <b>entre</b> deux exécutions, stockées hors de sa fenêtre de contexte — typiquement dans une base de données.</dd></div>\n    </dl></div>\n    <p><strong>Le mental model :</strong> le LLM est le <strong>cerveau</strong>, l'orchestrateur est le <strong>corps</strong>. Un cerveau dans un bocal ne fait rien d'utile : il lui faut des yeux (les déclencheurs), des mains (les outils), et une mémoire externe (la base de données) pour agir dans le monde réel.</p>\n    <p>Concrètement, un outil comme n8n joue le rôle de système nerveux : il écoute un déclencheur (un webhook, une heure, un nouveau message), appelle le LLM avec le bon contexte, exécute les outils que le modèle demande, puis écrit le résultat quelque part de durable — souvent une base comme Supabase.</p>\n    <div class=\"note\"><b>Vu en vrai — le Knowledge Hub.</b> Mon pipeline de veille ne « parle » pas tout seul. Une note brute arrive, n8n la déclenche, le LLM la structure (titre, points clés, projet, potentiel de contenu), Supabase la stocke, et le résultat repart vers Notion puis Telegram. Le modèle ne fait qu'<em>une</em> étape — structurer. Tout le reste, c'est de l'orchestration. Sans elle, j'aurais un prompt malin et zéro système.</div>\n    <div class=\"note\"><b>La stack DKM en vrai — qui fait quoi.</b>\n      <ul>\n        <li><b>n8n</b> — l'orchestrateur : il écoute les déclencheurs, appelle le modèle et les outils, enchaîne les étapes (le « système nerveux »).</li>\n        <li><b>Supabase</b> — la base de données : l'état persistant, là où le résultat est stocké durablement (source de vérité des données).</li>\n        <li><b>Docker</b> — le conteneur qui fige le code et son environnement pour qu'il tourne pareil partout.</li>\n        <li><b>VPS (Hostinger)</b> — le serveur loué, allumé en permanence, où vivent n8n et l'agent.</li>\n        <li><b>Telegram</b> — un canal d'entrée / sortie : capter une note, ou recevoir le résultat.</li>\n        <li><b>Notion</b> — le miroir de triage : relire et classer les résultats (jamais la source de vérité).</li>\n      </ul>\n    </div>"
+        },
+        {
+          "type": "demo",
+          "key": "tome4-orchestration#0",
+          "title": "Reconstitue la chaîne d'orchestration",
+          "intro": "Le modèle n'est qu'une étape. Remets les maillons dans l'ordre : du déclencheur jusqu'à la destination."
+        },
+        {
+          "type": "html",
+          "html": "<p><strong>Application :</strong> avant de peaufiner ton prompt, dessine la chaîne complète : <em>quoi déclenche → quelles données entrent → ce que le modèle décide → où va le résultat → ce qu'on retient pour la fois d'après</em>. Le prompt n'est qu'une case de ce schéma.</p>"
+        }
+      ],
+      "minutes": 4,
+      "quiz": {
+        "question": "Dans un agent en production, quel est le rôle de l'orchestration (ex. n8n) ?",
+        "options": [
+          "Remplacer le LLM par des règles fixes",
+          "Coordonner le déclenchement, les données, l'état et les destinations autour du modèle",
+          "Rendre les réponses du modèle plus créatives"
+        ],
+        "answer": 1,
+        "ok": "Voilà : l'orchestrateur est le corps autour du cerveau — il gère tout ce que le modèle ne gère pas lui-même.",
+        "no": "L'orchestration ne remplace pas le modèle et ne touche pas sa créativité : elle coordonne tout le reste (déclencheurs, données, état, sorties)."
+      }
+    },
+    {
+      "id": "tome4-reliability",
+      "tome": "Tome 4 · La prod",
+      "number": 23,
+      "title": "Fiable ≠ parfait : gérer le contexte et l'échec",
+      "nav": "Fiabilité & contexte",
+      "eyebrow": "Tome 4 — Module 3",
+      "body": [
+        {
+          "type": "html",
+          "html": "<p class=\"lead\">Le passage du prototype au système qui tient se joue presque entièrement ici. Un agent en prod va <strong>forcément</strong> rencontrer des ratés : un outil qui ne répond pas, une fenêtre de contexte qui déborde, une réponse mal formée. La fiabilité, ce n'est pas l'absence d'erreurs — c'est savoir quoi faire <em>quand</em> elles arrivent.</p>\n    <div class=\"define\"><div class=\"ico\">[def]</div><dl>\n      <div><dt>Gestion du contexte</dt><dd>l'art de garder, dans la fenêtre du modèle, <b>juste ce qu'il faut</b> : assez pour bien décider, pas trop pour ne pas déborder ni « noyer » l'information utile.</dd></div>\n      <div><dt>Idempotence</dt><dd>une opération qu'on peut <b>rejouer sans dégât</b> : la lancer deux fois donne le même résultat qu'une fois (utile quand on doit réessayer après un échec).</dd></div>\n      <div><dt>Dégradation gracieuse</dt><dd>quand quelque chose échoue, l'agent <b>réduit la voilure</b> proprement (réponse partielle, repli, message clair) au lieu de planter ou d'inventer.</dd></div>\n    </dl></div>\n    <p><strong>Le mental model :</strong> un agent fiable n'est pas un agent qui ne se trompe jamais — c'est un agent qui <strong>sait quoi faire quand il se trompe</strong>. Comme un bon employé : ce n'est pas celui qui ne tombe jamais sur un imprévu, c'est celui qui réagit bien à l'imprévu.</p>\n    <p>Quatre réflexes de fiabilité :</p>\n    <ul>\n      <li><strong>Maîtriser le contexte</strong> — résumer l'historique long, ne charger que les documents pertinents, surveiller le remplissage de la fenêtre.</li>\n      <li><strong>Réessayer intelligemment</strong> — sur un échec passager (réseau, surcharge), retenter après un court délai, mais un nombre limité de fois.</li>\n      <li><strong>Rendre les actions rejouables</strong> — pour qu'un retry ne crée pas deux fois la même commande (idempotence).</li>\n      <li><strong>Dégrader proprement</strong> — préférer « je n'ai pas pu vérifier X » à une réponse inventée avec assurance (rappel du tome 2 : l'hallucination).</li>\n    </ul>\n    <div class=\"note\"><b>Vu en vrai — mon angle mort, devenu méthode.</b> En préparant la certification Architecte Claude, mon domaine le plus faible était justement « gestion du contexte & fiabilité ». L'enseigner m'a forcé à le verrouiller : sur mes workflows, je résume l'historique au lieu de tout réinjecter, je borne les retries, et je rends les écritures rejouables. La leçon DKM : ton point faible devient ton meilleur module dès que tu dois l'expliquer simplement.</div>"
+        },
+        {
+          "type": "demo",
+          "key": "tome4-reliability#0",
+          "title": "Une panne survient : choisis la parade",
+          "intro": "Choisis un scénario d'échec, puis la réaction la plus fiable. La fiabilité, c'est savoir quoi faire quand ça casse."
+        },
+        {
+          "type": "html",
+          "html": "<p><strong>Application :</strong> pour ton agent, écris noir sur blanc trois scénarios d'échec (« et si l'outil ne répond pas ? », « et si le contexte est trop long ? », « et si la sortie est mal formée ? ») et la réaction prévue pour chacun. Un agent sans plan d'échec n'est pas prêt pour la prod.</p>"
+        }
+      ],
+      "minutes": 4,
+      "quiz": {
+        "question": "Que signifie « un agent fiable » en production ?",
+        "options": [
+          "Un agent qui ne fait jamais d'erreur",
+          "Un agent qui sait réagir correctement quand une erreur survient (retry, repli, dégradation propre)",
+          "Un agent qui utilise toujours le modèle le plus cher"
+        ],
+        "answer": 1,
+        "ok": "Exact : la fiabilité, c'est la bonne réaction à l'échec — pas l'absence d'échec, qui est impossible.",
+        "no": "Aucun agent n'évite toutes les erreurs. La fiabilité, c'est la qualité de la réaction quand l'erreur arrive."
+      }
+    },
+    {
+      "id": "tome4-cost",
+      "tome": "Tome 4 · La prod",
+      "number": 24,
+      "title": "Chaque appel a un prix et un délai",
+      "nav": "Coût, latence, modèle",
+      "eyebrow": "Tome 4 — Module 4",
+      "body": [
+        {
+          "type": "html",
+          "html": "<p class=\"lead\">Voici le module que les ingénieurs adorent et que les formations zappent. En démo, le coût ne se voit pas. En prod, à des milliers d'appels, chaque token et chaque seconde comptent. Un bon builder ne choisit pas « le meilleur modèle » — il choisit <strong>le bon modèle pour chaque tâche</strong>.</p>\n    <div class=\"define\"><div class=\"ico\">[def]</div><dl>\n      <div><dt>Latence</dt><dd>le temps entre la demande et la réponse. Faible latence = expérience fluide ; forte latence = utilisateur qui attend.</dd></div>\n      <div><dt>Mise en cache (caching)</dt><dd>réutiliser un calcul déjà fait au lieu de le refaire — par exemple un long contexte stable réinjecté à chaque appel — pour payer moins et répondre plus vite.</dd></div>\n      <div><dt>Traitement par lots (batching)</dt><dd>regrouper plusieurs tâches non urgentes en un seul envoi, souvent moins cher, quand la réponse immédiate n'est pas nécessaire.</dd></div>\n    </dl></div>\n    <p><strong>Le mental model :</strong> chaque appel au modèle a un <strong>prix</strong> (les tokens) et un <strong>délai</strong> (la latence). Un builder budgète les deux, comme un artisan compte la matière et le temps. « Toujours prendre le plus puissant » est aussi naïf que « toujours prendre le camion » pour aller chercher du pain.</p>\n    <p>La règle pratique : associer la <strong>taille du modèle à la difficulté de la tâche</strong>. Un petit modèle rapide pour trier, étiqueter, reformuler ; un grand modèle pour raisonner, arbitrer, produire du contenu délicat. Et toujours : <strong>mesurer avant d'optimiser</strong> — on n'optimise pas un coût qu'on n'a pas regardé.</p>\n    <div class=\"note\"><b>Vu en vrai — arbitrer entre les modèles.</b> Je n'utilise pas un seul modèle pour tout. Selon la tâche, je route entre un modèle léger (extraction, classement, structuration de notes) et un modèle plus fort (génération de contenu, décisions business), parfois via un agrégateur, parfois en appel direct. Le réflexe : la tâche d'abord, le modèle ensuite. C'est ce qui rend un système rentable au lieu de joli mais ruineux.</div>"
+        },
+        {
+          "type": "demo",
+          "key": "tome4-cost#0",
+          "title": "Associe chaque tâche au bon modèle",
+          "intro": "Petit modèle ou grand modèle ? Choisis pour chaque tâche et vois pourquoi — la taille suit la difficulté."
+        },
+        {
+          "type": "html",
+          "html": "<p><strong>Application :</strong> liste les appels au modèle dans ton agent. Pour chacun, demande-toi : « la tâche est-elle assez simple pour un petit modèle ? puis-je mettre en cache la partie stable ? est-ce urgent, ou groupable en lot ? » Tu trouveras presque toujours du coût et du délai à récupérer.</p>"
+        }
+      ],
+      "minutes": 4,
+      "quiz": {
+        "question": "Quel est le bon réflexe pour choisir un modèle dans un système en production ?",
+        "options": [
+          "Toujours prendre le modèle le plus puissant disponible",
+          "Adapter la taille du modèle à la difficulté réelle de la tâche, et mesurer avant d'optimiser",
+          "Choisir le moins cher dans tous les cas"
+        ],
+        "answer": 1,
+        "ok": "Exact : la tâche d'abord, le modèle ensuite — et on mesure avant d'optimiser le coût ou la latence.",
+        "no": "Ni « toujours le plus puissant » ni « toujours le moins cher » : on associe le modèle à la difficulté de la tâche, après avoir mesuré."
+      }
+    },
+    {
+      "id": "tome4-guardrails",
+      "tome": "Tome 4 · La prod",
+      "number": 25,
+      "title": "La confiance se conçoit, elle ne s'espère pas",
+      "nav": "Garde-fous en prod",
+      "eyebrow": "Tome 4 — Module 5",
+      "body": [
+        {
+          "type": "html",
+          "html": "<p class=\"lead\">Au tome 3, on a vu le principe de l'humain dans la boucle. Ici, on le rend réel. Un agent qui agit dans le monde — envoyer un email, modifier une base, publier un post — peut causer des dégâts irréversibles. Les garde-fous, ce n'est pas de la méfiance : c'est de l'ingénierie.</p>\n    <div class=\"define\"><div class=\"ico\">[def]</div><dl>\n      <div><dt>Garde-fou</dt><dd>une règle ou un contrôle qui empêche un agent de faire quelque chose de dangereux ou d'irréversible sans validation.</dd></div>\n      <div><dt>Observabilité</dt><dd>la capacité de <b>voir ce que l'agent a fait</b> : journaux (logs) de ses décisions, actions et erreurs, pour comprendre et corriger après coup.</dd></div>\n      <div><dt><span class=\"acro\">HITL</span> — Humain dans la boucle</dt><dd>exiger une confirmation humaine <b>avant</b> une action sensible ou irréversible (rappel du tome 3, ici appliqué en production).</dd></div>\n    </dl></div>\n    <p><strong>Le mental model :</strong> <strong>la confiance se conçoit, elle ne s'espère pas.</strong> On ne « croise pas les doigts » pour qu'un agent se comporte bien : on conçoit le système pour qu'il <em>ne puisse pas</em> dépasser certaines limites sans qu'un humain valide.</p>\n    <p>Quatre garde-fous de base :</p>\n    <ul>\n      <li><strong>Permissions minimales</strong> — l'agent n'a accès qu'à ce dont il a strictement besoin, rien de plus.</li>\n      <li><strong>Validation humaine sur l'irréversible</strong> — envoyer, supprimer, publier, payer : un humain confirme.</li>\n      <li><strong>Observabilité</strong> — chaque décision et action est journalisée, pour pouvoir auditer après coup.</li>\n      <li><strong>Méfiance envers le contenu lu</strong> — un texte trouvé dans une page ou un document n'est jamais une commande (l'injection de consigne, vue au tome 3, est une menace réelle en prod).</li>\n    </ul>\n    <div class=\"warn\"><b>Le piège classique :</b> donner à un agent un accès large « pour gagner du temps », en se disant qu'on surveillera. En prod, on ne surveille jamais autant qu'on le croit. Le bon réflexe est inverse : permissions minimales par défaut, on élargit seulement quand c'est prouvé nécessaire.</div>"
+        },
+        {
+          "type": "demo",
+          "key": "tome4-guardrails#0",
+          "title": "Réversible ou irréversible ?",
+          "intro": "Classe chaque action. Les irréversibles passent par une validation humaine — c'est ton premier jeu de garde-fous."
+        },
+        {
+          "type": "html",
+          "html": "<p><strong>Application :</strong> pour chaque action que ton agent peut déclencher, classe-la en « réversible » (l'agent peut la faire seul) ou « irréversible / sensible » (validation humaine obligatoire). Cette simple liste est ton premier jeu de garde-fous.</p>"
+        }
+      ],
+      "minutes": 4,
+      "quiz": {
+        "question": "Quel principe résume la bonne approche des garde-fous en production ?",
+        "options": [
+          "Faire confiance à l'agent et corriger après coup",
+          "Concevoir le système pour que l'agent ne puisse pas franchir certaines limites sans validation humaine",
+          "Donner un accès large pour ne pas ralentir l'agent"
+        ],
+        "answer": 1,
+        "ok": "Voilà : la confiance se conçoit. On encadre par design, surtout les actions irréversibles.",
+        "no": "On ne mise pas sur la confiance a posteriori ni sur l'accès large : on conçoit des limites que l'agent ne peut franchir sans validation."
+      }
+    },
+    {
+      "id": "tome4-judgment",
+      "tome": "Tome 4 · La prod",
+      "number": 26,
+      "title": "Le meilleur builder sait aussi dire non",
+      "nav": "Quand NE PAS le faire",
+      "eyebrow": "Tome 4 — Module 6",
+      "body": [
+        {
+          "type": "html",
+          "html": "<p class=\"lead\">On termine par le module le plus important — et le plus rare. Tout ce parcours t'a appris à <em>construire</em> des agents. Ce dernier module t'apprend à savoir <strong>quand ne pas le faire</strong>. Car la vraie maîtrise, ce n'est pas de tout automatiser : c'est de choisir ce qui mérite de l'être.</p>\n    <div class=\"define\"><div class=\"ico\">[def]</div><dl>\n      <div><dt>Sur-ingénierie</dt><dd>construire une solution plus complexe que le problème ne l'exige — un agent là où une règle simple suffirait.</dd></div>\n      <div><dt>Risque de conformité (compliance)</dt><dd>le risque qu'une automatisation enfreigne les règles d'une plateforme, un contrat, ou une loi — même si elle « fonctionne » techniquement.</dd></div>\n    </dl></div>\n    <p><strong>Le mental model :</strong> <strong>le meilleur builder sait aussi dire non.</strong> Savoir construire un agent ne signifie pas qu'il faut en construire un. Souvent, la meilleure décision d'ingénierie est de <em>ne pas</em> automatiser — parce qu'une solution simple suffit, ou parce que le risque dépasse le gain.</p>\n    <p>Trois signaux qu'un agent n'est PAS la bonne réponse :</p>\n    <ul>\n      <li><strong>Une règle fixe suffirait</strong> — si la tâche est déterministe et stable, un simple « si ceci, alors cela » est plus fiable, moins cher et plus prévisible qu'un LLM.</li>\n      <li><strong>Le risque dépasse le gain</strong> — quand un faux pas coûte cher (légal, réputation, accès coupé), le temps gagné ne le justifie pas.</li>\n      <li><strong>Ça touche une zone interdite</strong> — automatiser contre les règles d'une plateforme, c'est emprunter une dette qui finit par se payer, souvent au pire moment.</li>\n    </ul>\n    <div class=\"warn\"><b>Vu en vrai — un « non » assumé.</b> Pour l'un de mes projets, j'aurais pu automatiser des actions à l'intérieur d'une plateforme métier via un pilotage de navigateur. Techniquement faisable, tentant, et ça m'aurait fait gagner du temps. J'ai dit non : le risque de conformité vis-à-vis de la plateforme dépassait le gain. Ce « non » n'est pas un échec d'ingénieur — c'est l'ingénierie. Le discernement fait partie de la compétence.</div>"
+        },
+        {
+          "type": "demo",
+          "key": "tome4-judgment#0",
+          "title": "Agent, ou règle simple ?",
+          "intro": "Pour chaque cas, décide : un agent se justifie-t-il, une règle simple suffit-elle, ou vaut-il mieux ne pas automatiser ?"
+        },
+        {
+          "type": "html",
+          "html": "<p><strong>Application :</strong> avant de lancer ton prochain agent, pose-toi les trois questions : « une règle simple suffirait-elle ? », « que se passe-t-il si ça se trompe ? », « est-ce que je respecte les règles du terrain ? ». Si l'une des réponses coince, le bon move est peut-être de ne pas construire. C'est ça, passer de l'IA-chat à l'IA-workforce avec discernement.</p>"
+        }
+      ],
+      "minutes": 4,
+      "quiz": {
+        "question": "Selon ce module, quand un agent n'est-il PAS la bonne solution ?",
+        "options": [
+          "Quand la tâche est importante",
+          "Quand une règle simple suffirait, quand le risque dépasse le gain, ou quand cela enfreint les règles du terrain",
+          "Jamais : un agent est toujours préférable à une automatisation simple"
+        ],
+        "answer": 1,
+        "ok": "Exact : le discernement fait partie de la compétence. Savoir dire non est une décision d'ingénierie à part entière.",
+        "no": "Un agent n'est pas toujours la réponse. Une règle simple, un risque trop élevé ou une zone interdite sont de vraies raisons de ne pas construire."
+      }
     }
   ],
   "exam": [
@@ -1110,6 +1434,78 @@
       ],
       "answer": 1,
       "explain": "Envoyer, publier, supprimer, payer : ces actions irréversibles passent par une validation humaine. C'est un garde-fou central de la conception d'agents."
+    },
+    {
+      "n": 19,
+      "tome": "Tome 4 · La prod",
+      "question": "Qu'est-ce qui distingue le mieux un agent « en production » d'un agent de démo ?",
+      "options": [
+        "Il tourne tout seul, de façon fiable, déclenché au bon moment, sans relance manuelle",
+        "Il utilise systématiquement le modèle le plus puissant",
+        "Il répond toujours plus vite qu'une démo"
+      ],
+      "answer": 0,
+      "explain": "La prod, c'est l'autonomie fiable dans le temps — pas la puissance brute du modèle ni la vitesse. Un agent de prod a un bureau (le serveur), des clés (ses secrets) et des horaires (ses déclencheurs)."
+    },
+    {
+      "n": 20,
+      "tome": "Tome 4 · La prod",
+      "question": "Dans un système agentique, quel est le rôle de l'orchestration (ex. n8n) ?",
+      "options": [
+        "Rendre les réponses du modèle plus créatives",
+        "Remplacer le LLM par des règles fixes",
+        "Coordonner le déclenchement, les données, l'état persistant et les destinations autour du modèle"
+      ],
+      "answer": 2,
+      "explain": "Le LLM est le cerveau, l'orchestrateur est le corps : déclencheurs, données, mémoire externe et sorties. Le modèle ne fait souvent qu'une étape ; tout le reste est orchestration."
+    },
+    {
+      "n": 21,
+      "tome": "Tome 4 · La prod",
+      "question": "Que signifie « un agent fiable » en production ?",
+      "options": [
+        "Un agent qui ne fait jamais d'erreur",
+        "Un agent qui sait réagir correctement quand une erreur survient : retry borné, repli, dégradation propre",
+        "Un agent qui utilise toujours le modèle le plus cher"
+      ],
+      "answer": 1,
+      "explain": "Aucun agent n'évite toutes les erreurs. La fiabilité, c'est la qualité de la réaction à l'échec : réessais limités, actions rejouables (idempotence), dégradation gracieuse plutôt qu'invention."
+    },
+    {
+      "n": 22,
+      "tome": "Tome 4 · La prod",
+      "question": "Quel est le bon réflexe pour choisir un modèle dans un système en production ?",
+      "options": [
+        "Toujours prendre le modèle le plus puissant disponible",
+        "Adapter la taille du modèle à la difficulté réelle de la tâche, et mesurer avant d'optimiser",
+        "Toujours choisir le moins cher, quelle que soit la tâche"
+      ],
+      "answer": 1,
+      "explain": "La tâche d'abord, le modèle ensuite : petit modèle pour trier/étiqueter, grand modèle pour raisonner. Et on mesure le coût et la latence avant de les optimiser."
+    },
+    {
+      "n": 23,
+      "tome": "Tome 4 · La prod",
+      "question": "Quel principe résume la bonne approche des garde-fous en production ?",
+      "options": [
+        "Donner un accès large pour ne pas ralentir l'agent",
+        "Faire confiance à l'agent et corriger après coup",
+        "Concevoir le système pour que l'agent ne puisse pas franchir certaines limites sans validation humaine"
+      ],
+      "answer": 2,
+      "explain": "La confiance se conçoit, elle ne s'espère pas : permissions minimales par défaut, validation humaine sur l'irréversible, observabilité, et méfiance envers le contenu lu (injection de consigne)."
+    },
+    {
+      "n": 24,
+      "tome": "Tome 4 · La prod",
+      "question": "Selon le tome 4, quand un agent n'est-il PAS la bonne solution ?",
+      "options": [
+        "Jamais : un agent est toujours préférable à une automatisation simple",
+        "Quand une règle fixe suffirait, quand le risque dépasse le gain, ou quand cela enfreint les règles d'une plateforme",
+        "Uniquement quand la tâche est jugée peu importante"
+      ],
+      "answer": 1,
+      "explain": "Le discernement fait partie de la compétence. Une règle « si ceci alors cela », un risque trop élevé ou une zone interdite (conformité) sont de vraies raisons de ne pas construire."
     }
   ]
 }

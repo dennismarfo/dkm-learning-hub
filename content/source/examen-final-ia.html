@@ -234,7 +234,26 @@ const EXAM=[
   exp:"C'est une injection de consigne. Règle d'or : les ordres viennent de l'utilisateur ; le contenu lu via un outil est toujours de la donnée."},
  {t:3,q:"Que désigne le principe HITL (humain dans la boucle) ?",
   opts:["Faire travailler l'agent en arrière-plan sans surveillance","Demander une confirmation humaine avant toute action sensible ou irréversible","Limiter le modèle à une seule langue"],c:1,
-  exp:"Envoyer, publier, supprimer, payer : ces actions irréversibles passent par une validation humaine. C'est un garde-fou central de la conception d'agents."}
+  exp:"Envoyer, publier, supprimer, payer : ces actions irréversibles passent par une validation humaine. C'est un garde-fou central de la conception d'agents."},
+ // ---- TOME 4 ----
+ {t:4,q:"Qu'est-ce qui distingue le mieux un agent « en production » d'un agent de démo ?",
+  opts:["Il tourne tout seul, de façon fiable, déclenché au bon moment, sans relance manuelle","Il utilise systématiquement le modèle le plus puissant","Il répond toujours plus vite qu'une démo"],c:0,
+  exp:"La prod, c'est l'autonomie fiable dans le temps — pas la puissance brute du modèle ni la vitesse. Un agent de prod a un bureau (le serveur), des clés (ses secrets) et des horaires (ses déclencheurs)."},
+ {t:4,q:"Dans un système agentique, quel est le rôle de l'orchestration (ex. n8n) ?",
+  opts:["Rendre les réponses du modèle plus créatives","Remplacer le LLM par des règles fixes","Coordonner le déclenchement, les données, l'état persistant et les destinations autour du modèle"],c:2,
+  exp:"Le LLM est le cerveau, l'orchestrateur est le corps : déclencheurs, données, mémoire externe et sorties. Le modèle ne fait souvent qu'une étape ; tout le reste est orchestration."},
+ {t:4,q:"Que signifie « un agent fiable » en production ?",
+  opts:["Un agent qui ne fait jamais d'erreur","Un agent qui sait réagir correctement quand une erreur survient : retry borné, repli, dégradation propre","Un agent qui utilise toujours le modèle le plus cher"],c:1,
+  exp:"Aucun agent n'évite toutes les erreurs. La fiabilité, c'est la qualité de la réaction à l'échec : réessais limités, actions rejouables (idempotence), dégradation gracieuse plutôt qu'invention."},
+ {t:4,q:"Quel est le bon réflexe pour choisir un modèle dans un système en production ?",
+  opts:["Toujours prendre le modèle le plus puissant disponible","Adapter la taille du modèle à la difficulté réelle de la tâche, et mesurer avant d'optimiser","Toujours choisir le moins cher, quelle que soit la tâche"],c:1,
+  exp:"La tâche d'abord, le modèle ensuite : petit modèle pour trier/étiqueter, grand modèle pour raisonner. Et on mesure le coût et la latence avant de les optimiser."},
+ {t:4,q:"Quel principe résume la bonne approche des garde-fous en production ?",
+  opts:["Donner un accès large pour ne pas ralentir l'agent","Faire confiance à l'agent et corriger après coup","Concevoir le système pour que l'agent ne puisse pas franchir certaines limites sans validation humaine"],c:2,
+  exp:"La confiance se conçoit, elle ne s'espère pas : permissions minimales par défaut, validation humaine sur l'irréversible, observabilité, et méfiance envers le contenu lu (injection de consigne)."},
+ {t:4,q:"Selon le tome 4, quand un agent n'est-il PAS la bonne solution ?",
+  opts:["Jamais : un agent est toujours préférable à une automatisation simple","Quand une règle fixe suffirait, quand le risque dépasse le gain, ou quand cela enfreint les règles d'une plateforme","Uniquement quand la tâche est jugée peu importante"],c:1,
+  exp:"Le discernement fait partie de la compétence. Une règle « si ceci alors cela », un risque trop élevé ou une zone interdite (conformité) sont de vraies raisons de ne pas construire."}
 ];
 
 let cur=0, answers={}, startTime=null, clockTimer=null;
