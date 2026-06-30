@@ -13,6 +13,12 @@ import { ToolUse } from './ToolUse';
 import { AgentLoop } from './AgentLoop';
 import { McpServers } from './McpServers';
 import { PromptInjection } from './PromptInjection';
+import { HostingEmployee } from './HostingEmployee';
+import { OrchestrationChain } from './OrchestrationChain';
+import { FailureDrill } from './FailureDrill';
+import { ModelRouter } from './ModelRouter';
+import { ReversibleSort } from './ReversibleSort';
+import { AgentOrNot } from './AgentOrNot';
 
 type DemoProps = { title: string; intro: string };
 const REGISTRY: Record<string, (p: DemoProps) => React.JSX.Element> = {
@@ -31,6 +37,12 @@ const REGISTRY: Record<string, (p: DemoProps) => React.JSX.Element> = {
   'tome3-loop#0': AgentLoop,
   'tome3-mcp#0': McpServers,
   'tome3-garde#0': PromptInjection,
+  'tome4-prod#0': HostingEmployee,
+  'tome4-orchestration#0': OrchestrationChain,
+  'tome4-reliability#0': FailureDrill,
+  'tome4-cost#0': ModelRouter,
+  'tome4-guardrails#0': ReversibleSort,
+  'tome4-judgment#0': AgentOrNot,
 };
 
 export function DemoSlot({ demoKey, title, intro }: { demoKey: string; title: string; intro: string }) {

@@ -106,7 +106,7 @@ function CourseDetail() {
     <main className="wrap section">
       <Brand />
       <section className="hero">
-        <div className="eyebrow">Cours MVP · 3 tomes · examen final</div>
+        <div className="eyebrow">Cours MVP · 4 tomes · examen final</div>
         <h1 className="display h1">{course.title}</h1>
         <p className="lead">{course.promise}</p>
         <div className="tags">
@@ -191,7 +191,7 @@ function Lesson({ moduleId }: { moduleId?: string }) {
             <DemoSlot key={i} demoKey={b.key} title={b.title} intro={b.intro} />
           ),
         )}
-        {module.quiz && <QuizBlock quiz={module.quiz} />}
+        {module.quiz && <QuizBlock key={module.id} quiz={module.quiz} />}
         <div className="actions">
           <Button variant="light" onClick={() => go('/courses/architecture-ia')}>Retour au parcours</Button>
           {next && <Button onClick={() => go(`/courses/architecture-ia/${next.id}`)}>Module suivant →</Button>}

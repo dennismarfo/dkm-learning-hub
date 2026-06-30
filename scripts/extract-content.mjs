@@ -25,6 +25,7 @@ const TOME_LABELS = {
   1: 'Tome 1 · La fabrique',
   2: "Tome 2 · L'adaptation",
   3: 'Tome 3 · L’action',
+  4: 'Tome 4 · La prod',
 };
 
 /**
@@ -152,6 +153,7 @@ const TOME_FILES = [
   { n: 1, file: 'architecture-ia-tome1.html' },
   { n: 2, file: 'architecture-ia-tome2.html' },
   { n: 3, file: 'architecture-ia-tome3.html' },
+  { n: 4, file: 'architecture-ia-tome4.html' },
 ];
 
 const modules = [];
@@ -213,7 +215,7 @@ const content = {
   promise:
     'Comprends l’IA moderne depuis les bases, puis relie chaque concept aux workflows, agents et décisions business.',
   level: 'Débutant → builder',
-  duration: `3 tomes · ${modules.length} modules · examen final`,
+  duration: `4 tomes · ${modules.length} modules · examen final`,
   glossary: [...glossaryByTerm.values()],
   modules,
   exam,
@@ -221,9 +223,9 @@ const content = {
 
 // --- Sanity assertions (fail loudly rather than emit silently-wrong data) ---
 const errors = [];
-if (modules.length !== 20) errors.push(`expected 20 modules, got ${modules.length}`);
-if (exam.length !== 18) errors.push(`expected 18 exam questions, got ${exam.length}`);
-const expectGloss = { 1: 16, 2: 16, 3: 14 };
+if (modules.length !== 26) errors.push(`expected 26 modules, got ${modules.length}`);
+if (exam.length !== 24) errors.push(`expected 24 exam questions, got ${exam.length}`);
+const expectGloss = { 1: 16, 2: 16, 3: 14, 4: 18 };
 for (const [n, c] of Object.entries(expectGloss)) {
   if (glossaryCounts[n] !== c) errors.push(`tome ${n}: expected ${c} glossary terms, got ${glossaryCounts[n]}`);
 }
@@ -264,6 +266,12 @@ const EXPECTED_DEMOS = [
   ['tome3-loop#0', 'plusieurs tours'],
   ['tome3-mcp#0', 'Branche des serveurs'],
   ['tome3-garde#0', 'Repère le piège'],
+  ['tome4-prod#0', 'employé'],
+  ['tome4-orchestration#0', 'chaîne'],
+  ['tome4-reliability#0', 'panne'],
+  ['tome4-cost#0', 'modèle'],
+  ['tome4-guardrails#0', 'versible'],
+  ['tome4-judgment#0', 'règle simple'],
 ];
 if (demoBlocks.length !== EXPECTED_DEMOS.length) {
   errors.push(`expected ${EXPECTED_DEMOS.length} demo blocks, got ${demoBlocks.length} [${demoBlocks.map((b) => b.key).join(', ')}]`);
@@ -285,6 +293,6 @@ const withQuiz = modules.filter((m) => m.quiz).length;
 console.log(
   `OK → ${OUT}\n` +
     `  modules: ${modules.length} (quiz: ${withQuiz})\n` +
-    `  glossary (merged unique): ${content.glossary.length}  [per tome: ${glossaryCounts[1]}/${glossaryCounts[2]}/${glossaryCounts[3]}]\n` +
+    `  glossary (merged unique): ${content.glossary.length}  [per tome: ${glossaryCounts[1]}/${glossaryCounts[2]}/${glossaryCounts[3]}/${glossaryCounts[4]}]\n` +
     `  exam questions: ${exam.length}`,
 );
