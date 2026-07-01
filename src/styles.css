@@ -209,3 +209,60 @@
 
 @media(max-width:860px){.grid2,.grid3,.sidebar-layout{grid-template-columns:1fr}.links{gap:14px}.nav-extra{display:none}.module{grid-template-columns:44px 1fr}.module .pill{display:none}.side{position:static}.hero{padding-top:52px;padding-bottom:36px}.section-title{font-size:32px}.lesson h1{font-size:40px}.card{padding:24px}.modules.mini{display:grid;grid-template-columns:1fr 1fr;max-height:188px;overflow:auto}.demo-slider{grid-template-columns:110px 1fr 48px}.ab{grid-template-columns:1fr}.mcp-grid{grid-template-columns:1fr}}
 @media(max-width:420px){.brand-label,.brand-sep{display:none}.section{padding-top:40px;padding-bottom:40px}.h1{line-height:1}}
+
+/* Course page — Direction A « atelier affiné »: typed manifest + ordered parcours spine */
+.course-hero{display:grid;grid-template-columns:1.25fr .85fr;gap:44px;align-items:end}
+.course-hero .h1{font-size:clamp(38px,6vw,82px);margin:14px 0 18px}
+.course-manifest{display:inline-flex;align-items:center;gap:9px;flex-wrap:wrap}
+.course-manifest-codes{color:var(--ink);background:var(--sand-60);border:1px solid var(--rule);border-radius:6px;padding:2px 8px;letter-spacing:.14em}
+.course-manifest-card{padding:22px 22px 18px;align-self:end}
+.manifest-list{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:2px}
+.manifest-row{display:grid;grid-template-columns:30px 1fr auto;align-items:center;gap:12px;width:100%;padding:11px 10px;border-radius:12px;cursor:pointer;transition:background .14s}
+.manifest-row:hover{background:var(--sand-60)}
+.manifest-code{font-family:'JetBrains Mono',monospace;font-weight:800;color:var(--terracotta);font-size:13px}
+.manifest-name{font-weight:700}
+.manifest-count{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-70)}
+.manifest-foot{margin-top:14px;padding-top:14px;border-top:1px solid var(--rule);font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--ink-70);letter-spacing:.06em;text-transform:uppercase}
+.parcours{display:grid;gap:6px}
+.parcours-tome{display:grid;grid-template-columns:44px 1fr;column-gap:16px}
+.parcours-rail{position:relative;display:flex;justify-content:center;padding-top:2px}
+.parcours-rail::before{content:"";position:absolute;top:6px;bottom:-6px;width:2px;background:var(--rule)}
+.parcours-tome:last-child .parcours-rail::before{display:none}
+.parcours-badge{position:relative;z-index:1;font-family:'JetBrains Mono',monospace;font-weight:800;font-size:12px;color:var(--white);background:var(--ink);border-radius:8px;padding:6px 7px;height:fit-content}
+.parcours-body{padding-bottom:26px}
+.parcours-tome-head{display:flex;align-items:baseline;gap:12px;margin-bottom:12px}
+.parcours-tome-name{font-weight:800;font-size:19px}
+.parcours-tome-meta{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-70)}
+.parcours-rows{display:grid;gap:8px}
+.parcours-row{display:grid;grid-template-columns:38px 1fr auto;align-items:center;gap:14px;width:100%;padding:14px 16px;border:1px solid var(--rule);border-radius:16px;background:var(--surface);cursor:pointer;transition:border-color .15s,transform .15s}
+.parcours-row:hover{border-color:rgba(42,26,18,.32);transform:translateX(3px)}
+.parcours-num{font-family:'JetBrains Mono',monospace;color:var(--terracotta);font-weight:800}
+.parcours-row-main strong{display:block;font-size:16px}
+.parcours-row-main small{color:var(--ink-70);font-size:13.5px}
+.parcours-arrow{color:var(--ink-70);font-weight:800;transition:color .15s,transform .15s}
+.parcours-row:hover .parcours-arrow{color:var(--terracotta);transform:translateX(2px)}
+@media(max-width:860px){.course-hero{grid-template-columns:1fr;gap:28px;align-items:start}.course-manifest-card{align-self:stretch}.parcours-row{grid-template-columns:30px 1fr auto;padding:13px 14px}}
+@media(prefers-reduced-motion:reduce){.parcours-row,.parcours-arrow{transition:none}.parcours-row:hover{transform:none}.parcours-row:hover .parcours-arrow{transform:none}}
+
+/* Home — parcours preview on the dark band (echoes the course manifest) */
+.home-parcours{list-style:none;margin:26px 0 0;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.home-tome{display:grid;gap:6px;padding:16px;border:1px solid rgba(244,229,154,.22);border-radius:16px;background:rgba(244,229,154,.06)}
+.home-tome-code{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:13px;color:var(--sand)}
+.home-tome-name{font-weight:700;color:var(--white)}
+.home-tome-count{font-family:'JetBrains Mono',monospace;font-size:12px;color:rgba(255,253,244,.6)}
+.home-parcours-foot{margin-top:14px;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,253,244,.6)}
+
+/* Lesson sidebar — tome-grouped spine + position progress */
+.side-progress{margin:12px 0 6px}
+.side-progress-label{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-70)}
+.side-progress-track{display:block;height:5px;background:var(--rule);border-radius:999px;margin-top:6px;overflow:hidden}
+.side-progress-track i{display:block;height:100%;background:var(--terracotta);border-radius:999px;transition:width .25s}
+.side-spine{margin-top:8px}
+.side-tome{margin-bottom:6px}
+.side-tome-head{display:flex;align-items:center;gap:8px;font-weight:800;font-size:13px;margin:12px 0 4px;color:var(--ink)}
+.side-tome-code{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:11px;color:var(--white);background:var(--ink);border-radius:6px;padding:3px 6px;letter-spacing:.04em}
+.lesson-eyebrow{display:inline-flex;align-items:center;gap:9px;flex-wrap:wrap}
+.lesson-eyebrow-code{font-family:'JetBrains Mono',monospace;font-weight:800;color:var(--white);background:var(--ink);border-radius:6px;padding:3px 7px;letter-spacing:.08em}
+@media(max-width:860px){.home-parcours{grid-template-columns:repeat(2,1fr)}.side-spine{max-height:240px;overflow:auto}}
+@media(max-width:420px){.home-parcours{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.side-progress-track i{transition:none}}

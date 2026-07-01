@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { course, getModule, getExam } from './course-data';
 import { DemoSlot } from './demos/registry';
-import { Brand, Button, Nav, Pill, ModuleLink, QuizBlock } from './components';
+import { Brand, Button, Nav, Pill, QuizBlock } from './components';
 import { go } from './nav';
 import SoulDocument from './resources/SoulDocument';
 import Projects from './Projects';
@@ -21,6 +21,25 @@ function parseRoute() {
   if (path === '/projects') return { view: 'projects' as View };
   return { view: 'home' as View };
 }
+
+// The course is an ordered build (Tome 1 → Tome 4). Group the flat module list
+// back into its tomes so the UI can speak that real sequence — codes T1…T4,
+// per-tome counts, and the ordered "parcours" spine reused on home, course page
+// and lesson sidebar. Computed once (course is static). `label` is the tome's
+// name without the "Tome N · " prefix.
+const TOME_GROUPS = (() => {
+  const groups: { key: string; code: string; label: string; modules: typeof course.modules }[] = [];
+  for (const m of course.modules) {
+    let g = groups.find((x) => x.key === m.tome);
+    if (!g) {
+      const label = m.tome.includes('·') ? m.tome.split('·').slice(1).join('·').trim() : m.tome;
+      g = { key: m.tome, code: `T${groups.length + 1}`, label, modules: [] };
+      groups.push(g);
+    }
+    g.modules.push(m);
+  }
+  return groups;
+})();
 
 function Home() {
   return (
@@ -60,13 +79,20 @@ function Home() {
         </section>
         <section className="band band-ink">
           <div className="wrap section">
-            <div className="eyebrow">Cours vedette</div>
+            <div className="eyebrow">Cours vedette · {TOME_GROUPS.length} tomes</div>
             <h2 className="display section-title">{course.title}</h2>
             <p className="lead">{course.promise}</p>
-            <div className="tags">
-              <Pill>{course.duration}</Pill>
-              <Pill>{course.level}</Pill>
-              <Pill>{course.exam.length} questions d’examen</Pill>
+            <ol className="home-parcours">
+              {TOME_GROUPS.map((g) => (
+                <li className="home-tome" key={g.key}>
+                  <span className="home-tome-code">{g.code}</span>
+                  <span className="home-tome-name">{g.label}</span>
+                  <span className="home-tome-count">{g.modules.length} mod</span>
+                </li>
+              ))}
+            </ol>
+            <div className="home-parcours-foot">
+              {course.glossary.length} notions · {course.exam.length} questions · {course.level}
             </div>
             <div className="actions">
               <Button onClick={() => go('/courses/architecture-ia')}>Ouvrir la fiche cours</Button>
@@ -105,19 +131,37 @@ function CourseDetail() {
   return (
     <main className="wrap section">
       <Brand />
-      <section className="hero">
-        <div className="eyebrow">Cours MVP · 4 tomes · examen final</div>
-        <h1 className="display h1">{course.title}</h1>
-        <p className="lead">{course.promise}</p>
-        <div className="tags">
-          <Pill>{course.duration}</Pill>
-          <Pill>{course.level}</Pill>
-          <Pill>{course.exam.length} questions d’examen</Pill>
+      <section className="hero course-hero">
+        <div className="course-hero-main">
+          <div className="eyebrow course-manifest">
+            Cours MVP
+            <span className="course-manifest-codes">{TOME_GROUPS.map((g) => g.code).join('·')}</span>
+            examen final
+          </div>
+          <h1 className="display h1">{course.title}</h1>
+          <p className="lead">{course.promise}</p>
+          <div className="actions">
+            <Button onClick={() => go(`/courses/architecture-ia/${course.modules[0].id}`)}>Commencer le tome 1</Button>
+            <Button variant="light" onClick={() => go('/courses/architecture-ia/examen')}>Passer l’examen</Button>
+          </div>
         </div>
-        <div className="actions">
-          <Button onClick={() => go(`/courses/architecture-ia/${course.modules[0].id}`)}>Commencer le tome 1</Button>
-          <Button variant="light" onClick={() => go('/courses/architecture-ia/examen')}>Passer l’examen</Button>
-        </div>
+        <aside className="card course-manifest-card">
+          <div className="eyebrow">Le parcours</div>
+          <ol className="manifest-list">
+            {TOME_GROUPS.map((g) => (
+              <li key={g.key}>
+                <button className="manifest-row reset" onClick={() => go(`/courses/architecture-ia/${g.modules[0].id}`)}>
+                  <span className="manifest-code">{g.code}</span>
+                  <span className="manifest-name">{g.label}</span>
+                  <span className="manifest-count">{g.modules.length} mod</span>
+                </button>
+              </li>
+            ))}
+          </ol>
+          <div className="manifest-foot">
+            {course.glossary.length} notions · {course.exam.length} questions · {course.level}
+          </div>
+        </aside>
       </section>
       <section className="grid grid2">
         <div className="card dark">
@@ -144,9 +188,35 @@ function CourseDetail() {
       <section className="section">
         <div className="eyebrow">Modules</div>
         <h2 className="display section-title">Le parcours</h2>
-        <div className="modules">
-          {course.modules.map((m) => (
-            <ModuleLink key={m.id} m={m} />
+        <div className="parcours">
+          {TOME_GROUPS.map((g) => (
+            <div className="parcours-tome" key={g.key}>
+              <div className="parcours-rail">
+                <span className="parcours-badge">{g.code}</span>
+              </div>
+              <div className="parcours-body">
+                <div className="parcours-tome-head">
+                  <span className="parcours-tome-name">{g.label}</span>
+                  <span className="parcours-tome-meta">{g.modules.length} modules</span>
+                </div>
+                <div className="parcours-rows">
+                  {g.modules.map((m) => (
+                    <button
+                      key={m.id}
+                      className="parcours-row reset"
+                      onClick={() => go(`/courses/architecture-ia/${m.id}`)}
+                    >
+                      <span className="parcours-num">{String(m.number).padStart(2, '0')}</span>
+                      <span className="parcours-row-main">
+                        <strong>{m.title}</strong>
+                        <small>{m.eyebrow} · {m.minutes} min</small>
+                      </span>
+                      <span className="parcours-arrow" aria-hidden="true">→</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       </section>
@@ -159,29 +229,45 @@ function Lesson({ moduleId }: { moduleId?: string }) {
   if (!module) return <CourseDetail />;
   const next = course.modules.find((m) => m.number === module.number + 1);
   const isLast = !next;
+  const group = TOME_GROUPS.find((g) => g.modules.some((m) => m.id === module.id));
+  const posInTome = group ? group.modules.findIndex((m) => m.id === module.id) + 1 : 0;
   return (
     <main className="wrap section sidebar-layout">
       <aside className="side card">
         <Brand label="Hub" />
         <p className="side-title">{course.title}</p>
-        <div className="modules mini">
-          {course.modules.map((m) => (
-            <button
-              key={m.id}
-              className={`side-link reset ${m.id === module.id ? 'on' : ''}`}
-              onClick={() => go(`/courses/architecture-ia/${m.id}`)}
-            >
-              <span className="num">{String(m.number).padStart(2, '0')}</span> {m.nav}
-            </button>
+        <div className="side-progress">
+          <span className="side-progress-label">Module {module.number}/{course.modules.length}</span>
+          <span className="side-progress-track">
+            <i style={{ width: `${(module.number / course.modules.length) * 100}%` }} />
+          </span>
+        </div>
+        <nav className="side-spine">
+          {TOME_GROUPS.map((g) => (
+            <div className="side-tome" key={g.key}>
+              <div className="side-tome-head">
+                <span className="side-tome-code">{g.code}</span> {g.label}
+              </div>
+              {g.modules.map((m) => (
+                <button
+                  key={m.id}
+                  className={`side-link reset ${m.id === module.id ? 'on' : ''}`}
+                  onClick={() => go(`/courses/architecture-ia/${m.id}`)}
+                >
+                  <span className="num">{String(m.number).padStart(2, '0')}</span> {m.nav}
+                </button>
+              ))}
+            </div>
           ))}
           <button className="side-link reset exam" onClick={() => go('/courses/architecture-ia/examen')}>
             ✦ Examen final
           </button>
-        </div>
+        </nav>
       </aside>
       <article className="lesson card">
-        <div className="eyebrow">
-          {module.tome} · {module.eyebrow}
+        <div className="eyebrow lesson-eyebrow">
+          {group && <span className="lesson-eyebrow-code">{group.code}</span>}
+          {group ? group.label : module.tome} · {posInTome}/{group ? group.modules.length : ''}
         </div>
         <h1 className="display">{module.title}</h1>
         {module.body.map((b, i) =>
