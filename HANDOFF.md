@@ -16,6 +16,19 @@ Prochaine action recommandée (1 seule) : review puis merger la PR `feat/about-d
 
 ---
 
+## 2026-07-15 — Hermès (audit audience & autorité)
+
+- Dennis a demandé de conserver dans le repo l’analyse du site public DKM Learning Hub et un plan d’actions pour les prochaines discussions.
+- Analyse effectuée sur le site public `https://dkm-learning-hub.vercel.app` : home, fiche cours, leçon, ressources, générateur Soul Document, Projets & Labs.
+- Nouveau document durable créé : `docs/audience-authority-audit-plan-v1.md`.
+- Synthèse : le site a déjà une base forte d’autorité grâce au positionnement builder, au cours Architecture IA, au Soul Document et aux labs réels. Le manque principal est la transformation du visiteur en audience récurrente.
+- Priorités recommandées : capture audience minimale, section courte sur Dennis/DKM, Soul Document comme lead magnet, preuves visuelles dans Projets & Labs, progression/feedback dans le cours.
+- Aucun secret, aucune action Supabase/n8n/Notion, aucune donnée client ajoutée.
+
+Prochaine action recommandée (1 seule) : implémenter une capture audience minimale autour du Soul Document et de la home (`Rejoindre DKM Builders` ou équivalent), après choix du canal email ou Telegram.
+
+---
+
 ## 2026-06-29 — Claude Code (refactor primitives UI + nouveau logo)
 
 - **Extraction de primitives UI** dans `src/components/` (réutilisées partout, allège
