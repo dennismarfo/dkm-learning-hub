@@ -116,7 +116,7 @@ function AboutPreview() {
         <h2 className="display section-title">De la comptabilité à l’IA.</h2>
       </div>
       <div className="card about-card">
-        <p className="about-hook">Ce que j’apprends, je le teste, je le construis — puis je le partage ici.</p>
+        <p className="about-hook">Ce que j’apprends, je le teste, je le construis, puis je le partage ici.</p>
         <p>
           Je m’appelle Dennis Marfo Kojo. Mon parcours n’a pas commencé dans l’intelligence artificielle, mais dans
           la finance : plus de huit ans en comptabilité, puis en gestion administrative et financière, avant de me
@@ -143,7 +143,7 @@ function About() {
           <div className="wrap hero about-hero">
             <div className="eyebrow">À propos · Dennis Marfo Kojo</div>
             <h1 className="display h1">De la comptabilité à l’IA.</h1>
-            <p className="lead">Ce que j’apprends, je le teste, je le construis — puis je le partage ici.</p>
+            <p className="lead">Ce que j’apprends, je le teste, je le construis, puis je le partage ici.</p>
           </div>
         </section>
         <section className="section wrap about-page">
@@ -155,7 +155,7 @@ function About() {
             </p>
             <p>
               La technologie m’attire depuis toujours. Mais comme beaucoup, je n’ai pas suivi un chemin linéaire. J’ai
-              appris, travaillé, repris les bases, changé de direction — et construit ma place dans la tech étape par
+              appris, travaillé, repris les bases, changé de direction, et construit ma place dans la tech étape par
               étape.
             </p>
             <p>
@@ -166,19 +166,19 @@ function About() {
             <p className="about-punch">DKM est né de cette démarche.</p>
             <p>
               Ce Learning Hub en est le prolongement : un espace pour rendre l’IA plus claire, plus concrète et plus
-              utile. J’y partage ce que j’apprends, ce que je construis, ce que je teste, et ce que je comprends en chemin
-              — des automatisations, des agents et des systèmes réels, pas seulement des concepts.
+              utile. J’y partage ce que j’apprends, ce que je construis, ce que je teste, et ce que je comprends en chemin :
+              des automatisations, des agents et des systèmes réels, pas seulement des concepts.
             </p>
             <p>
               Je préfère l’expérimentation aux promesses faciles. Ce qui m’intéresse, c’est montrer comment l’IA
               fonctionne vraiment, comment l’utiliser avec discernement, et comment elle peut devenir un levier réel pour
-              les créateurs, les professionnels, les entrepreneurs — et pour toute personne qui veut avancer.
+              les créateurs, les professionnels, les entrepreneurs, et pour toute personne qui veut avancer.
             </p>
             <p>
               Ma foi et ma famille donnent du sens au reste. Si ce projet aide quelqu’un à mieux comprendre, mieux
               apprendre, ou à oser construire à son tour, il aura déjà rempli une partie de sa mission.
             </p>
-            <p className="about-closing">Ici, l’objectif est simple : acquérir de la connaissance — puis l’utiliser à bon escient.</p>
+            <p className="about-closing">Ici, l’objectif est simple : acquérir de la connaissance, puis l’utiliser à bon escient.</p>
             <p className="about-signature">— Dennis</p>
           </article>
         </section>
