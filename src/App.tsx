@@ -7,7 +7,7 @@ import SoulDocument from './resources/SoulDocument';
 import Projects from './Projects';
 import './styles.css';
 
-type View = 'home' | 'courses' | 'course' | 'resources' | 'soul' | 'lesson' | 'exam' | 'projects';
+type View = 'home' | 'courses' | 'course' | 'resources' | 'soul' | 'lesson' | 'exam' | 'projects' | 'about';
 
 function parseRoute() {
   const path = window.location.pathname.replace(/\/+$/, '') || '/';
@@ -19,6 +19,7 @@ function parseRoute() {
   if (parts[0] === 'resources' && parts[1] === 'soul-document') return { view: 'soul' as View };
   if (path === '/resources') return { view: 'resources' as View };
   if (path === '/projects') return { view: 'projects' as View };
+  if (path === '/about') return { view: 'about' as View };
   return { view: 'home' as View };
 }
 
@@ -58,6 +59,7 @@ function Home() {
             <p>RAG, fine-tuning, tool use, MCP et garde-fous reliés à des cas concrets.</p>
           </div>
         </section>
+        <AboutPreview />
         <section className="band band-ink">
           <div className="wrap section">
             <div className="eyebrow">Cours vedette</div>
@@ -72,6 +74,87 @@ function Home() {
               <Button onClick={() => go('/courses/architecture-ia')}>Ouvrir la fiche cours</Button>
             </div>
           </div>
+        </section>
+      </main>
+      <footer className="footer wrap">@dkmarfo · apprendre, documenter, construire.</footer>
+    </>
+  );
+}
+
+
+function AboutPreview() {
+  return (
+    <section className="section wrap about-preview" id="about">
+      <div className="about-kicker">
+        <div className="eyebrow">Qui suis-je ?</div>
+        <h2 className="display section-title">De la comptabilité à l’IA.</h2>
+      </div>
+      <div className="card about-card">
+        <p className="about-hook">Ce que j’apprends, je le teste, je le construis — puis je le partage ici.</p>
+        <p>
+          Je m’appelle Dennis Marfo Kojo. Mon parcours n’a pas commencé dans l’intelligence artificielle, mais dans
+          la finance : plus de huit ans en comptabilité, puis en gestion administrative et financière, avant de me
+          reconvertir dans le développement web.
+        </p>
+        <p>
+          DKM Learning Hub est le prolongement de ce voyage : un espace pour rendre l’IA plus claire, plus concrète
+          et plus utile, avec des explications simples, des expérimentations réelles et une volonté de transmettre.
+        </p>
+        <div className="actions">
+          <Button variant="light" onClick={() => go('/about')}>Lire mon parcours</Button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function About() {
+  return (
+    <>
+      <Nav />
+      <main>
+        <section className="band band-ink">
+          <div className="wrap hero about-hero">
+            <div className="eyebrow">À propos · Dennis Marfo Kojo</div>
+            <h1 className="display h1">De la comptabilité à l’IA.</h1>
+            <p className="lead">Ce que j’apprends, je le teste, je le construis — puis je le partage ici.</p>
+          </div>
+        </section>
+        <section className="section wrap about-page">
+          <article className="card about-long">
+            <p>
+              Je m’appelle Dennis Marfo Kojo. Mon parcours n’a pas commencé dans l’intelligence artificielle, mais dans
+              la finance : plus de huit ans en comptabilité, puis en gestion administrative et financière, avant de me
+              reconvertir dans le développement web.
+            </p>
+            <p>
+              La technologie m’attire depuis toujours. Mais comme beaucoup, je n’ai pas suivi un chemin linéaire. J’ai
+              appris, travaillé, repris les bases, changé de direction — et construit ma place dans la tech étape par
+              étape.
+            </p>
+            <p>
+              Quand l’IA générative a accéléré, je n’y ai pas vu un simple outil à la mode. J’y ai vu un nouveau langage
+              pour apprendre, créer, automatiser et construire. Alors je m’y suis mis sérieusement : lire, tester,
+              échouer, recommencer, documenter, puis expliquer.
+            </p>
+            <p className="about-punch">DKM est né de cette démarche.</p>
+            <p>
+              Ce Learning Hub en est le prolongement : un espace pour rendre l’IA plus claire, plus concrète et plus
+              utile. J’y partage ce que j’apprends, ce que je construis, ce que je teste, et ce que je comprends en chemin
+              — des automatisations, des agents et des systèmes réels, pas seulement des concepts.
+            </p>
+            <p>
+              Je préfère l’expérimentation aux promesses faciles. Ce qui m’intéresse, c’est montrer comment l’IA
+              fonctionne vraiment, comment l’utiliser avec discernement, et comment elle peut devenir un levier réel pour
+              les créateurs, les professionnels, les entrepreneurs — et pour toute personne qui veut avancer.
+            </p>
+            <p>
+              Ma foi et ma famille donnent du sens au reste. Si ce projet aide quelqu’un à mieux comprendre, mieux
+              apprendre, ou à oser construire à son tour, il aura déjà rempli une partie de sa mission.
+            </p>
+            <p className="about-closing">Ici, l’objectif est simple : acquérir de la connaissance — puis l’utiliser à bon escient.</p>
+            <p className="about-signature">— Dennis</p>
+          </article>
         </section>
       </main>
       <footer className="footer wrap">@dkmarfo · apprendre, documenter, construire.</footer>
@@ -388,6 +471,7 @@ export default function App() {
   if (route.view === 'course') return <CourseDetail />;
   if (route.view === 'resources') return <Resources />;
   if (route.view === 'projects') return <Projects />;
+  if (route.view === 'about') return <About />;
   if (route.view === 'soul') return <SoulDocument />;
   if (route.view === 'exam') return <ExamFlow />;
   if (route.view === 'lesson') return <Lesson moduleId={route.moduleId} />;
