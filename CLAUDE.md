@@ -73,6 +73,11 @@ permettre de les transformer en contenus, décisions, offres ou actions.
   Ink structurant, Terracotta pour les CTA). Cf. `DECISIONS.md` D-015.
 - **Contenu de cours** : généré via `npm run extract:content` vers
   `src/content/*.json` — **ne jamais éditer le JSON à la main** (cf. D-014).
+- **Rédaction des textes publics** (home, `/about`, cours, ressources, labs) :
+  **pas de tirets cadratins « — »** — demande explicite de Dennis (« ça fait
+  trop IA »). Remplacer par une virgule ou deux-points selon le contexte.
+  Exception unique : la signature « — Dennis » (convention épistolaire).
+  Vérification rapide en revue : `grep -n "—" src/`.
 
 ## Quand une action infra est nécessaire
 

@@ -2,6 +2,24 @@
 
 Journal de coordination entre Dennis, Claude Code et Hermès.
 
+## 2026-08-12 — Claude Code (consigne rédaction : pas de tirets cadratins)
+
+- **Consigne permanente pour Hermès (et Claude Code)** : ne plus utiliser de
+  tirets cadratins « — » dans les textes publics du site (home, `/about`,
+  cours, ressources, labs). Demande explicite de Dennis : « ça fait trop IA ».
+- Remplacer par une virgule ou deux-points selon le contexte. Exception
+  unique : la signature « — Dennis » sur la page À propos.
+- Contexte : corrigé une première fois dans la PR #16, puis réintroduit dans
+  la PR #17 (texte « capture email ») et re-corrigé au rebase. Consigne
+  ajoutée aux conventions frontend de `CLAUDE.md` pour la rendre durable.
+- Auto-vérification avant d'ouvrir une PR : `grep -n "—" src/` ne doit
+  matcher que la signature « — Dennis » (et les commentaires de code).
+
+Prochaine action recommandée (1 seule) : appliquer cette consigne à toute
+future PR touchant du texte public, dès la rédaction.
+
+---
+
 ## 2026-08-12 — Hermès (homepage journey + CTAs)
 
 - Amélioration du chemin homepage : hero orienté “Commencer le cours gratuit” + “Comprendre la démarche”, puis ajout d’une section `Parcours conseillé` en 4 étapes : confiance (`/about`), apprentissage (`/courses/architecture-ia`), application (`/resources/soul-document`), exploration (`/projects`).
