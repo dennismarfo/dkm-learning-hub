@@ -146,3 +146,13 @@ s'ajoutent ici.
 - **Conséquence** : zéro coût infra et aucune action Hermès pour cette ressource. Si une
   capture/persistance des Soul Documents devient souhaitable plus tard, elle fera l'objet
   d'une décision distincte (Supabase = source de vérité, cf. D-001).
+
+
+---
+
+## 2026-08-12 — Acquisition : accès au contenu et capture email (Hermès)
+
+### D-017 — V1 ouverte avec capture email progressive, pas de hard gate immédiat
+- **Contexte** : Dennis envisage de demander nom, prénom et email avant de donner accès au Learning Hub.
+- **Décision** : ne pas bloquer l’accès au cours principal en V1. Garder le parcours d’apprentissage ouvert pour réduire la friction, construire la confiance et laisser le contenu prouver sa valeur. Introduire plutôt une capture email progressive sur les éléments à forte valeur perçue : ressources bonus, mises à jour, templates, certificat/examen, communauté ou futures cohortes.
+- **Conséquence** : la homepage peut annoncer une logique “accès libre maintenant, capture email bientôt”, mais la vraie persistance des leads nécessitera une décision/implémentation dédiée (formulaire + backend/Supabase/n8n + consentement). Aucun faux formulaire sans stockage réel.
