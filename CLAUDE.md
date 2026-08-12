@@ -77,7 +77,7 @@ permettre de les transformer en contenus, décisions, offres ou actions.
   **pas de tirets cadratins « — »** — demande explicite de Dennis (« ça fait
   trop IA »). Remplacer par une virgule ou deux-points selon le contexte.
   Exception unique : la signature « — Dennis » (convention épistolaire).
-  Vérification rapide en revue : `grep -n "—" src/`.
+  Vérification rapide en revue : `grep -RIn "—" src/`.
 
 ## Quand une action infra est nécessaire
 

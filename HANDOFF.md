@@ -12,7 +12,7 @@ Journal de coordination entre Dennis, Claude Code et Hermès.
 - Contexte : corrigé une première fois dans la PR #16, puis réintroduit dans
   la PR #17 (texte « capture email ») et re-corrigé au rebase. Consigne
   ajoutée aux conventions frontend de `CLAUDE.md` pour la rendre durable.
-- Auto-vérification avant d'ouvrir une PR : `grep -n "—" src/` ne doit
+- Auto-vérification avant d'ouvrir une PR : `grep -RIn "—" src/` ne doit
   matcher que la signature « — Dennis » (et les commentaires de code).
 
 Prochaine action recommandée (1 seule) : appliquer cette consigne à toute
