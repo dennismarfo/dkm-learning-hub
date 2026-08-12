@@ -2,6 +2,19 @@
 
 Journal de coordination entre Dennis, Claude Code et Hermès.
 
+## 2026-08-12 — Hermès (homepage journey + CTAs)
+
+- Amélioration du chemin homepage : hero orienté “Commencer le cours gratuit” + “Comprendre la démarche”, puis ajout d’une section `Parcours conseillé` en 4 étapes : confiance (`/about`), apprentissage (`/courses/architecture-ia`), application (`/resources/soul-document`), exploration (`/projects`).
+- Ajout d’un bloc d’orientation acquisition : V1 en accès libre maintenant, capture email progressive recommandée plus tard sur ressources bonus, mises à jour, certificat, communauté ou cohortes.
+- Ajout de CTAs en bas de `/about` vers le cours et les projets/labs.
+- Décision documentée dans `DECISIONS.md` D-017 : ne pas hard-gater le cours principal en V1 ; préférer une capture email à valeur perçue, avec future implémentation backend réelle.
+- Vérifs à exécuter avant merge : `npm run build`, puis smoke test navigateur homepage/about si possible.
+- Aucun secret. Aucun faux formulaire sans stockage réel.
+
+Prochaine action recommandée (1 seule) : choisir le mécanisme réel de capture email (Supabase+n8n, ConvertKit/Brevo, ou simple waitlist Vercel/API) avant d’ajouter un formulaire public.
+
+---
+
 ## 2026-08-12 — Hermès (section À propos / Qui suis-je)
 
 - Ajout d’une section homepage `Qui suis-je ?` après les trois cartes de promesse, avec l’accroche :

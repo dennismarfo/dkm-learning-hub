@@ -56,8 +56,8 @@ function Home() {
               MVP : Architecture IA, du neurone à l’agent.
             </p>
             <div className="actions">
-              <Button onClick={() => go('/courses/architecture-ia')}>Commencer le cours</Button>
-              <Button variant="light" onClick={() => go('/resources')}>Voir les ressources</Button>
+              <Button onClick={() => go('/courses/architecture-ia')}>Commencer le cours gratuit</Button>
+              <Button variant="light" onClick={() => go('/about')}>Comprendre la démarche</Button>
             </div>
           </div>
         </section>
@@ -79,6 +79,7 @@ function Home() {
           </div>
         </section>
         <AboutPreview />
+        <JourneySection />
         <section className="band band-ink">
           <div className="wrap section">
             <div className="eyebrow">Cours vedette · {TOME_GROUPS.length} tomes</div>
@@ -179,12 +180,88 @@ function About() {
               apprendre, ou à oser construire à son tour, il aura déjà rempli une partie de sa mission.
             </p>
             <p className="about-closing">Ici, l’objectif est simple : acquérir de la connaissance, puis l’utiliser à bon escient.</p>
+            <div className="about-next-actions">
+              <Button onClick={() => go('/courses/architecture-ia')}>Commencer le cours</Button>
+              <Button variant="light" onClick={() => go('/projects')}>Voir les projets & labs</Button>
+            </div>
             <p className="about-signature">— Dennis</p>
           </article>
         </section>
       </main>
       <footer className="footer wrap">@dkmarfo · apprendre, documenter, construire.</footer>
     </>
+  );
+}
+
+
+function JourneySection() {
+  const steps = [
+    {
+      label: '01 · Confiance',
+      title: 'Comprendre qui transmet.',
+      body: 'Lis le parcours de Dennis : finance, reconversion dev, expérimentation IA et mission DKM.',
+      cta: 'Lire À propos',
+      to: '/about',
+    },
+    {
+      label: '02 · Apprendre',
+      title: 'Commencer par les bases.',
+      body: 'Suis Architecture IA, du neurone à l’agent, avec tomes, démos, quiz et examen final.',
+      cta: 'Commencer le cours',
+      to: '/courses/architecture-ia',
+    },
+    {
+      label: '03 · Appliquer',
+      title: 'Transformer en outil.',
+      body: 'Utilise le Soul Document pour créer une mémoire business claire pour tes assistants IA.',
+      cta: 'Voir la ressource',
+      to: '/resources/soul-document',
+    },
+    {
+      label: '04 · Explorer',
+      title: 'Voir les labs réels.',
+      body: 'Parcours les projets DKM : pipelines, agents, automatisations et expérimentations produit.',
+      cta: 'Explorer les projets',
+      to: '/projects',
+    },
+  ];
+
+  return (
+    <section className="section wrap journey-section">
+      <div className="journey-head">
+        <div>
+          <div className="eyebrow">Parcours conseillé</div>
+          <h2 className="display section-title">Si tu découvres le Hub, commence ici.</h2>
+        </div>
+        <p>
+          Le site n’est pas seulement une bibliothèque : c’est un chemin. Découvre la démarche, apprends les bases,
+          applique avec une ressource concrète, puis explore les projets qui prouvent le terrain.
+        </p>
+      </div>
+      <div className="journey-grid">
+        {steps.map((step) => (
+          <article className="card journey-card" key={step.label}>
+            <div className="eyebrow">{step.label}</div>
+            <h3>{step.title}</h3>
+            <p>{step.body}</p>
+            <button className="journey-link reset" onClick={() => go(step.to)}>
+              {step.cta} <span aria-hidden="true">→</span>
+            </button>
+          </article>
+        ))}
+      </div>
+      <div className="card journey-capture-note">
+        <div>
+          <div className="eyebrow">Accès & communauté</div>
+          <h3>Accès libre maintenant, capture email bientôt.</h3>
+          <p>
+            La V1 reste ouverte pour réduire la friction. La capture nom/prénom/email sera plus utile sur les ressources,
+            les mises à jour, les bonus ou un futur certificat : là où la valeur perçue justifie naturellement l’inscription.
+          </p>
+        </div>
+        <Button variant="light" onClick={() => go('/resources')}>Voir les ressources</Button>
+      </div>
+    </section>
   );
 }
 
