@@ -2,6 +2,20 @@
 
 Journal de coordination entre Dennis, Claude Code et Hermès.
 
+## 2026-08-12 — Hermès (section À propos / Qui suis-je)
+
+- Ajout d’une section homepage `Qui suis-je ?` après les trois cartes de promesse, avec l’accroche :
+  « De la comptabilité à l’IA. Ce que j’apprends, je le teste, je le construis — puis je le partage ici. »
+- Ajout d’une route dédiée `/about` dans le routeur custom de `src/App.tsx`, avec le texte long validé par Dennis : parcours finance → reconversion dev web → adoption IA → méthode lire/tester/documenter/expliquer → mission DKM → foi/famille intégrées sobrement.
+- Ajout du lien `À propos` dans `src/components/Nav.tsx`.
+- Ajout des styles `about-*` dans `src/styles.css`, alignés avec la DA existante : card claire, accent DM Serif terracotta, page lisible mobile.
+- Vérifs : `npm ci`, `npm run build` OK. `npm ci` signale 2 vulnérabilités high existantes dans l’audit npm ; non corrigées dans cette PR pour garder le scope limité au contenu/UI.
+- Aucune action infra. Aucun secret.
+
+Prochaine action recommandée (1 seule) : review puis merger la PR `feat/about-dennis-section` si le ton public de la section convient à Dennis.
+
+---
+
 ## 2026-06-29 — Claude Code (refactor primitives UI + nouveau logo)
 
 - **Extraction de primitives UI** dans `src/components/` (réutilisées partout, allège

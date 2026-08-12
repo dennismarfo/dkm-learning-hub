@@ -11,6 +11,7 @@ export function Nav() {
           <button onClick={() => go('/courses')}>Cours</button>
           <button onClick={() => go('/resources')}>Ressources</button>
           <button onClick={() => go('/projects')}>Projets</button>
+          <button onClick={() => go('/about')}>À propos</button>
           <button className="nav-extra" onClick={() => go('/courses/architecture-ia')}>Architecture IA</button>
         </nav>
       </div>
