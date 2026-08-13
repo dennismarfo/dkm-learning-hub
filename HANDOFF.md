@@ -2,6 +2,28 @@
 
 Journal de coordination entre Dennis, Claude Code et Hermès.
 
+## 2026-08-12 — Claude Code (polish mobile — PR 1/3 du plan UX)
+
+- **Audit mobile complet au viewport réel** (Playwright, 360/390/430/530/560/768px)
+  sur toutes les routes : home, `/courses`, fiche cours, leçon, examen,
+  `/resources`, Soul Document, `/projects`, `/about`. Aucun débordement
+  horizontal détecté, console sans erreur.
+- **Bug corrigé — nav mobile** : à ≤ 400px, « À propos » cassait sur deux lignes
+  (les 4 liens ne tenaient plus). Fix dans `src/styles.css` : `white-space:nowrap`
+  sur les liens, et à ≤ 520px gap resserré (9px), font 13px, padding vertical
+  10px (meilleures cibles tactiles), label « Learning Hub » masqué dès 520px
+  (au lieu de 420px) pour libérer la place.
+- Le reste du responsive était déjà sain (spine cours, journey grid, Soul
+  Document, leçons) : pas de sur-correction.
+- Vérifs : `npm run build` OK, re-test navigateur après fix aux 6 largeurs.
+- Aucune action infra. Aucun secret.
+
+Prochaine action recommandée (1 seule) : PR 2/3 du plan UX — copy (bandeau
+accès libre reformulé sans promesse de features, CTA) + micro-interactions
+(focus visible, état actif nav).
+
+---
+
 ## 2026-08-12 — Claude Code (consigne rédaction : pas de tirets cadratins)
 
 - **Consigne permanente pour Hermès (et Claude Code)** : ne plus utiliser de
