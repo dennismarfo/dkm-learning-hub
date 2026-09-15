@@ -19,6 +19,11 @@ function parseRoute() {
   if (path === '/courses') return { view: 'courses' as View };
   if (parts[0] === 'resources' && parts[1] === 'soul-document') return { view: 'soul' as View };
   if (parts[0] === 'resources' && parts[1] === 'anatomie') return { view: 'anatomie' as View };
+  // Raccourci partageable (reels, bio) : /anatomie → canonique /resources/anatomie
+  if (path === '/anatomie') {
+    window.history.replaceState({}, '', '/resources/anatomie');
+    return { view: 'anatomie' as View };
+  }
   if (path === '/resources') return { view: 'resources' as View };
   if (path === '/projects') return { view: 'projects' as View };
   if (path === '/about') return { view: 'about' as View };
