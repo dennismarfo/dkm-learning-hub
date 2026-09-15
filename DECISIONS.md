@@ -156,3 +156,30 @@ s'ajoutent ici.
 - **Contexte** : Dennis envisage de demander nom, prénom et email avant de donner accès au Learning Hub.
 - **Décision** : ne pas bloquer l’accès au cours principal en V1. Garder le parcours d’apprentissage ouvert pour réduire la friction, construire la confiance et laisser le contenu prouver sa valeur. Introduire plutôt une capture email progressive sur les éléments à forte valeur perçue : ressources bonus, mises à jour, templates, certificat/examen, communauté ou futures cohortes.
 - **Conséquence** : la homepage peut annoncer une logique “accès libre maintenant, capture email bientôt”, mais la vraie persistance des leads nécessitera une décision/implémentation dédiée (formulaire + backend/Supabase/n8n + consentement). Aucun faux formulaire sans stockage réel.
+
+### D-018 — « L'anatomie de ton entreprise » : module 0 interactif, rapport IA-ready, capture conditionnelle
+- **Contexte** : cadrage de l'offre formation/coaching DKM (cohorte « Ton système IA en place »).
+  Constat : la plupart des solos ne savent pas nommer leurs tâches récurrentes ni les
+  fonctions de leur entreprise ; on ne peut pas auditer à partir d'une page blanche. Le
+  module 0 « L'anatomie de ton entreprise » (7 fonctions, tâches typiques à cocher,
+  reconstruction par agenda/courriels/messages) est le contenu gratuit d'entrée, et son
+  rapport de sortie doit être réutilisable dans une IA (graine du Soul Document).
+- **Décision** : implémenter le module 0 comme **outil interactif 100 % client** sur
+  `/resources/anatomie` (`src/resources/Anatomie.tsx`, données et moteur de score dans
+  `anatomie-data.ts`, rapport dans `anatomie-report.ts`) : 7 écrans (un par fonction),
+  statut FAIS / DEVRAIS / N/A par tâche, pour FAIS fréquence + minutes + pénibilité +
+  répétitivité en chips, tâches personnalisées, avancement persisté en `localStorage`,
+  écran de résultats (heures/mois par fonction, DEVRAIS, top candidats par score, choix du
+  processus prioritaire), rapport **Markdown** avec prompt de démarrage en tête, export par
+  Blob / presse-papier / impression (PDF via `window.print()`). Score = heures/mois ×
+  pénibilité × répétitivité, aligné sur le gabarit Notion de la cohorte.
+- **Capture courriel** : conforme à D-017, **aucun faux formulaire**. L'écran de capture
+  n'existe que si `VITE_ANATOMIE_WEBHOOK_URL` est défini au build ; il envoie alors
+  prénom, courriel, consentement explicite et un **résumé chiffré** (heures, top 3,
+  processus prioritaire), jamais la carte détaillée. L'utilisateur peut toujours passer
+  et voir le rapport. La création du webhook n8n (→ Notion/Supabase) est déléguée à
+  Hermès (cf. `HANDOFF.md`).
+- **Conséquence** : la page `/resources` présente un ordre (Étape 1 anatomie, Étape 2 Soul
+  Document). Le gabarit de tâches est une transposition du gabarit Notion : toute
+  révision issue de l'auto-cohorte de Dennis (sept.-oct. 2026) se répercute dans
+  `anatomie-data.ts`. Zéro dépendance ajoutée ; `src/vite-env.d.ts` type `import.meta.env`.
