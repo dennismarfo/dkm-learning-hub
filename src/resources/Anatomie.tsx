@@ -33,17 +33,57 @@ type Screen = { kind: 'intro' } | { kind: 'fn'; i: number } | { kind: 'results' 
 const WEBHOOK = (import.meta.env.VITE_ANATOMIE_WEBHOOK_URL as string | undefined)?.trim() || '';
 const LEAD_KEY = 'dkm.anatomie.lead';
 
+/** Ramène un écran restauré (potentiellement corrompu ou obsolète) vers un état sûr. */
+function normalizeScreen(raw: unknown): Screen {
+  const intro: Screen = { kind: 'intro' };
+  if (!raw || typeof raw !== 'object') return intro;
+  const s = raw as { kind?: unknown; i?: unknown };
+  switch (s.kind) {
+    case 'intro':
+      return intro;
+    case 'fn': {
+      const i = typeof s.i === 'number' && Number.isInteger(s.i) ? s.i : -1;
+      return i >= 0 && i < FUNCTIONS.length ? { kind: 'fn', i } : intro;
+    }
+    case 'results':
+      return { kind: 'results' };
+    case 'lead':
+      // pas d'écran de capture sans webhook configuré, ni après un envoi réussi
+      return WEBHOOK && !leadDone() ? { kind: 'lead' } : { kind: 'report' };
+    case 'report':
+      return { kind: 'report' };
+    default:
+      return intro;
+  }
+}
+
 function load(): { audit: Audit; screen: Screen } {
   const fresh = { audit: emptyAudit(), screen: { kind: 'intro' } as Screen };
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return fresh;
-    const parsed = JSON.parse(raw) as { audit?: Audit; screen?: Screen };
-    if (!parsed.audit || !parsed.audit.tasks) return fresh;
-    // merge: keep user data, make sure every catalogue task exists
+    const parsed = JSON.parse(raw) as { audit?: Partial<Audit>; screen?: unknown };
+    if (!parsed.audit || typeof parsed.audit !== 'object' || !parsed.audit.tasks || typeof parsed.audit.tasks !== 'object') {
+      return fresh;
+    }
+    // merge: keep user data, make sure every catalogue task exists and every entry is well-formed
     const base = emptyAudit();
-    const tasks = { ...base.tasks, ...parsed.audit.tasks };
-    return { audit: { ...base, ...parsed.audit, tasks }, screen: parsed.screen ?? fresh.screen };
+    const tasks: Audit['tasks'] = { ...base.tasks };
+    for (const [id, t] of Object.entries(parsed.audit.tasks)) {
+      if (!t || typeof t !== 'object' || typeof (t as TaskEntry).label !== 'string') continue;
+      const fn = (t as TaskEntry).fn;
+      if (!FUNCTIONS.some((f) => f.id === fn)) continue;
+      tasks[id] = { ...(base.tasks[id] ?? {}), ...(t as TaskEntry), id, fn };
+    }
+    const audit: Audit = {
+      ...base,
+      business: typeof parsed.audit.business === 'string' ? parsed.audit.business : '',
+      activity: typeof parsed.audit.activity === 'string' ? parsed.audit.activity : '',
+      startedAt: typeof parsed.audit.startedAt === 'string' ? parsed.audit.startedAt : base.startedAt,
+      priorityId: typeof parsed.audit.priorityId === 'string' && tasks[parsed.audit.priorityId] ? parsed.audit.priorityId : undefined,
+      tasks,
+    };
+    return { audit, screen: normalizeScreen(parsed.screen) };
   } catch {
     return fresh;
   }
