@@ -347,3 +347,13 @@ Note 2026-06-25 : pour la partie site/mini-LMS, voir maintenant `docs/product-we
   (clé `dkm.anatomie.lead` en localStorage) ; vérifier le parcours sans variable.
 - **Risques** : CORS mal configuré = échec silencieux côté client (message d'erreur
   non bloquant) ; ne jamais committer l'URL du webhook si elle contient un secret.
+- **État (2026-09-14)** : fait par Claude (Cowork, sur instruction de Dennis) plutôt que
+  par Hermès. Workflow n8n « DKM — Anatomie Lead Capture » (id `dBJfnfyoaLp3enqK`) actif,
+  chemin `/webhook/anatomie-lead`, POST JSON, CORS `*` (même réglage que le workflow Soul
+  Document). Écrit dans la base Notion « Soul Document — Leads » (id
+  `1c55b3e3fe6f412aa48096726c2e5089`), enrichie des propriétés Source (select), Entreprise,
+  Heures / mois, Processus prioritaire, Top 3, Tâches à faire. Test de bout en bout réussi
+  (réponse `{ ok: true }`, ligne créée). **Reste à faire par Dennis** : définir
+  `VITE_ANATOMIE_WEBHOOK_URL` sur Vercel (Production + Preview) avec l'URL de production
+  affichée dans le nœud Webhook, puis redéployer ; supprimer la ligne de test
+  « Test Claude » dans Notion.
