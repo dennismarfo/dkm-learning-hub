@@ -343,3 +343,39 @@ Note 2026-06-25 : pour la partie site/mini-LMS, voir maintenant `docs/product-we
 - Secrets : ne jamais committer un export n8n contenant des credentials.
 - Sans RLS, toute clé ayant accès au schéma peut lire/écrire — restreindre au
   service role côté n8n.
+
+## Handoff pour Hermès · webhook « Anatomie » (capture courriel du module 0)
+
+- **Contexte** : l'outil `/resources/anatomie` (D-018) affiche un écran de capture
+  courriel uniquement si la variable de build `VITE_ANATOMIE_WEBHOOK_URL` est définie.
+  Tant qu'elle n'existe pas, l'outil tourne sans capture (pas de faux formulaire).
+- **Action attendue** :
+  1. Créer un workflow n8n « DKM · Anatomie lead » avec un Webhook (POST, JSON, CORS
+     autorisant `https://dkm-learning-hub.vercel.app` et le domaine de preview Vercel).
+  2. Payload reçu :
+     `{ source: "anatomie", name, email, consent: true, summary: { business, activity,
+     totalHours, faisCount, devraisCount, top3: [{label, fn, score}], priority: {label, fn, score} | null,
+     hoursByFn: {acq, vente, livr, sc, admin, ops, dir} }, sentAt }`.
+  3. Stocker le lead (même destination que les lead magnets SOUL / AGENT : Notion, ou
+     Supabase si une table leads existe ; ne pas supposer, vérifier l'état réel).
+  4. Répondre `200` avec un corps JSON minimal `{ ok: true }` ; toute autre réponse
+     affiche « l'envoi n'a pas fonctionné » côté client, sans bloquer le rapport.
+  5. Envoyer (optionnel V1) un courriel de bienvenue avec le lien vers
+     `/resources/soul-document` ; le rapport complet n'est **pas** transmis au webhook.
+  6. Définir `VITE_ANATOMIE_WEBHOOK_URL` dans les variables d'environnement Vercel
+     (Production + Preview) puis redéployer.
+- **Tests** : POST de test depuis le navigateur sur la preview ; vérifier l'entrée
+  Notion/Supabase ; vérifier que l'écran de capture disparaît après un envoi réussi
+  (clé `dkm.anatomie.lead` en localStorage) ; vérifier le parcours sans variable.
+- **Risques** : CORS mal configuré = échec silencieux côté client (message d'erreur
+  non bloquant) ; ne jamais committer l'URL du webhook si elle contient un secret.
+- **État (2026-09-14)** : fait par Claude (Cowork, sur instruction de Dennis) plutôt que
+  par Hermès. Workflow n8n « DKM — Anatomie Lead Capture » (id `dBJfnfyoaLp3enqK`) actif,
+  chemin `/webhook/anatomie-lead`, POST JSON, CORS `*` (même réglage que le workflow Soul
+  Document). Écrit dans la base Notion « Soul Document — Leads » (id
+  `1c55b3e3fe6f412aa48096726c2e5089`), enrichie des propriétés Source (select), Entreprise,
+  Heures / mois, Processus prioritaire, Top 3, Tâches à faire. Test de bout en bout réussi
+  (réponse `{ ok: true }`, ligne créée). **Reste à faire par Dennis** : définir
+  `VITE_ANATOMIE_WEBHOOK_URL` sur Vercel (Production + Preview) avec l'URL de production
+  affichée dans le nœud Webhook, puis redéployer ; supprimer la ligne de test
+  « Test Claude » dans Notion.

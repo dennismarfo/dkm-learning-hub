@@ -4,10 +4,11 @@ import { DemoSlot } from './demos/registry';
 import { Brand, Button, Nav, Pill, QuizBlock } from './components';
 import { go } from './nav';
 import SoulDocument from './resources/SoulDocument';
+import Anatomie from './resources/Anatomie';
 import Projects from './Projects';
 import './styles.css';
 
-type View = 'home' | 'courses' | 'course' | 'resources' | 'soul' | 'lesson' | 'exam' | 'projects' | 'about';
+type View = 'home' | 'courses' | 'course' | 'resources' | 'soul' | 'anatomie' | 'lesson' | 'exam' | 'projects' | 'about';
 
 function parseRoute() {
   const path = window.location.pathname.replace(/\/+$/, '') || '/';
@@ -17,6 +18,12 @@ function parseRoute() {
   if (path === '/courses/architecture-ia') return { view: 'course' as View };
   if (path === '/courses') return { view: 'courses' as View };
   if (parts[0] === 'resources' && parts[1] === 'soul-document') return { view: 'soul' as View };
+  if (parts[0] === 'resources' && parts[1] === 'anatomie') return { view: 'anatomie' as View };
+  // Raccourci partageable (reels, bio) : /anatomie → canonique /resources/anatomie
+  if (path === '/anatomie') {
+    window.history.replaceState({}, '', '/resources/anatomie');
+    return { view: 'anatomie' as View };
+  }
   if (path === '/resources') return { view: 'resources' as View };
   if (path === '/projects') return { view: 'projects' as View };
   if (path === '/about') return { view: 'about' as View };
@@ -213,9 +220,9 @@ function JourneySection() {
     {
       label: '03 · Appliquer',
       title: 'Transformer en outil.',
-      body: 'Utilise le Soul Document pour créer une mémoire business claire pour tes assistants IA.',
-      cta: 'Voir la ressource',
-      to: '/resources/soul-document',
+      body: 'Fais l’anatomie de ton entreprise, puis crée avec le Soul Document une mémoire business claire pour tes IA.',
+      cta: 'Voir les ressources',
+      to: '/resources',
     },
     {
       label: '04 · Explorer',
@@ -570,37 +577,54 @@ function Resources() {
       <Nav />
       <section className="band band-ink">
         <div className="wrap hero">
-          <div className="eyebrow">Ressources · Outil phare</div>
-          <h1 className="display h1">Génère la mémoire business de ton IA.</h1>
+          <div className="eyebrow">Ressources · Deux outils, un système</div>
+          <h1 className="display h1">Vois ton entreprise, puis donne-la à ton IA.</h1>
           <p className="lead">
-            Un assistant IA n’est bon que s’il connaît ton entreprise. Le Soul Document te guide en 6 étapes pour
-            produire une mémoire de référence claire, et un prompt système prêt à coller.
+            D’abord la carte : sept fonctions, ce que tu fais vraiment, où part ton temps, par où commencer. Ensuite la
+            mémoire : le Soul Document que toute IA doit connaître avant de t’aider. Sans compte, tout reste dans ton
+            navigateur.
           </p>
           <div className="actions">
-            <Button onClick={() => go('/resources/soul-document')}>Lancer le générateur</Button>
+            <Button onClick={() => go('/resources/anatomie')}>Faire l’anatomie de mon entreprise</Button>
+            <Button variant="light" onClick={() => go('/resources/soul-document')}>Générer mon Soul Document</Button>
           </div>
         </div>
       </section>
       <main className="wrap section">
         <section className="grid grid2">
           <div className="card">
-            <div className="eyebrow">Soul Document</div>
+            <div className="eyebrow">Étape 1 · L’anatomie de ton entreprise</div>
+            <h2 className="display section-title">Sept départements, un seul employé : toi.</h2>
+            <p>
+              Un audit guidé de trente minutes. Tu coches ce que tu fais, ce que tu devrais faire et ce qui ne s’applique
+              pas, fonction par fonction. Tu repars avec les heures que ça te coûte, ton processus prioritaire et un rapport{' '}
+              <strong>.md</strong> conçu pour être collé dans Claude, ChatGPT ou Gemini.
+            </p>
+            <div className="actions">
+              <Button onClick={() => go('/resources/anatomie')}>Commencer l’audit</Button>
+            </div>
+          </div>
+          <div className="card">
+            <div className="eyebrow">Étape 2 · Soul Document</div>
             <h2 className="display section-title">Ta mémoire business, en 10 minutes.</h2>
             <p>
               Identité, audience, offre, voix, règles, contexte : tu réponds, on structure. Tu repars avec un document{' '}
-              <strong>.md</strong> exportable et un prompt système opérationnel. Sans compte, sans envoi de données —
-              tout reste dans ton navigateur.
+              <strong>.md</strong> exportable et un prompt système opérationnel, prêt à coller dans ton assistant, ton
+              agent ou ton chatbot.
             </p>
             <div className="actions">
               <Button onClick={() => go('/resources/soul-document')}>Lancer le générateur</Button>
             </div>
           </div>
+        </section>
+        <section className="section">
           <div className="card dark">
-            <div className="eyebrow">Pourquoi c’est utile</div>
-            <h2>De la connaissance à l’action.</h2>
+            <div className="eyebrow">Pourquoi dans cet ordre</div>
+            <h2>On ne délègue pas une tâche qu’on n’a jamais nommée.</h2>
             <p>
-              Colle la mémoire dans ton chatbot, ton agent ou ta base de connaissance. Tes réponses IA deviennent
-              alignées sur ta marque, ta cible et tes garde-fous.
+              La plupart des solos ne savent pas par où commencer avec l’IA parce qu’ils n’ont jamais fait la carte de ce
+              qu’ils font. L’anatomie donne la carte. Le Soul Document donne le contexte. Avec les deux, une IA cesse de
+              répondre à côté.
             </p>
           </div>
         </section>
@@ -636,6 +660,7 @@ export default function App() {
   if (route.view === 'projects') return <Projects />;
   if (route.view === 'about') return <About />;
   if (route.view === 'soul') return <SoulDocument />;
+  if (route.view === 'anatomie') return <Anatomie />;
   if (route.view === 'exam') return <ExamFlow />;
   if (route.view === 'lesson') return <Lesson moduleId={route.moduleId} />;
   return <Home />;
