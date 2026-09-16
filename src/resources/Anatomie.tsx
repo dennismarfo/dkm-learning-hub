@@ -18,6 +18,7 @@ import {
   type TaskEntry,
 } from './anatomie-data';
 import { buildLeadSummary, buildReport } from './anatomie-report';
+import { track } from '../analytics';
 
 /* ============================================================
    L'anatomie de ton entreprise · outil interactif (module 0)
@@ -278,6 +279,7 @@ export default function Anatomie() {
   };
 
   const copy = async () => {
+    track('anatomie_copy');
     try {
       await navigator.clipboard.writeText(md);
       setCopied(true);
@@ -288,6 +290,7 @@ export default function Anatomie() {
   };
 
   const download = () => {
+    track('anatomie_download');
     const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -311,6 +314,7 @@ export default function Anatomie() {
     if (top && !(audit.priorityId && audit.tasks[audit.priorityId])) {
       setAudit((a) => ({ ...a, priorityId: top.id }));
     }
+    track('anatomie_report', { hours: summary.totalHours, fais: summary.fais.length, devrais: summary.devrais.length });
     if (WEBHOOK && !leadDone()) setScreen({ kind: 'lead' });
     else setScreen({ kind: 'report' });
   };
@@ -338,6 +342,7 @@ export default function Anatomie() {
         /* ignore */
       }
       setLeadState('idle');
+      track('anatomie_lead');
       setScreen({ kind: 'report' });
     } catch {
       setLeadState('error');
@@ -444,7 +449,12 @@ export default function Anatomie() {
                   Repartir de zéro
                 </Button>
               )}
-              <Button onClick={() => setScreen(hasProgress && resume ? resume : { kind: 'fn', i: 0 })}>
+              <Button
+                onClick={() => {
+                  track(hasProgress ? 'anatomie_resume' : 'anatomie_start');
+                  setScreen(hasProgress && resume ? resume : { kind: 'fn', i: 0 });
+                }}
+              >
                 {hasProgress
                   ? resume?.kind === 'report'
                     ? 'Revoir mon rapport'
@@ -564,7 +574,14 @@ export default function Anatomie() {
             ← {screen.i === 0 ? 'Intro' : FUNCTIONS[screen.i - 1].name}
           </Button>
           {isLast ? (
-            <Button onClick={() => setScreen({ kind: 'results' })}>Voir mes résultats →</Button>
+            <Button
+              onClick={() => {
+                track('anatomie_results', { answered: summary.answered });
+                setScreen({ kind: 'results' });
+              }}
+            >
+              Voir mes résultats →
+            </Button>
           ) : (
             <Button onClick={() => setScreen({ kind: 'fn', i: screen.i + 1 })}>{FUNCTIONS[screen.i + 1].name} →</Button>
           )}
@@ -747,7 +764,13 @@ export default function Anatomie() {
           <p className="ana-hint">L’envoi n’a pas fonctionné. Réessaie, ou passe directement au rapport : il est déjà prêt.</p>
         )}
         <div className="soul-nav">
-          <Button variant="light" onClick={() => setScreen({ kind: 'report' })}>
+          <Button
+            variant="light"
+            onClick={() => {
+              track('anatomie_lead_skip');
+              setScreen({ kind: 'report' });
+            }}
+          >
             Passer, voir le rapport
           </Button>
           <Button onClick={sendLead} disabled={!ok || leadState === 'sending'}>
@@ -776,7 +799,13 @@ export default function Anatomie() {
         <Button variant="light" onClick={copy}>
           {copied ? 'Copié ✓' : 'Copier le rapport'}
         </Button>
-        <Button variant="light" onClick={() => window.print()}>
+        <Button
+          variant="light"
+          onClick={() => {
+            track('anatomie_print');
+            window.print();
+          }}
+        >
           Imprimer / PDF
         </Button>
         <Button variant="light" onClick={() => setScreen({ kind: 'results' })}>
