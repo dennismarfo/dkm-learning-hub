@@ -32,6 +32,13 @@ type Screen = { kind: 'intro' } | { kind: 'fn'; i: number } | { kind: 'results' 
 
 const WEBHOOK = (import.meta.env.VITE_ANATOMIE_WEBHOOK_URL as string | undefined)?.trim() || '';
 const LEAD_KEY = 'dkm.anatomie.lead';
+/**
+ * Mode autonome : l'outil est partagé publiquement avant que le reste du Hub soit prêt.
+ * Tant que c'est `true`, la page n'offre aucune navigation vers le site (pas de retour aux
+ * ressources, logo non cliquable, pas de renvoi vers le Soul Document). Passer à `false`
+ * quand le Hub est ouvert au public (décision Dennis, sept. 2026).
+ */
+const STANDALONE = true;
 
 /** Ramène un écran restauré (potentiellement corrompu ou obsolète) vers un état sûr. */
 function normalizeScreen(raw: unknown): Screen {
@@ -260,7 +267,7 @@ export default function Anatomie() {
     setAudit((a) => ({ ...a, tasks: { ...a.tasks, [id]: { ...a.tasks[id], ...p } } }));
 
   const summary = useMemo(() => summarize(audit), [audit]);
-  const md = useMemo(() => buildReport(audit), [audit]);
+  const md = useMemo(() => buildReport(audit, { standalone: STANDALONE }), [audit]);
 
   const restart = () => {
     setState({ audit: emptyAudit(), screen: { kind: 'intro' } });
@@ -296,6 +303,11 @@ export default function Anatomie() {
   };
 
   const goToReport = () => {
+    // fige le processus prioritaire (présélection du n°1 si l'utilisateur n'a rien choisi)
+    const top = summary.top[0];
+    if (top && !(audit.priorityId && audit.tasks[audit.priorityId])) {
+      setAudit((a) => ({ ...a, priorityId: top.id }));
+    }
     if (WEBHOOK && !leadDone()) setScreen({ kind: 'lead' });
     else setScreen({ kind: 'report' });
   };
@@ -334,10 +346,20 @@ export default function Anatomie() {
   const shell = (children: ReactNode, wide = false) => (
     <main className={`wrap section soul-shell ana-shell ${wide ? 'ana-wide' : ''}`}>
       <div className="ana-top">
-        <Brand />
-        <button className="reset soul-back" onClick={() => go('/resources')}>
-          ← Retour aux ressources
-        </button>
+        {STANDALONE ? (
+          <span className="brand" aria-label="dkm Learning Hub">
+            <span className="mark">dkm</span>
+            <span className="brand-sep" aria-hidden="true" />
+            <span className="brand-label">Learning Hub</span>
+          </span>
+        ) : (
+          <>
+            <Brand />
+            <button className="reset soul-back" onClick={() => go('/resources')}>
+              ← Retour aux ressources
+            </button>
+          </>
+        )}
       </div>
       {children}
     </main>
@@ -550,6 +572,8 @@ export default function Anatomie() {
   if (screen.kind === 'results') {
     const maxH = Math.max(1, ...summary.hoursByFn.map((x) => x.hours));
     const candidates = summary.top;
+    // présélection du n°1 si aucun choix (ou si l'ancien choix n'est plus candidat)
+    const effectivePriority = audit.priorityId && audit.tasks[audit.priorityId] ? audit.priorityId : candidates[0]?.id;
     const incompleteFais = summary.fais.filter((t) => !isComplete(t)).length;
     const unanswered = summary.total - summary.answered;
     return shell(
@@ -630,7 +654,7 @@ export default function Anatomie() {
             <div className="ana-cands">
               {candidates.map((t, i) => {
                 const fn = FUNCTIONS.find((f) => f.id === t.fn)!;
-                const on = audit.priorityId === t.id;
+                const on = effectivePriority === t.id;
                 return (
                   <button
                     type="button"
@@ -659,11 +683,14 @@ export default function Anatomie() {
             <Button variant="light" onClick={() => setScreen({ kind: 'fn', i: FUNCTIONS.length - 1 })}>
               ← Modifier mes réponses
             </Button>
-            <Button onClick={goToReport} disabled={candidates.length > 0 && !audit.priorityId}>
-              Générer mon rapport →
-            </Button>
+            <Button onClick={goToReport}>Générer mon rapport →</Button>
           </div>
-          {candidates.length > 0 && !audit.priorityId && <p className="ana-hint">Choisis un processus prioritaire pour générer le rapport.</p>}
+          {candidates.length > 0 && (
+            <p className="ana-hint">
+              Le n°1 est présélectionné. Clique sur un autre candidat si tu préfères commencer ailleurs : tu peux revenir le
+              changer à tout moment.
+            </p>
+          )}
         </div>
       </>,
       true,
@@ -729,8 +756,10 @@ export default function Anatomie() {
         La carte de ton entreprise ✦
       </h2>
       <p className="lead" style={{ fontSize: 18, marginBottom: 20 }}>
-        Télécharge-le, puis colle-le dans Claude, ChatGPT ou Gemini avec le prompt de démarrage inclus en tête. Prochaine
-        étape naturelle : le Soul Document, la mémoire de ton entreprise.
+        Télécharge-le, puis colle-le dans Claude, ChatGPT ou Gemini avec le prompt de démarrage inclus en tête.
+        {STANDALONE
+          ? ' Garde-le : c’est la première pièce de ton système IA, la suite arrive bientôt.'
+          : ' Prochaine étape naturelle : le Soul Document, la mémoire de ton entreprise.'}
       </p>
       <div className="soul-result-actions ana-print-hide">
         <Button onClick={download}>Télécharger .md</Button>
@@ -743,9 +772,11 @@ export default function Anatomie() {
         <Button variant="light" onClick={() => setScreen({ kind: 'results' })}>
           Retour aux résultats
         </Button>
-        <Button variant="light" onClick={() => go('/resources/soul-document')}>
-          Continuer avec le Soul Document →
-        </Button>
+        {!STANDALONE && (
+          <Button variant="light" onClick={() => go('/resources/soul-document')}>
+            Continuer avec le Soul Document →
+          </Button>
+        )}
         {copied && <span className="soul-toast">Copié dans le presse-papier</span>}
       </div>
       <pre className="soul-md ana-md">{md}</pre>
