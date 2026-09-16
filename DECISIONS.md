@@ -183,3 +183,18 @@ s'ajoutent ici.
   Document). Le gabarit de tâches est une transposition du gabarit Notion : toute
   révision issue de l'auto-cohorte de Dennis (sept.-oct. 2026) se répercute dans
   `anatomie-data.ts`. Zéro dépendance ajoutée ; `src/vite-env.d.ts` type `import.meta.env`.
+
+### D-019 — Mesure d'audience : Vercel Web Analytics + événements d'entonnoir
+- **Contexte** : l'outil Anatomie est partagé publiquement (D-018) ; il faut savoir combien
+  de personnes ouvrent, commencent, terminent et téléchargent, sans bannière cookies.
+- **Décision** : Vercel Web Analytics, chargé par balise `<script>` dans `index.html`
+  (`/_vercel/insights/script.js`, aucune dépendance npm, stub `window.va` en attendant le
+  script). Événements personnalisés via `src/analytics.ts` (`track(name, data)`), jamais
+  bloquants, sans donnée personnelle : `anatomie_start`, `anatomie_resume`,
+  `anatomie_results` (nb réponses), `anatomie_report` (heures, FAIS, DEVRAIS),
+  `anatomie_download`, `anatomie_copy`, `anatomie_print`, `anatomie_lead`,
+  `anatomie_lead_skip`. L'activation d'Analytics se fait dans le tableau de bord Vercel
+  (action Dennis). Les événements personnalisés peuvent être limités par le plan Vercel ;
+  les pages vues fonctionnent dans tous les cas.
+- **Conséquence** : Claude (Cowork) peut lire les chiffres via le MCP Vercel et les
+  intégrer au brief. Aucun tracker tiers, pas de consentement à gérer.
