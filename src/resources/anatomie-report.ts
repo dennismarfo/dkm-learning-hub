@@ -28,7 +28,7 @@ function line(t: TaskEntry): string {
   return `- ${t.label}${t.note ? ` · _${t.note}_` : ''}`;
 }
 
-export function buildReport(a: Audit): string {
+export function buildReport(a: Audit, opts: { standalone?: boolean } = {}): string {
   const s = summarize(a);
   const name = a.business.trim() || 'Mon entreprise';
   const priority = a.priorityId ? a.tasks[a.priorityId] : undefined;
@@ -131,7 +131,11 @@ export function buildReport(a: Audit): string {
   out.push('## 7. Prochaine étape');
   out.push('');
   out.push("Cette carte est la première pièce d'un système IA. La suivante est le **Soul Document** : la mémoire de mon entreprise (identité, clients, offre, ton, règles) que toute IA doit connaître avant de m'aider.");
-  out.push('Générateur gratuit : https://dkm-learning-hub.vercel.app/resources/soul-document');
+  if (opts.standalone) {
+    out.push('Pour être prévenu quand le module suivant sort : @dkmarfo sur Instagram.');
+  } else {
+    out.push('Générateur gratuit : https://dkm-learning-hub.vercel.app/resources/soul-document');
+  }
   out.push('');
   out.push('_DKM Learning Hub · apprendre, documenter, construire._');
   out.push('');
