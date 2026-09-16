@@ -64,8 +64,8 @@ function normalizeScreen(raw: unknown): Screen {
   }
 }
 
-function load(): { audit: Audit; screen: Screen } {
-  const fresh = { audit: emptyAudit(), screen: { kind: 'intro' } as Screen };
+function load(): { audit: Audit; screen: Screen; resume: Screen | null } {
+  const fresh = { audit: emptyAudit(), screen: { kind: 'intro' } as Screen, resume: null };
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return fresh;
@@ -90,7 +90,10 @@ function load(): { audit: Audit; screen: Screen } {
       priorityId: typeof parsed.audit.priorityId === 'string' && tasks[parsed.audit.priorityId] ? parsed.audit.priorityId : undefined,
       tasks,
     };
-    return { audit, screen: normalizeScreen(parsed.screen) };
+    // L'URL mène toujours à la première page : l'audit est conservé, et l'intro propose
+    // « Reprendre » vers l'écran où l'on s'était arrêté (fonction, résultats ou rapport).
+    const restored = normalizeScreen(parsed.screen);
+    return { audit, screen: { kind: 'intro' }, resume: restored.kind === 'intro' ? null : restored };
   } catch {
     return fresh;
   }
@@ -250,7 +253,7 @@ function TaskRow({ t, onChange, onRemove }: { t: TaskEntry; onChange: (p: Partia
 /* ---------- composant principal ---------- */
 
 export default function Anatomie() {
-  const [{ audit, screen }, setState] = useState(load);
+  const [{ audit, screen, resume }, setState] = useState(load);
   const [copied, setCopied] = useState(false);
   const [newTask, setNewTask] = useState('');
   const [lead, setLead] = useState({ name: '', email: '', consent: false });
@@ -270,7 +273,7 @@ export default function Anatomie() {
   const md = useMemo(() => buildReport(audit, { standalone: STANDALONE }), [audit]);
 
   const restart = () => {
-    setState({ audit: emptyAudit(), screen: { kind: 'intro' } });
+    setState({ audit: emptyAudit(), screen: { kind: 'intro' }, resume: null });
     setCopied(false);
   };
 
@@ -441,8 +444,15 @@ export default function Anatomie() {
                   Repartir de zéro
                 </Button>
               )}
-              <Button onClick={() => setScreen({ kind: 'fn', i: 0 })}>
-                {hasProgress ? `Reprendre (${summary.answered}/${summary.total} tâches)` : 'Commencer l’audit'} →
+              <Button onClick={() => setScreen(hasProgress && resume ? resume : { kind: 'fn', i: 0 })}>
+                {hasProgress
+                  ? resume?.kind === 'report'
+                    ? 'Revoir mon rapport'
+                    : resume?.kind === 'results'
+                      ? 'Revoir mes résultats'
+                      : `Reprendre (${summary.answered}/${summary.total} tâches)`
+                  : 'Commencer l’audit'}{' '}
+                →
               </Button>
             </div>
           </div>
