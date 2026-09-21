@@ -2,8 +2,9 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { go } from '../nav';
 import { Brand, Button } from '../components';
 import {
+  DURATIONS,
   FAILURES,
-  FPS_CHOICES,
+  FPS,
   GUIDE,
   HONESTY,
   NOT_NEEDED,
@@ -11,19 +12,24 @@ import {
   PREREQS,
   SETTINGS,
   SETTINGS_INTRO,
-  VOTE,
   STORAGE_KEY,
+  TEMPLATES,
+  VOTE,
+  WHAT_YOU_DO,
+  buildScenes,
   checkTiming,
   duration,
   emptyDraft,
   frameCount,
   isUsable,
-  newScene,
+  missing,
   platformOf,
   round1,
+  templateOf,
   type Draft,
   type PlatformId,
   type Scene,
+  type TemplateId,
 } from './pub-motion-data';
 import { buildBrief, buildLeadSummary, slugify } from './pub-motion-brief';
 import { track } from '../analytics';
@@ -42,7 +48,11 @@ import { track } from '../analytics';
 
 type Screen = { kind: 'guide' } | { kind: 'step'; i: number } | { kind: 'lead' } | { kind: 'brief' };
 
-const STEPS = ['La pub', 'Le format', 'Les scènes', 'La charte'];
+const STEPS = ['Ta pub', 'Le format', 'Ce qu’elle raconte', 'Tes couleurs'];
+
+/** Texte injecté quand la case « garder de la place pour l'interface » est cochée. */
+const SAFE_AREA =
+  'Rien d’important dans les 250 premiers pixels en haut ni dans les 400 derniers en bas : l’interface de la plateforme les recouvre.';
 
 const WEBHOOK = (import.meta.env.VITE_PUB_WEBHOOK_URL as string | undefined)?.trim() || '';
 const VOTE_WEBHOOK = (import.meta.env.VITE_VOTE_WEBHOOK_URL as string | undefined)?.trim() || '';
@@ -107,6 +117,8 @@ function load(): { draft: Draft; screen: Screen; resume: Screen | null } {
     const platform = PLATFORMS.some((p) => p.id === pd.platform)
       ? (pd.platform as PlatformId)
       : base.platform;
+    const template = TEMPLATES.some((t) => t.id === pd.template) ? (pd.template as TemplateId) : base.template;
+    const seconds = DURATIONS.includes(Number(pd.seconds)) ? Number(pd.seconds) : base.seconds;
     const draft: Draft = {
       ...base,
       brand: str(pd.brand, ''),
@@ -115,8 +127,9 @@ function load(): { draft: Draft; screen: Screen; resume: Screen | null } {
       promise: str(pd.promise, ''),
       action: str(pd.action, ''),
       platform,
-      fps: FPS_CHOICES.includes(Number(pd.fps)) ? Number(pd.fps) : base.fps,
-      scenes: scenes.length ? scenes : base.scenes,
+      seconds,
+      template,
+      scenes: scenes.length ? scenes : buildScenes(template, seconds),
       accent: str(pd.accent, base.accent),
       bg: str(pd.bg, base.bg),
       ink: str(pd.ink, base.ink),
@@ -210,71 +223,84 @@ function Swatch({ id, label, value, onChange }: { id: string; label: string; val
   );
 }
 
-function SceneRow({
+function BeatRow({
   s,
   i,
+  hint,
+  placeholder,
+  free,
   onChange,
-  onRemove,
 }: {
   s: Scene;
   i: number;
+  hint: string;
+  placeholder: string;
+  free: boolean;
   onChange: (p: Partial<Scene>) => void;
-  onRemove?: () => void;
 }) {
+  return (
+    <div className="pub-beat">
+      <div className="pub-beat-head">
+        <span className="pub-num">{i + 1}</span>
+        {free ? (
+          <input
+            className="soul-input pub-beat-name"
+            value={s.label}
+            placeholder={`Étape ${i + 1}`}
+            onChange={(e) => onChange({ label: e.target.value })}
+            aria-label={`Nom de l’étape ${i + 1}`}
+          />
+        ) : (
+          <h3>{s.label}</h3>
+        )}
+      </div>
+      <p className="pub-beat-hint">{hint}</p>
+      <textarea
+        className="soul-textarea"
+        rows={3}
+        value={s.shows}
+        placeholder={placeholder}
+        onChange={(e) => onChange({ shows: e.target.value })}
+        aria-label={`Ce qu’on voit, étape ${i + 1}`}
+      />
+    </div>
+  );
+}
+
+/** Panneau « ajuster le minutage », replié par défaut. Personne n'est obligé de l'ouvrir. */
+function TimingRow({ s, i, onChange }: { s: Scene; i: number; onChange: (p: Partial<Scene>) => void }) {
   const num = (v: string) => {
     const n = Number(v.replace(',', '.'));
     return Number.isFinite(n) && n >= 0 ? round1(n) : 0;
   };
   return (
-    <div className="pub-scene">
-      <div className="pub-scene-head">
-        <span className="pub-num">{i + 1}</span>
+    <div className="pub-timing-row">
+      <span className="pub-timing-name">
+        <span className="pub-num">{i + 1}</span> {s.label || `Étape ${i + 1}`}
+      </span>
+      <label className="pub-time">
+        <span>début</span>
         <input
-          className="soul-input pub-scene-label"
-          value={s.label}
-          placeholder="Nom de la scène"
-          onChange={(e) => onChange({ label: e.target.value })}
-          aria-label={`Nom de la scène ${i + 1}`}
+          type="number"
+          min={0}
+          step={0.5}
+          value={s.start}
+          onChange={(e) => onChange({ start: num(e.target.value) })}
+          aria-label={`Seconde de début, étape ${i + 1}`}
         />
-        <div className="pub-times">
-          <label className="pub-time">
-            <span>début</span>
-            <input
-              type="number"
-              min={0}
-              step={0.1}
-              value={s.start}
-              onChange={(e) => onChange({ start: num(e.target.value) })}
-              aria-label={`Seconde de début, scène ${i + 1}`}
-            />
-          </label>
-          <label className="pub-time">
-            <span>fin</span>
-            <input
-              type="number"
-              min={0}
-              step={0.1}
-              value={s.end}
-              onChange={(e) => onChange({ end: num(e.target.value) })}
-              aria-label={`Seconde de fin, scène ${i + 1}`}
-            />
-          </label>
-          <span className="pub-dur">{round1(Math.max(0, s.end - s.start))} s</span>
-        </div>
-        {onRemove && (
-          <button type="button" className="ana-task-remove reset" onClick={onRemove} aria-label={`Retirer la scène ${i + 1}`}>
-            ✕
-          </button>
-        )}
-      </div>
-      <textarea
-        className="soul-textarea pub-scene-shows"
-        rows={2}
-        value={s.shows}
-        placeholder="Ce qu’on voit. Une phrase, concrète."
-        onChange={(e) => onChange({ shows: e.target.value })}
-        aria-label={`Ce qu’on voit, scène ${i + 1}`}
-      />
+      </label>
+      <label className="pub-time">
+        <span>fin</span>
+        <input
+          type="number"
+          min={0}
+          step={0.5}
+          value={s.end}
+          onChange={(e) => onChange({ end: num(e.target.value) })}
+          aria-label={`Seconde de fin, étape ${i + 1}`}
+        />
+      </label>
+      <span className="pub-dur">{round1(Math.max(0, s.end - s.start))} s</span>
     </div>
   );
 }
@@ -306,6 +332,7 @@ export default function PubMotion() {
   const [lead, setLead] = useState({ name: '', email: '', consent: false });
   const [leadState, setLeadState] = useState<'idle' | 'sending' | 'error'>('idle');
   const [voted, setVoted] = useState(voteDone);
+  const [showTiming, setShowTiming] = useState(false);
 
   useEffect(() => save(draft, screen), [draft, screen]);
 
@@ -323,14 +350,14 @@ export default function PubMotion() {
   const updateScene = (id: string, p: Partial<Scene>) =>
     setState((s) => ({ ...s, draft: { ...s.draft, scenes: s.draft.scenes.map((x) => (x.id === id ? { ...x, ...p } : x)) } }));
 
-  const addScene = () => {
-    const sortedByEnd = [...draft.scenes].sort((a, b) => a.end - b.end);
-    const last = sortedByEnd[sortedByEnd.length - 1];
-    const start = last ? last.end : 0;
-    setDraft({ scenes: [...draft.scenes, newScene('', start, start + 3, '')] });
-  };
+  /** Changer de modèle ou de durée recalcule le minutage sans effacer ce qui est écrit. */
+  const setTemplate = (template: TemplateId) =>
+    setState((st) => ({ ...st, draft: { ...st.draft, template, scenes: buildScenes(template, st.draft.seconds, st.draft.scenes) } }));
 
-  const removeScene = (id: string) => setDraft({ scenes: draft.scenes.filter((x) => x.id !== id) });
+  const setSeconds = (seconds: number) =>
+    setState((st) => ({ ...st, draft: { ...st.draft, seconds, scenes: buildScenes(st.draft.template, seconds, st.draft.scenes) } }));
+
+  const resetTiming = () => setDraft({ scenes: buildScenes(draft.template, draft.seconds, draft.scenes) });
 
   const restart = () => {
     setState({ draft: emptyDraft(), screen: { kind: 'guide' }, resume: null });
@@ -477,6 +504,38 @@ export default function PubMotion() {
             diffusable.
           </p>
         </section>
+
+        <div className="card ana-card pub-plan">
+          <div className="eyebrow">Concrètement, tu fais quoi ?</div>
+          <h2 className="display section-title" style={{ marginTop: 8 }}>
+            Trois choses, et tu as ta vidéo.
+          </h2>
+          <p className="lead" style={{ fontSize: 18 }}>
+            {WHAT_YOU_DO.intro}
+          </p>
+          <ol className="pub-plan-steps">
+            {WHAT_YOU_DO.steps.map((x) => (
+              <li key={x.n}>
+                <span className="pub-num big">{x.n}</span>
+                <div>
+                  <h3>{x.title}</h3>
+                  <p>{x.detail}</p>
+                  <span className="pub-time-tag">{x.time}</span>
+                </div>
+              </li>
+            ))}
+          </ol>
+          <div className="actions">
+            <Button
+              onClick={() => {
+                track('pub_start', { from: 'plan' });
+                setScreen({ kind: 'step', i: 0 });
+              }}
+            >
+              Commencer →
+            </Button>
+          </div>
+        </div>
 
         <div className="card ana-card pub-honesty">
           <div className="eyebrow">D’abord, l’honnêteté</div>
@@ -732,11 +791,12 @@ export default function PubMotion() {
       <div className="card ana-card ana-report">
         <div className="eyebrow">Ton brief</div>
         <h2 className="display section-title" style={{ marginTop: 8 }}>
-          {round1(total)} secondes, {draft.scenes.length} scènes, {frameCount(draft)} images ✦
+          Ton brief est prêt ✦
         </h2>
         <p className="lead" style={{ fontSize: 18, marginBottom: 20 }}>
-          Télécharge-le, ouvre Claude Code dans un dossier vide, et colle-le. La consigne de démarrage est incluse en tête.
-          Tu ne demandes pas une pub : tu en commandes une.
+          Télécharge-le, ouvre Claude Code dans un dossier vide, et colle-le. Tout est dedans, y compris la consigne de
+          démarrage : tu n’as rien à ajouter. Claude commencera par te proposer le découpage en scènes, et attendra ton
+          accord avant de construire.
         </p>
         {issues.length > 0 && (
           <div className="pub-issues ana-print-hide">
@@ -765,7 +825,7 @@ export default function PubMotion() {
             Imprimer / PDF
           </Button>
           <Button variant="light" onClick={() => setScreen({ kind: 'step', i: 2 })}>
-            Retour aux scènes
+            Modifier ce qu’elle raconte
           </Button>
           {copied && <span className="soul-toast">Copié dans le presse-papier</span>}
         </div>
@@ -805,6 +865,9 @@ export default function PubMotion() {
   const next = () => (i < STEPS.length - 1 ? setScreen({ kind: 'step', i: i + 1 }) : goToBrief());
   const prev = () => (i > 0 ? setScreen({ kind: 'step', i: i - 1 }) : setScreen({ kind: 'guide' }));
 
+  const tpl = templateOf(draft);
+  const ordered = [...draft.scenes].sort((a, b) => a.start - b.start);
+
   const body = () => {
     if (i === 0) {
       return (
@@ -812,6 +875,7 @@ export default function PubMotion() {
           <Field
             id="pub-brand"
             label="Ta marque"
+            hint="Le seul champ vraiment obligatoire."
             value={draft.brand}
             placeholder="ex. Thermo Rive-Sud"
             onChange={(v) => setDraft({ brand: v })}
@@ -834,7 +898,7 @@ export default function PubMotion() {
           <Field
             id="pub-promise"
             label="Ce qu’elle promet, en une phrase"
-            hint="C’est la phrase que quelqu’un doit pouvoir répéter après avoir vu la pub une fois."
+            hint="La phrase que quelqu’un doit pouvoir répéter après avoir vu la pub une seule fois."
             value={draft.promise}
             placeholder="ex. Tu remplis le formulaire, on te rappelle en moins d’une heure."
             onChange={(v) => setDraft({ promise: v })}
@@ -858,16 +922,15 @@ export default function PubMotion() {
           <div className="ana-q">
             <span className="ana-q-label">Où la pub va vivre</span>
             <div className="ana-chips" role="group" aria-label="Format">
-              {PLATFORMS.map((p) => (
+              {PLATFORMS.map((x) => (
                 <button
                   type="button"
-                  key={p.id}
-                  className={`ana-chip ${draft.platform === p.id ? 'on' : ''}`}
-                  aria-pressed={draft.platform === p.id}
-                  onClick={() => setDraft({ platform: p.id })}
+                  key={x.id}
+                  className={`ana-chip ${draft.platform === x.id ? 'on' : ''}`}
+                  aria-pressed={draft.platform === x.id}
+                  onClick={() => setDraft({ platform: x.id })}
                 >
-                  {p.label}
-                  <small> · {p.width}×{p.height}</small>
+                  {x.label}
                 </button>
               ))}
             </div>
@@ -875,73 +938,112 @@ export default function PubMotion() {
           </div>
 
           <div className="ana-q">
-            <span className="ana-q-label">Images par seconde</span>
-            <div className="ana-chips" role="group" aria-label="Images par seconde">
-              {FPS_CHOICES.map((f) => (
+            <span className="ana-q-label">Combien de temps elle dure</span>
+            <div className="ana-chips" role="group" aria-label="Durée">
+              {DURATIONS.map((x) => (
                 <button
                   type="button"
-                  key={f}
-                  className={`ana-chip ${draft.fps === f ? 'on' : ''}`}
-                  aria-pressed={draft.fps === f}
-                  onClick={() => setDraft({ fps: f })}
+                  key={x}
+                  className={`ana-chip ${draft.seconds === x ? 'on' : ''}`}
+                  aria-pressed={draft.seconds === x}
+                  onClick={() => setSeconds(x)}
                 >
-                  {f}
+                  {x} s
                 </button>
               ))}
             </div>
             <p className="soul-hint">
-              30 convient à presque tout. 60 double le nombre d’images à capturer, donc le temps de rendu, pour un gain que
-              personne ne remarque sur une pub.
+              Quinze secondes suffisent à presque tout, et se regardent jusqu’au bout. Prends plus long seulement si tu as
+              vraiment quelque chose à montrer.
             </p>
           </div>
 
           <div className="ana-task-readout">
-            Rendu prévu : <b>{platform.width} × {platform.height}</b> · <b>{round1(total)} s</b> ·{' '}
-            <b>{frameCount(draft)} images</b> à capturer.
+            Ta pub fera <b>{platform.width} × {platform.height}</b>, <b>{round1(total)} secondes</b>, soit{' '}
+            <b>{frameCount(draft)} images</b> à produire. Tu n’as rien à faire de ces chiffres : ils sont dans le brief.
           </div>
         </>
       );
     }
 
     if (i === 2) {
-      const sorted = [...draft.scenes].sort((a, b) => a.start - b.start);
+      const free = draft.template === 'libre';
       return (
         <>
           <p className="lead" style={{ fontSize: 18 }}>
-            C’est le cœur du brief. Une ligne par scène : son nom, sa seconde de début, sa seconde de fin, et ce qu’on voit.
-            Décide les secondes avant de décider les images.
+            Choisis une forme, puis remplis chaque étape en une ou deux phrases. Écris ce qu’on <strong>voit</strong>,
+            pas ce qu’on ressent. Les secondes, c’est Claude qui les proposera.
           </p>
-          <Timeline d={draft} />
-          {issues.length > 0 && (
-            <div className="pub-issues">
-              <div className="eyebrow">À regarder</div>
-              <ul>
-                {issues.map((x, k) => (
-                  <li key={k} className={x.level}>
-                    {x.text}
-                  </li>
-                ))}
-              </ul>
+
+          <div className="ana-q">
+            <span className="ana-q-label">Quelle forme ?</span>
+            <div className="pub-templates" role="group" aria-label="Forme de la pub">
+              {TEMPLATES.map((t) => (
+                <button
+                  type="button"
+                  key={t.id}
+                  className={`pub-template ${draft.template === t.id ? 'on' : ''}`}
+                  aria-pressed={draft.template === t.id}
+                  onClick={() => setTemplate(t.id)}
+                >
+                  <strong>{t.label}</strong>
+                  <small>{t.tagline}</small>
+                </button>
+              ))}
             </div>
-          )}
-          <div className="pub-scenes">
-            {sorted.map((s, k) => (
-              <SceneRow
-                key={s.id}
-                s={s}
+          </div>
+
+          <div className="pub-beats">
+            {ordered.map((sc, k) => (
+              <BeatRow
+                key={sc.id}
+                s={sc}
                 i={k}
-                onChange={(p) => updateScene(s.id, p)}
-                onRemove={draft.scenes.length > 1 ? () => removeScene(s.id) : undefined}
+                free={free}
+                hint={tpl.beats[k]?.hint ?? 'Dis ce qu’on voit.'}
+                placeholder={tpl.beats[k]?.placeholder ?? 'Ce qu’on voit.'}
+                onChange={(patch) => updateScene(sc.id, patch)}
               />
             ))}
           </div>
-          <div className="ana-add">
-            <Button variant="light" onClick={addScene}>
-              + Ajouter une scène
-            </Button>
-            <p className="soul-hint">
-              Une pub de quinze secondes tient en trois ou quatre scènes. Au delà de dix, tu racontes trop.
-            </p>
+
+          <div className="pub-advanced">
+            <button
+              type="button"
+              className="reset pub-disclose"
+              aria-expanded={showTiming}
+              onClick={() => setShowTiming((v) => !v)}
+            >
+              {showTiming ? '▾' : '▸'} Ajuster le minutage toi-même
+              <small>Facultatif. Tu peux passer à la suite sans l’ouvrir.</small>
+            </button>
+            {showTiming && (
+              <div className="pub-timing">
+                <p className="ana-hint" style={{ marginTop: 0 }}>
+                  Réparti automatiquement sur {round1(total)} secondes, avec au moins trois secondes pour l’appel à
+                  l’action. Ces valeurs partent dans le brief comme proposition : Claude peut les discuter.
+                </p>
+                <Timeline d={draft} />
+                {ordered.map((sc, k) => (
+                  <TimingRow key={sc.id} s={sc} i={k} onChange={(patch) => updateScene(sc.id, patch)} />
+                ))}
+                {issues.length > 0 && (
+                  <div className="pub-issues">
+                    <div className="eyebrow">À regarder</div>
+                    <ul>
+                      {issues.map((x, k) => (
+                        <li key={k} className={x.level}>
+                          {x.text}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                <Button variant="light" onClick={resetTiming}>
+                  Revenir au minutage proposé
+                </Button>
+              </div>
+            )}
           </div>
         </>
       );
@@ -963,6 +1065,7 @@ export default function PubMotion() {
           <Field
             id="pub-font-title"
             label="Police des titres"
+            hint="Le nom suffit. Si tu ne sais pas, laisse vide : Claude proposera."
             value={draft.fontTitle}
             placeholder="ex. Outfit Bold"
             onChange={(v) => setDraft({ fontTitle: v })}
@@ -974,21 +1077,23 @@ export default function PubMotion() {
             placeholder="ex. Inter Regular"
             onChange={(v) => setDraft({ fontBody: v })}
           />
-          <Field
-            id="pub-forbidden"
-            label="Zones interdites"
-            hint="Les endroits où l’interface de la plateforme recouvre ta vidéo. Sur un Reel, compte environ 250 px en haut et 400 px en bas."
-            value={draft.forbidden}
-            placeholder="ex. Rien d’important dans les 250 premiers pixels ni les 400 derniers."
-            onChange={(v) => setDraft({ forbidden: v })}
-            area
-          />
+          <label className="ana-consent pub-safe">
+            <input
+              type="checkbox"
+              checked={!!draft.forbidden.trim()}
+              onChange={(e) => setDraft({ forbidden: e.target.checked ? SAFE_AREA : '' })}
+            />
+            <span>
+              <strong>Garder de la place pour l’interface de la plateforme.</strong> Instagram et TikTok posent des
+              boutons par dessus ta vidéo, en haut et en bas. Coché, rien d’important ne sera placé dessous.
+            </span>
+          </label>
           <Field
             id="pub-rules"
-            label="Autres règles"
-            hint="Ce que la machine doit savoir et qu’elle ne devinera pas. Facultatif."
+            label="Autre chose à savoir ?"
+            hint="Ce que la machine ne devinera pas. Facultatif, tu peux laisser vide."
             value={draft.rules}
-            placeholder="ex. Le logo n’apparaît qu’à la dernière scène. Jamais de texte en majuscules."
+            placeholder="ex. Le logo n’apparaît qu’à la dernière étape. Jamais de texte tout en majuscules."
             onChange={(v) => setDraft({ rules: v })}
             area
           />
@@ -998,10 +1103,11 @@ export default function PubMotion() {
     );
   };
 
+  const gap = missing(draft);
   const blocked = i === STEPS.length - 1 && !isUsable(draft);
 
   return shell(
-    <div className="card ana-card">
+    <div className="card ana-card pub-form">
       <div className="ana-fn-head">
         <div>
           <div className="eyebrow">
@@ -1017,18 +1123,13 @@ export default function PubMotion() {
           <div className="progress-fill" style={{ width: `${((i + 1) / STEPS.length) * 100}%` }} />
         </div>
         <span className="soul-stepline">
-          {STEPS[i]} · {round1(total)} s au total
+          {STEPS[i]} · pub de {round1(total)} s
         </span>
       </div>
 
       {body()}
 
-      {blocked && (
-        <p className="ana-hint">
-          Il manque le nom de ta marque, ou une scène n’a pas de nom, ou deux scènes se chevauchent. Corrige, et le brief
-          se génère.
-        </p>
-      )}
+      {blocked && gap && <p className="ana-hint">{gap}</p>}
 
       <div className="soul-nav">
         <Button variant="light" onClick={prev}>

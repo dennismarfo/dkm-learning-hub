@@ -410,16 +410,45 @@ a.btn{text-decoration:none}
 .pub-seg.t0{background:var(--ink);color:var(--sand)}
 .pub-seg.t1{background:var(--terracotta);color:#fff}
 .pub-seg.t2{background:var(--sand);color:var(--ink)}
-.pub-scenes{display:grid;gap:14px;margin-top:6px}
-.pub-scene{border:1px solid var(--rule);border-radius:18px;background:var(--surface);padding:16px 18px}
-.pub-scene-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.pub-scene-label{flex:1;min-width:180px}
+/* Le plan en trois temps : « concrètement, tu fais quoi ? » */
+.pub-plan-steps{list-style:none;margin:26px 0 0;padding:0;display:grid;gap:22px}
+.pub-plan-steps li{display:grid;grid-template-columns:60px 1fr;gap:20px;align-items:start}
+.pub-plan-steps h3{margin:0 0 8px}
+.pub-plan-steps p{margin:0;color:var(--ink-70);line-height:1.55}
+.pub-time-tag{display:inline-block;margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--terracotta);background:var(--sand-60);border-radius:999px;padding:5px 11px}
+
+/* Les modèles de pub : on choisit une forme, on ne part jamais d'une page blanche. */
+.pub-templates{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:10px}
+.pub-template{display:block;width:100%;text-align:left;padding:16px 18px;border-radius:18px;border:1px solid var(--rule);background:var(--white);cursor:pointer;transition:border-color .15s,background .15s}
+.pub-template:hover{border-color:var(--ink)}
+.pub-template.on{background:var(--ink);border-color:var(--ink)}
+.pub-template strong{display:block;font-size:16px;margin-bottom:5px}
+.pub-template small{display:block;color:var(--ink-70);font-size:13.5px;line-height:1.45}
+.pub-template.on strong{color:var(--sand)}
+.pub-template.on small{color:rgba(255,253,244,.72)}
+
+/* Une étape = un titre, une explication, un champ. Aucune seconde à l'écran. */
+.pub-beats{display:grid;gap:18px;margin-top:26px}
+.pub-beat{border:1px solid var(--rule);border-radius:20px;background:var(--surface);padding:20px 22px}
+.pub-beat-head{display:flex;align-items:center;gap:12px}
+.pub-beat-head h3{font-family:'DM Serif Display',Georgia,serif;font-style:italic;letter-spacing:-.02em;font-size:23px;margin:0}
+.pub-beat-name{flex:1;min-width:160px}
+.pub-beat-hint{margin:10px 0 12px;color:var(--ink-70);font-size:14.5px;line-height:1.5}
+
+/* Le minutage, replié par défaut. */
+.pub-advanced{margin-top:26px;padding-top:20px;border-top:1px solid var(--rule)}
+.pub-disclose{display:flex;flex-direction:column;gap:3px;font-weight:800;color:var(--ink-70);padding:4px 0}
+.pub-disclose:hover{color:var(--ink)}
+.pub-disclose small{font-weight:600;font-size:13px;color:var(--ink-70)}
+.pub-timing{margin-top:16px;display:grid;gap:10px}
+.pub-timing-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 14px;border-radius:14px;background:var(--surface-2)}
+.pub-timing-name{display:flex;align-items:center;gap:10px;flex:1;min-width:160px;font-weight:700;font-size:14.5px}
+.pub-safe{margin-top:6px}
 .pub-times{display:flex;align-items:center;gap:8px}
 .pub-time{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-70);font-family:'JetBrains Mono',monospace}
 .pub-time input{width:76px;padding:7px 10px;border:1px solid var(--rule);border-radius:999px;background:var(--white);font:inherit;font-size:13px}
 .pub-time input:focus{outline:none;border-color:var(--terracotta)}
 .pub-dur{font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:700;color:var(--terracotta);min-width:48px;text-align:right}
-.pub-scene-shows{margin-top:12px}
 .pub-issues{margin:20px 0;padding:18px 20px;border-radius:18px;background:var(--sand-60);border-left:3px solid var(--terracotta)}
 .pub-issues ul{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:7px}
 .pub-issues li{font-size:14px;line-height:1.5;color:var(--ink-70);padding-left:20px;position:relative}
@@ -433,5 +462,7 @@ a.btn{text-decoration:none}
 .pub-next{margin-top:32px}
 .pub-next h3{font-size:28px;margin:10px 0 12px;color:var(--white)}
 .pub-next .ana-hint{color:rgba(255,253,244,.62)}
-@media(max-width:860px){.pub-guide{gap:26px}.pub-guide>.ana-card{padding:26px}.pub-swatches{grid-template-columns:1fr}.pub-step{grid-template-columns:46px 1fr;gap:16px;padding:22px 0}.pub-num.big{width:46px;height:46px;font-size:19px}.pub-honesty-grid{grid-template-columns:1fr}}
-@media(max-width:520px){.pub-scene-head{align-items:flex-start}.pub-times{width:100%}.pub-time input{width:100%}}
+@media(max-width:860px){.pub-templates{grid-template-columns:1fr}.pub-plan-steps li{grid-template-columns:46px 1fr;gap:16px}.pub-guide{gap:26px}.pub-guide>.ana-card{padding:26px}.pub-swatches{grid-template-columns:1fr}.pub-step{grid-template-columns:46px 1fr;gap:16px;padding:22px 0}.pub-num.big{width:46px;height:46px;font-size:19px}.pub-honesty-grid{grid-template-columns:1fr}}
+/* Les libellés d'étapes sont plus longs ici que dans Anatomie : la ligne doit pouvoir passer à la ligne. */
+@media(max-width:620px){.pub-form .soul-progress{flex-wrap:wrap;gap:8px}.pub-form .soul-stepline{flex:1 0 100%;white-space:normal}}
+@media(max-width:520px){.pub-timing-row{align-items:flex-start}.pub-times{width:100%}.pub-time input{width:100%}.pub-beat{padding:16px 16px}}

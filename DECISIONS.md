@@ -307,3 +307,49 @@ s'ajoutent ici.
   approximatif : il décourage le clic répété, il ne prétend pas à l'unicité.
 - **Conséquence** : pas de troisième mot-clé en DM, ce que Dennis voulait éviter. Si le compte
   monte, le tuto direction artistique devient le produit suivant.
+
+---
+
+## 2026-09-21 — Refonte du générateur après test de lisibilité (Claude Code)
+
+### D-025 — On ne demande pas à l'utilisateur ce que la machine sait faire
+- **Contexte** : Dennis a testé la ressource et a dit deux choses. « On ne sait pas trop ce
+  qu'on doit faire », et surtout : l'étape des scènes est bloquante pour un non-technique,
+  **« moi-même je n'ai pas eu à faire ça »**.
+- **Vérification, et c'est le point important** : `pub-maya/BRIEF_CLAUDE_CODE.md` ne crée pas
+  l'animation, il la **finit**. Première ligne : « tout le reste est déjà monté : animation
+  60 s ». Le tableau de secondes qu'il contient concerne les **dix répliques de voix off**,
+  calées sur une animation qui existait déjà (« l'appel entrant apparaît à l'écran à 12,36 s » :
+  la seconde est lue, pas inventée). Dennis n'a donc jamais rédigé à la main un tableau de
+  scènes avec des débuts et des fins.
+- **Conclusion** : l'ancienne étape 3 demandait à un débutant le travail que la machine avait
+  fait pour l'auteur. Ce n'était pas un défaut d'ergonomie, c'était une erreur de conception,
+  et elle contaminait le guide, qui affirmait « décide les secondes avant de décider les images ».
+- **Décision** :
+  1. **Des modèles de pub** (`TEMPLATES`) : Problème → Preuve → Appel, Avant / Après,
+     Démonstration, Je pars de zéro. On choisit une forme, les étapes arrivent nommées, avec
+     une explication et un exemple en texte de substitution. Jamais de page blanche.
+  2. **Aucune seconde à l'écran.** Le minutage est calculé à partir de parts (`share`) et de la
+     durée choisie, et replié derrière « Ajuster le minutage toi-même », facultatif. Les parts
+     garantissent au moins trois secondes à l'appel à l'action, même sur une pub de quinze.
+  3. **Le brief demande le découpage à Claude**, en trois temps : propose le découpage, attends
+     ma validation, et seulement ensuite construis. Le minutage y figure comme « proposition,
+     à confirmer », avec deux contraintes de rythme non négociables (trois premières secondes,
+     appel à l'action ≥ 3 s et lisible jusqu'à la dernière image). C'est le vrai déroulé.
+  4. **Le choix des images par seconde disparaît de l'interface.** 30 convient à tout ; le
+     proposer ne faisait qu'ajouter une décision sans enjeu. `FPS` reste dans le brief.
+  5. **Les zones interdites deviennent une case à cocher** (« garder de la place pour
+     l'interface de la plateforme ») au lieu d'un champ libre parlant de pixels.
+  6. **Un bloc « Concrètement, tu fais quoi ? »** (`WHAT_YOU_DO`) ouvre la page, avant même
+     l'honnêteté : trois temps numérotés, une estimation de durée pour chacun, et un bouton
+     « Commencer ». C'est la réponse directe à « on ne sait pas trop ce qu'on doit faire ».
+  7. **Plus rien ne bloque** : `isUsable` exige seulement une marque et une étape remplie, et
+     `missing()` renvoie une phrase utile plutôt qu'une interdiction.
+- **Garde-fou vérifié** : changer de durée ou de modèle **ne doit jamais effacer** le texte
+  déjà saisi. `buildScenes` conserve le contenu position par position, et le mode « Je pars de
+  zéro » conserve aussi les noms d'étapes donnés par l'utilisateur. Testé en navigateur.
+- **Conséquence sur le guide** : l'étape 1 s'appelle désormais « Tu décris. Tu n'inventes pas le
+  minutage », et cite le déroulé réel de la pub Maya. Les erreurs listées passent de « ce qu'il
+  faut produire » à **« ce qu'il faut savoir regarder »** : accroche trop tardive, appel à
+  l'action trop court, première image noire. Le lecteur valide une proposition, il ne la
+  fabrique pas.

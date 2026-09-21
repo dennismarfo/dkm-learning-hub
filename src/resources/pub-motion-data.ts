@@ -21,14 +21,13 @@ export type GuideStep = {
 
 /**
  * Ce que les dix minutes couvrent, et ce qu'elles ne couvrent pas.
- * En tête de page, non négociable.
  * Chiffres vérifiés sur les fichiers de production : tout est daté du 11 septembre 2026,
  * voix off à 15h21, appel enregistré à 15h37, mixage à 16h14, rendu final à 22h53,
- * avec une longue coupure entre les deux. Environ deux heures de travail réel.
+ * avec une longue coupure. Environ deux heures de travail réel.
  */
 export const HONESTY = {
   covers: [
-    'Décrire ta pub scène par scène, avec les secondes.',
+    'Décrire ta pub, sans rien inventer de technique.',
     'Obtenir l’animation, fabriquée à partir de ta description.',
     'Sortir une vidéo verticale, prête pour Meta.',
   ],
@@ -42,15 +41,44 @@ export const HONESTY = {
     'Ma pub complète m’a pris une soirée. Voix off, appel enregistré, capture de mon téléphone et montage, tout dans la foulée, environ deux heures de travail réel. Les dix minutes dont je parle, c’est la partie animation : passer de ta description à la vidéo. C’est celle que les gens voient, et c’est sur elle qu’on me pose la question.',
 };
 
+/** Le bloc qui répond à « concrètement, je fais quoi ? ». En tête, avant tout le reste. */
+export const WHAT_YOU_DO = {
+  intro:
+    'Trois choses, dans cet ordre. Tu peux commencer tout de suite : le formulaire est juste en bas de cette page.',
+  steps: [
+    {
+      n: 1,
+      title: 'Tu réponds à quatre écrans, ici',
+      detail:
+        'Ta marque, la durée, ce que ta pub raconte, tes couleurs. Aucune connaissance technique. Aucun chiffre à inventer : tu choisis une forme de pub et tout est déjà rempli.',
+      time: 'environ 5 minutes',
+    },
+    {
+      n: 2,
+      title: 'Tu récupères ton brief et tu le colles dans Claude Code',
+      detail:
+        'Un simple fichier texte. Tu ouvres Claude Code dans un dossier vide, tu colles, tu envoies. La consigne de démarrage est déjà écrite en haut du fichier, tu n’as rien à ajouter.',
+      time: 'environ 1 minute',
+    },
+    {
+      n: 3,
+      title: 'Tu valides, il fabrique, tu récupères la vidéo',
+      detail:
+        'Claude te propose un découpage en scènes, avec les secondes. Tu dis oui, ou tu corriges. Il construit la page, il la filme, et tu as ton fichier MP4.',
+      time: 'environ 5 minutes',
+    },
+  ],
+};
+
 /** Le bloc qui rassure. La plupart des gens décrochent ici s'il n'est pas dit. */
 export const NOT_NEEDED = {
   no: [
     'Tu n’écris pas une ligne de code. Pas une seule.',
     'Tu n’ouvres aucun logiciel de montage.',
-    'Tu ne choisis ni effets, ni transitions, ni calques.',
+    'Tu n’inventes aucun minutage. C’est Claude qui le propose.',
   ],
   yes:
-    'Tu écris un brief. C’est-à-dire : tu décides ce qu’on voit, à quelle seconde, et dans quelles couleurs. Ensuite tu le donnes à Claude Code, et c’est lui qui fabrique.',
+    'Ton seul travail, c’est de dire ce que la pub doit raconter, et de vérifier ce qu’on te propose. C’est ça, diriger.',
   why:
     'C’est la seule compétence de ce guide, et c’est la seule qui ne périmera pas. Les outils changent tous les trois mois. Savoir cadrer un travail, non.',
 };
@@ -58,7 +86,7 @@ export const NOT_NEEDED = {
 export const PREREQS = [
   {
     label: 'Tes couleurs et tes polices',
-    why: 'Deux ou trois couleurs, deux polices. Décidées avant, pas pendant. Si tu les cherches en cours de route, tu ne seras pas à dix minutes.',
+    why: 'Deux ou trois couleurs, deux polices. Si tu n’en as pas, prends celles que tu utilises déjà ailleurs. On ne cherche pas une identité pendant l’exercice.',
   },
   {
     label: 'Claude Code',
@@ -66,7 +94,7 @@ export const PREREQS = [
   },
   {
     label: 'Trois outils, une seule fois',
-    why: 'Tu ne t’en sers jamais directement : ils travaillent pour Claude Code. Tu les installes, et tu les oublies.',
+    why: 'Tu ne t’en sers jamais directement : ils travaillent pour Claude Code. Tu colles ces deux lignes dans ton terminal, et tu les oublies.',
     command: 'pip install playwright && playwright install chromium\nbrew install ffmpeg',
   },
 ];
@@ -74,11 +102,11 @@ export const PREREQS = [
 export const GUIDE: GuideStep[] = [
   {
     n: 1,
-    title: 'Écris ce qu’on voit, seconde par seconde',
+    title: 'Tu décris. Tu n’inventes pas le minutage.',
     body:
-      'Une ligne par scène : son nom, la seconde où elle commence, la seconde où elle finit, et ce qu’on voit. C’est tout le brief. Une pub de quinze secondes tient en trois ou quatre lignes.',
+      'Tu dis ce que la pub raconte, dans l’ordre : l’accroche, la preuve, l’appel. C’est Claude qui propose les secondes de chaque scène. Toi, tu vérifies qu’elles tiennent debout, et ça se voit sans être technique.',
     detail:
-      'Décide les secondes avant de décider les images. C’est le chronométrage qui commande. Si ton appel à l’action ne dure qu’une seconde, il ne sert à rien, aussi beau soit-il.',
+      'C’est exactement comme ça que j’ai procédé. Je n’ai jamais écrit un tableau de secondes à la main : je l’ai lu sur l’animation une fois qu’elle existait, pour y caler ma voix off.',
   },
   {
     n: 2,
@@ -98,13 +126,8 @@ export const GUIDE: GuideStep[] = [
   },
 ];
 
-/**
- * Les deux réglages. Le lecteur n'a pas à les taper : le générateur les écrit dans son
- * brief. Il doit savoir pourquoi ils y sont, parce que c'est ce qui lui permet de dire
- * à la machine qu'elle s'est trompée.
- */
 export const SETTINGS_INTRO =
-  'Tu n’as pas à retenir ces deux lignes : le générateur les met dans ton brief à ta place. Mais tu dois savoir à quoi elles servent, parce que c’est ce qui te permet de voir quand la machine s’est trompée.';
+  'Tu n’as pas à retenir ces deux lignes : le générateur les écrit dans ton brief à ta place. Mais tu dois savoir à quoi elles servent, parce que c’est ce qui te permet de voir quand la machine s’est trompée.';
 
 export const SETTINGS = [
   {
@@ -121,12 +144,13 @@ export const SETTINGS = [
   },
 ];
 
+/** Ce qu'il faut savoir REGARDER. Le lecteur valide une proposition, il ne la produit pas. */
 export const FAILURES = [
-  'Deux scènes se chevauchent, ou il reste un trou entre elles. Le générateur te le signale avant que tu envoies quoi que ce soit.',
-  'La pub n’est pas identique à chaque rendu. Ça arrive quand l’animation dépend de l’heure réelle ou du hasard. Ton brief doit exiger que la seconde 8 donne toujours exactement la même image.',
+  'L’accroche arrive trop tard. Sur un Reel, tu as trois secondes pour donner une raison de rester. Si la première chose intéressante est à la huitième seconde, personne ne la verra.',
+  'L’appel à l’action passe en une seconde. Il lui en faut au moins trois, et il doit rester lisible jusqu’à la toute dernière image.',
   'La première image est noire. C’est pourtant elle qu’on voit dans le fil avant de cliquer : elle doit déjà dire quelque chose.',
+  'La pub n’est pas identique d’un rendu à l’autre. Ça arrive quand l’animation dépend de l’heure réelle ou du hasard. Ton brief exige que la même seconde donne toujours la même image.',
   'Un fond vert pour incruster une capture d’écran. Ça ne marche presque jamais. Filme le vrai, ou fais-le dessiner.',
-  'La pub est belle, mais l’appel à l’action passe en une seconde. Donne-lui au moins trois secondes, et jusqu’à la dernière image.',
 ];
 
 /** Vote anonyme : mesurer l'intérêt pour un tutoriel de direction artistique. */
@@ -154,12 +178,139 @@ export type PlatformDef = {
 };
 
 export const PLATFORMS: PlatformDef[] = [
-  { id: 'reels', label: 'Vertical 9:16', where: 'Reels, Stories, TikTok, Shorts', width: 1080, height: 1920 },
-  { id: 'feed45', label: 'Portrait 4:5', where: 'Fil Instagram et Facebook', width: 1080, height: 1350 },
-  { id: 'feed11', label: 'Carré 1:1', where: 'Fil, catalogue, bannières', width: 1080, height: 1080 },
+  { id: 'reels', label: 'Vertical', where: 'Reels, Stories, TikTok, Shorts', width: 1080, height: 1920 },
+  { id: 'feed45', label: 'Portrait', where: 'Fil Instagram et Facebook', width: 1080, height: 1350 },
+  { id: 'feed11', label: 'Carré', where: 'Fil, catalogue, bannières', width: 1080, height: 1080 },
 ];
 
-export const FPS_CHOICES = [24, 25, 30, 60];
+export const DURATIONS = [15, 20, 30, 60];
+
+/** Jamais montré à l'utilisateur : 30 convient à tout, et le choisir n'apporte rien. */
+export const FPS = 30;
+
+/* ---------- les modèles de pub ---------- */
+
+export type TemplateId = 'ppa' | 'avant-apres' | 'demo' | 'libre';
+
+export type Beat = {
+  label: string;
+  hint: string;
+  placeholder: string;
+  /** Part de la durée totale. La somme des parts d'un modèle vaut 1. */
+  share: number;
+};
+
+export type TemplateDef = {
+  id: TemplateId;
+  label: string;
+  tagline: string;
+  beats: Beat[];
+};
+
+/**
+ * Les modèles existent pour que personne ne parte d'une page blanche ni n'invente
+ * un minutage. Les parts sont pensées pour que l'appel à l'action garde toujours
+ * au moins trois secondes, même sur une pub de quinze.
+ */
+export const TEMPLATES: TemplateDef[] = [
+  {
+    id: 'ppa',
+    label: 'Problème → Preuve → Appel',
+    tagline: 'La forme la plus courante, et la plus sûre.',
+    beats: [
+      {
+        label: 'L’accroche',
+        hint: 'Le problème de ton client, montré plutôt que raconté. C’est ce qui décide si on reste.',
+        placeholder: 'ex. Il est 21 h, un client remplit le formulaire, et personne ne le rappelle.',
+        share: 0.2,
+      },
+      {
+        label: 'La preuve',
+        hint: 'Ce que ton produit fait, concrètement. Une chose qu’on peut voir, pas un adjectif.',
+        placeholder: 'ex. Son téléphone sonne en moins d’une minute, et le rendez-vous se réserve tout seul.',
+        share: 0.55,
+      },
+      {
+        label: 'L’appel',
+        hint: 'Une seule action. Elle reste à l’écran jusqu’à la dernière image.',
+        placeholder: 'ex. Laisse ton numéro, on te rappelle en moins de soixante secondes.',
+        share: 0.25,
+      },
+    ],
+  },
+  {
+    id: 'avant-apres',
+    label: 'Avant / Après',
+    tagline: 'Quand le contraste est plus parlant que l’explication.',
+    beats: [
+      {
+        label: 'Avant',
+        hint: 'La situation d’aujourd’hui, celle qui coûte cher. Sois précis, pas dramatique.',
+        placeholder: 'ex. Trois heures par semaine à rappeler des gens qui ne répondent plus.',
+        share: 0.3,
+      },
+      {
+        label: 'Après',
+        hint: 'La même situation, une fois le problème réglé. Montre la différence, ne la commente pas.',
+        placeholder: 'ex. Les rappels partent seuls, et tu ne vois que les rendez-vous confirmés.',
+        share: 0.45,
+      },
+      {
+        label: 'L’appel',
+        hint: 'Une seule action. Elle reste à l’écran jusqu’à la dernière image.',
+        placeholder: 'ex. Écris-moi le mot ESSAI et je te montre.',
+        share: 0.25,
+      },
+    ],
+  },
+  {
+    id: 'demo',
+    label: 'Démonstration',
+    tagline: 'Quand il faut voir le produit fonctionner pour y croire.',
+    beats: [
+      {
+        label: 'La promesse',
+        hint: 'Ce que la personne saura faire à la fin, en une phrase.',
+        placeholder: 'ex. Une soumission envoyée en deux minutes, depuis ton téléphone.',
+        share: 0.15,
+      },
+      {
+        label: 'Comment ça marche',
+        hint: 'Les gestes, dans l’ordre. Deux ou trois, pas dix.',
+        placeholder: 'ex. Tu choisis le service, tu ajoutes une photo, tu envoies.',
+        share: 0.3,
+      },
+      {
+        label: 'Le résultat',
+        hint: 'Ce qu’on obtient, à l’écran. C’est la preuve.',
+        placeholder: 'ex. Le client reçoit le devis signé dans sa boîte, avec le prix.',
+        share: 0.3,
+      },
+      {
+        label: 'L’appel',
+        hint: 'Une seule action. Elle reste à l’écran jusqu’à la dernière image.',
+        placeholder: 'ex. Essaie-le gratuitement, le lien est en bio.',
+        share: 0.25,
+      },
+    ],
+  },
+  {
+    id: 'libre',
+    label: 'Je pars de zéro',
+    tagline: 'Tu nommes tes propres étapes.',
+    beats: [
+      { label: 'Étape 1', hint: 'Nomme-la et dis ce qu’on voit.', placeholder: 'Ce qu’on voit en premier.', share: 0.3 },
+      { label: 'Étape 2', hint: 'Nomme-la et dis ce qu’on voit.', placeholder: 'Ce qui vient ensuite.', share: 0.45 },
+      { label: 'Étape 3', hint: 'Nomme-la et dis ce qu’on voit.', placeholder: 'Ce qu’on voit en dernier.', share: 0.25 },
+    ],
+  },
+];
+
+export function templateOf(d: Draft): TemplateDef {
+  return TEMPLATES.find((t) => t.id === d.template) ?? TEMPLATES[0];
+}
+
+/* ---------- le brouillon ---------- */
 
 export type Scene = {
   id: string;
@@ -176,7 +327,8 @@ export type Draft = {
   promise: string;
   action: string;
   platform: PlatformId;
-  fps: number;
+  seconds: number;
+  template: TemplateId;
   scenes: Scene[];
   accent: string;
   bg: string;
@@ -194,8 +346,38 @@ export function newScene(label = '', start = 0, end = 0, shows = ''): Scene {
   return { id: `s${Date.now().toString(36)}${seq}`, label, start, end, shows };
 }
 
-/** On ne part jamais d'une page blanche : trois scènes types, à réécrire. */
+export function round1(n: number): number {
+  return Math.round(n * 10) / 10;
+}
+
+/**
+ * Construit les scènes d'un modèle pour une durée donnée.
+ * Le texte déjà saisi est conservé, position par position : changer de durée ou de
+ * modèle ne doit jamais effacer ce que la personne a écrit.
+ */
+export function buildScenes(id: TemplateId, seconds: number, previous: Scene[] = []): Scene[] {
+  const tpl = TEMPLATES.find((t) => t.id === id) ?? TEMPLATES[0];
+  let cursor = 0;
+  return tpl.beats.map((b, i) => {
+    const last = i === tpl.beats.length - 1;
+    const start = round1(cursor);
+    const end = last ? seconds : round1(Math.min(seconds, cursor + seconds * b.share));
+    cursor = end;
+    const prev = previous[i];
+    return {
+      id: prev ? prev.id : newScene().id,
+      // en mode libre, on garde le nom que la personne a donné
+      label: id === 'libre' && prev && prev.label.trim() ? prev.label : b.label,
+      start,
+      end,
+      shows: prev ? prev.shows : '',
+    };
+  });
+}
+
 export function emptyDraft(): Draft {
+  const seconds = 15;
+  const template: TemplateId = 'ppa';
   return {
     brand: '',
     product: '',
@@ -203,12 +385,9 @@ export function emptyDraft(): Draft {
     promise: '',
     action: '',
     platform: 'reels',
-    fps: 30,
-    scenes: [
-      newScene('Accroche', 0, 3, 'Le problème du client, montré, pas raconté.'),
-      newScene('Preuve', 3, 11, 'Ce que le produit fait, à l’écran, en vrai.'),
-      newScene('Appel', 11, 15, 'Une seule action, lisible jusqu’à la dernière image.'),
-    ],
+    seconds,
+    template,
+    scenes: buildScenes(template, seconds),
     accent: '#C8553D',
     bg: '#2A1A12',
     ink: '#F4E59A',
@@ -224,20 +403,20 @@ export function platformOf(d: Draft): PlatformDef {
   return PLATFORMS.find((p) => p.id === d.platform) ?? PLATFORMS[0];
 }
 
-/** Durée totale = fin de la dernière scène. */
+/** Durée réelle, lue sur les scènes. Elle vaut `seconds` tant qu'on n'a rien ajusté à la main. */
 export function duration(d: Draft): number {
   return d.scenes.reduce((max, s) => Math.max(max, s.end), 0);
 }
 
 export function frameCount(d: Draft): number {
-  return Math.round(duration(d) * d.fps);
+  return Math.round(duration(d) * FPS);
 }
 
 export type Issue = { level: 'error' | 'warn'; text: string };
 
 /**
- * Le moteur de vérification du chronométrage. C'est lui qui évite le raté le plus
- * fréquent : des scènes qui se chevauchent ou qui laissent un trou.
+ * Vérification du minutage. Elle ne sert plus qu'au panneau « ajuster » : avec un modèle,
+ * le minutage est cohérent par construction. Rien ici ne bloque la génération du brief.
  */
 export function checkTiming(d: Draft): Issue[] {
   const out: Issue[] = [];
@@ -249,8 +428,6 @@ export function checkTiming(d: Draft): Issue[] {
     } else if (s.end - s.start < 1) {
       out.push({ level: 'warn', text: `« ${s.label || 'Scène sans nom'} » dure moins d’une seconde. Personne n’aura le temps de la lire.` });
     }
-    if (!s.label.trim()) out.push({ level: 'warn', text: 'Une scène n’a pas de nom.' });
-    if (!s.shows.trim()) out.push({ level: 'warn', text: `« ${s.label || 'Scène sans nom'} » ne dit pas ce qu’on voit.` });
   });
 
   for (let i = 1; i < ordered.length; i += 1) {
@@ -266,22 +443,24 @@ export function checkTiming(d: Draft): Issue[] {
     }
   }
 
-  if (ordered.length && ordered[0].start > 0) {
-    out.push({ level: 'warn', text: `La première scène commence à ${round1(ordered[0].start)} s. Les premières images seront vides.` });
+  const last = ordered[ordered.length - 1];
+  if (last && last.end - last.start < 3) {
+    out.push({ level: 'warn', text: `« ${last.label || 'La dernière scène'} » porte l’appel à l’action et dure moins de trois secondes. C’est court pour être lu.` });
   }
   return out;
 }
 
-export function round1(n: number): number {
-  return Math.round(n * 10) / 10;
+/**
+ * Assez rempli pour que le brief vaille la peine.
+ * Volontairement permissif : on n'empêche personne d'avancer.
+ */
+export function isUsable(d: Draft): boolean {
+  return d.brand.trim().length > 0 && d.scenes.some((s) => s.shows.trim().length > 0);
 }
 
-/** Assez rempli pour que le brief vaille la peine d'être généré. */
-export function isUsable(d: Draft): boolean {
-  return (
-    d.brand.trim().length > 0 &&
-    d.scenes.length > 0 &&
-    d.scenes.every((s) => s.label.trim() && s.end > s.start) &&
-    checkTiming(d).every((i) => i.level !== 'error')
-  );
+/** Ce qu'il manque, dit en une phrase utile plutôt qu'en interdiction. */
+export function missing(d: Draft): string | null {
+  if (!d.brand.trim()) return 'Il manque le nom de ta marque, au premier écran.';
+  if (!d.scenes.some((s) => s.shows.trim())) return 'Remplis au moins une étape de ta pub, pour que le brief ait quelque chose à raconter.';
+  return null;
 }
