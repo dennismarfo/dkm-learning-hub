@@ -19,78 +19,127 @@ export type GuideStep = {
   detail?: string;
 };
 
-/** Ce que les dix minutes couvrent, et ce qu'elles ne couvrent pas. En tête de page, non négociable. */
+/**
+ * Ce que les dix minutes couvrent, et ce qu'elles ne couvrent pas.
+ * En tête de page, non négociable.
+ * Chiffres vérifiés sur les fichiers de production : tout est daté du 11 septembre 2026,
+ * voix off à 15h21, appel enregistré à 15h37, mixage à 16h14, rendu final à 22h53,
+ * avec une longue coupure entre les deux. Environ deux heures de travail réel.
+ */
 export const HONESTY = {
   covers: [
-    'Écrire le brief de l’animation, scène par scène.',
-    'Obtenir une page web qui dessine la pub à n’importe quelle seconde.',
-    'La filmer et sortir un MP4 vertical prêt pour Meta.',
+    'Décrire ta pub scène par scène, avec les secondes.',
+    'Obtenir l’animation, fabriquée à partir de ta description.',
+    'Sortir une vidéo verticale, prête pour Meta.',
   ],
   excludes: [
-    'La voix off, écrite au mot près et posée sur la seconde.',
-    'Le tournage réel : un vrai écran, un vrai produit, une vraie main.',
+    'Enregistrer ta voix et la caler au mot près.',
+    'Filmer le vrai : ton écran, ton produit, ta main.',
     'Le son, la musique, le mixage.',
-    'La direction artistique vérifiée contre une charte.',
+    'Vérifier que tout respecte bien tes couleurs et tes polices.',
   ],
   note:
-    'Ma pub complète a pris deux jours, pas dix minutes. Les dix minutes, c’est le décor : du brief à l’animation rendue. C’est la partie que les gens voient et sur laquelle on me pose la question.',
+    'Ma pub complète m’a pris une soirée. Voix off, appel enregistré, capture de mon téléphone et montage, tout dans la foulée, environ deux heures de travail réel. Les dix minutes dont je parle, c’est la partie animation : passer de ta description à la vidéo. C’est celle que les gens voient, et c’est sur elle qu’on me pose la question.',
+};
+
+/** Le bloc qui rassure. La plupart des gens décrochent ici s'il n'est pas dit. */
+export const NOT_NEEDED = {
+  no: [
+    'Tu n’écris pas une ligne de code. Pas une seule.',
+    'Tu n’ouvres aucun logiciel de montage.',
+    'Tu ne choisis ni effets, ni transitions, ni calques.',
+  ],
+  yes:
+    'Tu écris un brief. C’est-à-dire : tu décides ce qu’on voit, à quelle seconde, et dans quelles couleurs. Ensuite tu le donnes à Claude Code, et c’est lui qui fabrique.',
+  why:
+    'C’est la seule compétence de ce guide, et c’est la seule qui ne périmera pas. Les outils changent tous les trois mois. Savoir cadrer un travail, non.',
 };
 
 export const PREREQS = [
-  { label: 'Une charte déjà décidée', why: 'Deux ou trois couleurs et deux polices. Si tu les cherches pendant l’exercice, tu ne seras pas à dix minutes.' },
-  { label: 'Claude Code installé', why: 'C’est lui qui écrit la page. Toi, tu écris le brief.' },
-  { label: 'Python, Playwright et ffmpeg', why: 'Les trois outils que le programme de rendu utilise. Une seule installation, une fois pour toutes.' },
+  {
+    label: 'Tes couleurs et tes polices',
+    why: 'Deux ou trois couleurs, deux polices. Décidées avant, pas pendant. Si tu les cherches en cours de route, tu ne seras pas à dix minutes.',
+  },
+  {
+    label: 'Claude Code',
+    why: 'C’est lui qui fabrique la page. Toi, tu décides ce qu’il y a dessus. Si tu ne l’as jamais installé, compte une soirée, une seule fois.',
+  },
+  {
+    label: 'Trois outils, une seule fois',
+    why: 'Tu ne t’en sers jamais directement : ils travaillent pour Claude Code. Tu les installes, et tu les oublies.',
+    command: 'pip install playwright && playwright install chromium\nbrew install ffmpeg',
+  },
 ];
 
 export const GUIDE: GuideStep[] = [
   {
     n: 1,
-    title: 'Écris le tableau des scènes',
+    title: 'Écris ce qu’on voit, seconde par seconde',
     body:
-      'Toute la structure d’une pub tient sur une ligne par scène : son libellé, sa seconde de début, sa seconde de fin, et ce qu’on voit. Rien d’autre. C’est ça, le brief.',
+      'Une ligne par scène : son nom, la seconde où elle commence, la seconde où elle finit, et ce qu’on voit. C’est tout le brief. Une pub de quinze secondes tient en trois ou quatre lignes.',
     detail:
-      'Une pub de soixante secondes en tient dix. Une pub de quinze en tient trois ou quatre. Décide les secondes avant de décider les images : c’est le chronométrage qui commande, pas l’inverse.',
+      'Décide les secondes avant de décider les images. C’est le chronométrage qui commande. Si ton appel à l’action ne dure qu’une seconde, il ne sert à rien, aussi beau soit-il.',
   },
   {
     n: 2,
-    title: 'L’animation est une page web',
+    title: 'Ta pub est une page web',
     body:
-      'Pas un logiciel de montage. Un fichier index.html, avec une fonction render(t) qui dessine l’instant qu’on lui demande. Tu tapes render(8), elle affiche la seconde huit.',
+      'Pas un fichier vidéo, pas un projet de montage. Une page, comme un site. La machine l’écrit à partir de ton brief. Tu l’ouvres dans ton navigateur, tu lui demandes n’importe quelle seconde, et elle te l’affiche.',
     detail:
-      'Deux avantages immédiats. Tu vas n’importe où dans la pub instantanément, sans scroller une timeline. Et comme c’est du texte, changer une couleur d’accent la change dans toutes les scènes d’un coup. Sur une vidéo déjà exportée, tu recommences.',
+      'Deux conséquences agréables. Tu vérifies ta pub tout de suite, sans attendre un rendu. Et comme c’est du texte, changer ta couleur d’accent la change dans toutes les scènes d’un coup. Sur une vidéo déjà exportée, tu recommencerais tout.',
   },
   {
     n: 3,
-    title: 'Un programme de seize lignes la filme',
+    title: 'Un petit programme filme la page',
     body:
-      'render.py ouvre un navigateur sans fenêtre, règle la taille à 1080 par 1920, puis boucle : il appelle render(t), prend une capture, l’envoie à ffmpeg qui empile tout en vidéo.',
+      'Il ouvre ta page sans l’afficher, photographie chaque instant, et recolle les photos en vidéo. Trente photos par seconde. Tu tapes une ligne, tu attends, tu as ton fichier.',
     detail:
-      'Trente images par seconde. Pour soixante secondes, ça fait mille huit cents captures. C’est lent, compte quelques minutes. Pendant ce temps tu ne fais rien, c’est un bon moment pour écrire ta voix off.',
+      'C’est lent, et c’est normal. Pour quinze secondes, compte une à deux minutes. Pour soixante, plutôt cinq. Pendant ce temps tu ne fais rien : c’est un bon moment pour écrire ta voix off.',
   },
 ];
 
-/** Les deux réglages. Réels, tirés de render.py, avec leur symptôme. */
+/**
+ * Les deux réglages. Le lecteur n'a pas à les taper : le générateur les écrit dans son
+ * brief. Il doit savoir pourquoi ils y sont, parce que c'est ce qui lui permet de dire
+ * à la machine qu'elle s'est trompée.
+ */
+export const SETTINGS_INTRO =
+  'Tu n’as pas à retenir ces deux lignes : le générateur les met dans ton brief à ta place. Mais tu dois savoir à quoi elles servent, parce que c’est ce qui te permet de voir quand la machine s’est trompée.';
+
 export const SETTINGS = [
   {
-    code: "await page.evaluate('document.fonts.ready')",
-    title: 'Attendre les polices avant la première capture',
-    symptom: 'Sans cette ligne, les vingt premières images sortent en Times New Roman.',
-    why: 'Le navigateur commence à dessiner avant d’avoir fini de télécharger tes polices. Personne ne le voit venir, parce qu’à l’écran, en ouvrant la page à la main, tout est déjà chargé.',
+    demand: '« Attends que mes polices soient chargées. »',
+    symptom: 'Sinon les premières secondes de ta vidéo sortent dans une autre police que la tienne.',
+    why: 'L’ordinateur commence à photographier avant d’avoir fini de charger ta police. Tu ne le vois jamais en ouvrant la page toi-même, parce qu’à ce moment-là tout est déjà chargé. Tu le découvres dans la vidéo finale.',
+    code: 'document.fonts.ready',
   },
   {
-    code: 'ffmpeg -pix_fmt yuv420p',
-    title: 'Forcer le format de couleur à la sortie',
-    symptom: 'Sans ce réglage, ta vidéo se lit sur ton ordinateur et nulle part ailleurs.',
-    why: 'Meta, iPhone et la plupart des lecteurs refusent les autres formats de couleur. Tu l’apprends en envoyant la pub au client, ce qui est le plus mauvais moment. Piège supplémentaire : si tes images arrivent en JPEG, ffmpeg garde la plage de couleur pleine et sort du yuvj420p en ignorant ton réglage. Il faut convertir la plage en même temps. C’est fait dans le gabarit.',
+    demand: '« Sors la vidéo dans le format que tout le monde lit. »',
+    symptom: 'Sinon ta vidéo marche sur ton ordinateur et refuse de se lire sur Meta et sur iPhone.',
+    why: 'Il existe plusieurs façons de coder les couleurs d’une vidéo, et une seule passe partout. Tu l’apprends en envoyant la pub au client, ce qui est le plus mauvais moment. Piège en plus : le demander ne suffit pas toujours, il faut aussi convertir les couleurs avant. C’est déjà fait dans le gabarit.',
+    code: '-pix_fmt yuv420p',
   },
 ];
 
 export const FAILURES = [
-  'Les scènes se chevauchent ou laissent un trou. Le générateur te le signale avant que tu envoies le brief.',
-  'L’animation dépend de l’heure réelle ou d’un hasard non semé : deux rendus donnent deux vidéos différentes. render(t) doit être déterministe.',
-  'Une incrustation sur fond vert. Ça ne marche presque jamais. Filme le vrai, ou dessine-le.',
-  'La pub est belle mais l’appel à l’action passe en une seconde. Donne-lui au moins trois secondes à l’écran.',
+  'Deux scènes se chevauchent, ou il reste un trou entre elles. Le générateur te le signale avant que tu envoies quoi que ce soit.',
+  'La pub n’est pas identique à chaque rendu. Ça arrive quand l’animation dépend de l’heure réelle ou du hasard. Ton brief doit exiger que la seconde 8 donne toujours exactement la même image.',
+  'La première image est noire. C’est pourtant elle qu’on voit dans le fil avant de cliquer : elle doit déjà dire quelque chose.',
+  'Un fond vert pour incruster une capture d’écran. Ça ne marche presque jamais. Filme le vrai, ou fais-le dessiner.',
+  'La pub est belle, mais l’appel à l’action passe en une seconde. Donne-lui au moins trois secondes, et jusqu’à la dernière image.',
 ];
+
+/** Vote anonyme : mesurer l'intérêt pour un tutoriel de direction artistique. */
+export const VOTE = {
+  topic: 'direction-artistique',
+  eyebrow: 'Un vote, pas un formulaire',
+  title: 'Un tuto pour créer ta direction artistique avec Claude ?',
+  body:
+    'Tes couleurs, tes polices, ton style, décidés avec Claude au lieu d’être copiés ailleurs. C’est ce qui manque à la plupart des gens avant même de penser à une pub. Si ça t’intéresse, dis-le : je saurai s’il faut le faire.',
+  cta: 'Oui, ça m’intéresse',
+  done: 'C’est noté. Merci.',
+  note: 'Anonyme. Pas de courriel, pas de nom, rien d’autre que le compte.',
+};
 
 /* ---------- le générateur ---------- */
 

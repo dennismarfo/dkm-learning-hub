@@ -208,11 +208,9 @@ s'ajoutent ici.
   Maya en motion design. Demande exprimée, pas devinée. Il veut y répondre par un Reel
   (mot-clé PUB) qui renvoie vers un guide, et le guide doit exister avant le Reel : si les
   gens commentent et qu'il n'y a rien à envoyer, on perd exactement les gens qu'on visait.
-- **Périmètre honnête** : les dix minutes couvrent **le décor seul**, du brief à l'animation
-  rendue en MP4. La pub Maya complète (voix off, tournage réel, son, charte vérifiée) a pris
-  deux jours, et `~/Documents/DKM/LearningHub/01-pub-ia/00-STRUCTURE.md` le dit noir sur
-  blanc. Le premier bloc de la page dit ce que les dix minutes couvrent et ce qu'elles ne
-  couvrent pas, avant tout le reste. Se contredire publiquement coûte plus cher qu'un hook.
+- **Périmètre honnête** : les dix minutes couvrent **l'animation seule**, de la description à
+  la vidéo. Le premier bloc de la page dit ce qu'elles couvrent et ce qu'elles ne couvrent pas,
+  avant tout le reste. Se contredire publiquement coûte plus cher qu'un hook.
 - **Décision** : implémenter la ressource comme **page 100 % client** sur `/resources/pub-motion`
   (`src/resources/PubMotion.tsx`, contenu et moteur dans `pub-motion-data.ts`, brief dans
   `pub-motion-brief.ts`), sur le modèle d'Anatomie (D-018) : un guide court lisible, puis un
@@ -250,3 +248,62 @@ s'ajoutent ici.
    couleur pleine et sortait du `yuvj420p` en ignorant le réglage. La conversion
    `-vf scale=in_range=full:out_range=tv` est ajoutée avant l'encodage. Vérifié : le rendu sort
    en `yuv420p`, `color_range=tv`, 1080×1920, 30 i/s, 450 images, 15,000 s.
+
+---
+
+## 2026-09-21 — Corrections après relecture de Dennis (Claude Code)
+
+### D-021 — La pub Maya a pris une soirée, pas deux jours : correction propagée
+- **Contexte** : `00-STRUCTURE.md` affirmait « la pub a pris deux jours ». D-020 et toute la
+  ressource reprenaient ce chiffre. Dennis a corrigé : voix off, enregistrement de l'appel et
+  capture vidéo de son téléphone ont été faits dans la foulée, le même jour.
+- **Vérification** : les horodatages de `~/Documents/OptiAI/.../pub-maya/` donnent tout au
+  **11 septembre 2026** : voix off 15h21 et 15h22, appel enregistré 15h37, mixage audio 16h14,
+  maquettes de direction artistique 21h44, rendu final 22h53. Longue coupure entre 16h26 et
+  21h43, soit **environ deux heures de travail réel**. Le pipeline `Video/` n'a jamais servi :
+  aucune sortie « maya » dans `Video/output/`.
+- **Décision** : dire « **une soirée, environ deux heures de travail réel** » partout, et
+  « **l'animation** » plutôt que « le décor » pour désigner les dix minutes. Corrigé dans
+  `pub-motion-data.ts`, `pub-motion-brief.ts`, `App.tsx`, `REEL-pub-motion.md`, la mémoire
+  projet, et **à la source** dans `01-pub-ia/00-STRUCTURE.md`.
+- **Conséquence** : l'affirmation devient à la fois plus forte et vraie. Une pub complète en
+  une soirée impressionne davantage que la même en deux jours.
+
+### D-022 — HyperFrames n'entre pas dans le guide : il n'a pas servi à la pub Maya
+- **Contexte** : Dennis utilise HyperFrames 0.8.20 (épinglé) dans `~/Documents/DKM/Video/`
+  pour ses Reels (`hyperframes lint`, `render`, `check --caption-zone --frame-check`). Question
+  posée : faut-il l'enseigner dans le guide ?
+- **Vérification** : zéro occurrence de « hyperframe » dans `pub-maya/`. `BRIEF_CLAUDE_CODE.md`
+  cite Playwright, ffmpeg, whisper et `render.py`. Aucune sortie « maya » dans `Video/output/`.
+- **Décision** : **ne pas en parler**. Le guide raconte la pub Maya, donc Playwright et ffmpeg.
+  Règle retenue de Dennis : on ne mentionne un outil que s'il a réellement servi à ce qu'on
+  raconte. Si un futur contenu part du pipeline `Video/`, HyperFrames y aura sa place.
+
+### D-023 — Langue du guide : pour quelqu'un qui ne s'y connaît pas
+- **Contexte** : Dennis a jugé la première version « trop technique pour quelqu'un qui ne s'y
+  connaît pas ». Le guide ouvrait sur `render(t)`, `index.html`, Playwright et ffmpeg.
+- **Décision** : réécriture complète du contenu de `pub-motion-data.ts`. Ajout d'un bloc
+  **« Tu n'as pas besoin de savoir coder »** (`NOT_NEEDED`) juste après l'honnêteté, parce que
+  c'est là que les gens décrochent. Les deux réglages deviennent **deux exigences à mettre dans
+  le brief**, formulées en phrases (« Attends que mes polices soient chargées »), le symptôme
+  d'abord, la ligne de code reléguée en bas comme vérification facultative. Le jargon est
+  expliqué à sa première apparition, ou supprimé.
+- **Pourquoi c'est aligné sur la thèse** : le lecteur n'écrit jamais de code, il écrit un brief.
+  Présenter les réglages comme des lignes à taper contredisait la thèse du produit.
+- **Conséquence** : espacement revu aussi (`.pub-guide` en grille, gap 36px, cartes à 38px de
+  padding), la page se lit au lieu de se remplir.
+
+### D-024 — Vote anonyme sur l'intérêt pour un tuto « direction artistique »
+- **Contexte** : Dennis veut mesurer si les gens veulent un tutoriel sur la création d'une
+  direction artistique avec Claude. Il a déjà la matière : `pub-maya/maquettes-da/` compare
+  trois pistes.
+- **Décision** : un **vote anonyme** à l'étape « La charte » du générateur, c'est-à-dire au
+  moment exact où la personne doit entrer ses couleurs et se rend compte qu'elle n'en a pas.
+  Ni nom, ni courriel, ni consentement à gérer : un bouton, un compte.
+  Le vote est **toujours réellement enregistré** via `track('pub_vote', { topic })`
+  (Vercel Web Analytics, D-019), donc aucun faux formulaire au sens de D-017 même sans webhook.
+  `VITE_VOTE_WEBHOOK_URL`, quand il est défini, ajoute une trace durable côté n8n.
+  Anti-double-vote par `localStorage` (`dkm.vote.direction-artistique`), assumé comme
+  approximatif : il décourage le clic répété, il ne prétend pas à l'unicité.
+- **Conséquence** : pas de troisième mot-clé en DM, ce que Dennis voulait éviter. Si le compte
+  monte, le tuto direction artistique devient le produit suivant.

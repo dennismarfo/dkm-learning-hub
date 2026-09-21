@@ -2,6 +2,20 @@
 
 Journal de coordination entre Dennis, Claude Code et Hermès.
 
+## 2026-09-21 — Claude Code (corrections après relecture de Dennis)
+
+- **La pub Maya a pris une soirée, pas deux jours.** Vérifié sur les horodatages de
+  `pub-maya/` : tout le 11 septembre, 15h37 à 22h53 avec une longue coupure, ~2 h de travail
+  réel. Corrigé partout, **y compris à la source** dans `01-pub-ia/00-STRUCTURE.md`. Voir D-021.
+- **HyperFrames n'entre pas dans le guide** : zéro occurrence dans `pub-maya/`, la pub est
+  passée par `render.py`. Voir D-022.
+- **Guide réécrit pour un non-technique** : bloc « Tu n'as pas besoin de savoir coder », les
+  deux réglages deviennent des exigences en français, le code passe en vérification
+  facultative. Espacement revu. Voir D-023.
+- **Vote anonyme** sur l'intérêt pour un tuto direction artistique, à l'étape « La charte ».
+  Compté via Vercel Analytics dans tous les cas ; webhook optionnel. Voir D-024 et la demande
+  en bas de ce fichier.
+
 ## 2026-09-21 — Claude Code (ressource « La pub en dix minutes »)
 
 - Nouvelle ressource sur `/resources/pub-motion` (raccourci `/pub`) : guide court, puis
@@ -433,3 +447,31 @@ Note 2026-06-25 : pour la partie site/mini-LMS, voir maintenant `docs/product-we
 - **Ordre à respecter** : la ressource doit être en ligne **avant** la publication du Reel
   « PUB ». Le webhook, lui, peut arriver après : sans lui la ressource marche, elle ne
   capture simplement rien.
+
+---
+
+## Handoff pour Hermès · webhook « Votes » (vote anonyme, D-024)
+
+- **Contexte** : la ressource « La pub en dix minutes » contient un vote anonyme à l'étape
+  « La charte » : *« Un tuto pour créer ta direction artistique avec Claude ? »*. Il n'y a
+  **ni nom, ni courriel, ni consentement à gérer** : le vote ne contient aucune donnée
+  personnelle.
+- **Ce webhook est facultatif.** Le vote est déjà compté via `track('pub_vote', { topic })`
+  dans Vercel Web Analytics. Le webhook ajoute une trace durable et interrogeable côté n8n,
+  utile si les événements personnalisés sont limités par le plan Vercel (cf. D-019).
+- **Action attendue** :
+  1. Workflow n8n « DKM — Votes », chemin `/webhook/vote`, POST JSON, CORS `*`.
+  2. Corps reçu : `{ source: 'pub-motion', topic: 'direction-artistique', vote: 'oui', sentAt }`.
+     Prévoir que `source` et `topic` varieront : ce webhook est générique, pas propre à la pub.
+  3. Stocker dans une base Notion « Votes » (à créer) ou une table dédiée. **Vérifier l'état
+     réel avant de choisir, ne rien supposer.**
+  4. La réponse n'a pas d'importance : le client n'attend rien et n'affiche aucune erreur, le
+     vote étant déjà compté côté analytics.
+  5. Définir `VITE_VOTE_WEBHOOK_URL` dans les variables Vercel (Production + Preview), puis
+     redéployer.
+- **Tests** : cliquer le vote sur la preview, vérifier la ligne ; vérifier que le bouton passe
+  à « C'est noté. Merci. » et ne repart pas au rechargement (clé `dkm.vote.direction-artistique`
+  en localStorage) ; vérifier que le vote fonctionne **sans** la variable définie.
+- **Limite assumée** : l'anti-double-vote est en `localStorage`. Il décourage le clic répété,
+  il ne prétend pas à l'unicité. Pour un signal d'intérêt, c'est suffisant ; ne pas présenter
+  ces chiffres comme un sondage rigoureux.

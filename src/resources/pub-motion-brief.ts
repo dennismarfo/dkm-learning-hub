@@ -159,7 +159,7 @@ export function buildBrief(d: Draft): string {
 
   out.push('---');
   out.push('');
-  out.push('_Ce brief couvre le décor : du brief à l’animation rendue. La voix off, le tournage réel, le son et le mixage sont un autre travail, et il est plus long._');
+  out.push('_Ce brief couvre l’animation : de ta description à la vidéo. La voix off, le tournage réel, le son et le mixage sont un autre travail. Pour ma propre pub, l’ensemble a tenu dans une soirée._');
   out.push('');
   out.push('_DKM Learning Hub · apprendre, documenter, construire._');
   out.push('');

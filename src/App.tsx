@@ -650,11 +650,12 @@ function Resources() {
           <h2 className="display section-title">La pub en dix minutes.</h2>
           <div className="grid grid2">
             <div className="card">
-              <h2 className="display section-title">Une page web, seize lignes, un MP4.</h2>
+              <h2 className="display section-title">Tu décris, la machine fabrique.</h2>
               <p>
-                Pas d’agence, pas de monteur, pas de logiciel de montage. Le guide montre comment le décor d’une pub motion
-                design se fabrique, et les deux réglages qui décident si elle est diffusable. Ensuite tu écris ton brief,
-                scène par scène, et tu repars avec un <strong>.md</strong> à coller dans Claude Code.
+                Pas d’agence, pas de monteur, pas de logiciel de montage, et pas une ligne de code à écrire. Le guide
+                montre comment l’animation d’une pub se fabrique, et les deux choses à exiger pour qu’elle soit
+                diffusable. Ensuite tu décris ta pub scène par scène, et tu repars avec un <strong>.md</strong> à coller
+                dans Claude Code.
               </p>
               <div className="actions">
                 <Button onClick={() => go('/resources/pub-motion')}>Lire le guide, écrire mon brief</Button>
@@ -662,11 +663,11 @@ function Resources() {
             </div>
             <div className="card dark">
               <div className="eyebrow">Ce que couvrent les dix minutes</div>
-              <h2>Le décor, pas la pub entière.</h2>
+              <h2>L’animation, pas la pub entière.</h2>
               <p>
-                Dix minutes pour passer du brief à l’animation rendue. La voix off, le tournage réel, le son et la charte
-                vérifiée sont un autre travail, et il est plus long. C’est écrit en haut de la ressource, avant tout le
-                reste.
+                Dix minutes pour passer de ta description à la vidéo. La voix off, le tournage réel et le son sont un
+                autre travail : pour ma propre pub, l’ensemble a tenu dans une soirée. C’est écrit en haut de la
+                ressource, avant tout le reste.
               </p>
             </div>
           </div>

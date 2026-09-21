@@ -6,9 +6,12 @@ import {
   FPS_CHOICES,
   GUIDE,
   HONESTY,
+  NOT_NEEDED,
   PLATFORMS,
   PREREQS,
   SETTINGS,
+  SETTINGS_INTRO,
+  VOTE,
   STORAGE_KEY,
   checkTiming,
   duration,
@@ -42,7 +45,17 @@ type Screen = { kind: 'guide' } | { kind: 'step'; i: number } | { kind: 'lead' }
 const STEPS = ['La pub', 'Le format', 'Les scènes', 'La charte'];
 
 const WEBHOOK = (import.meta.env.VITE_PUB_WEBHOOK_URL as string | undefined)?.trim() || '';
+const VOTE_WEBHOOK = (import.meta.env.VITE_VOTE_WEBHOOK_URL as string | undefined)?.trim() || '';
 const LEAD_KEY = 'dkm.pub-motion.lead';
+const VOTE_KEY = `dkm.vote.${VOTE.topic}`;
+
+function voteDone(): boolean {
+  try {
+    return window.localStorage.getItem(VOTE_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
 
 function leadDone(): boolean {
   try {
@@ -292,6 +305,7 @@ export default function PubMotion() {
   const [copied, setCopied] = useState(false);
   const [lead, setLead] = useState({ name: '', email: '', consent: false });
   const [leadState, setLeadState] = useState<'idle' | 'sending' | 'error'>('idle');
+  const [voted, setVoted] = useState(voteDone);
 
   useEffect(() => save(draft, screen), [draft, screen]);
 
@@ -353,6 +367,46 @@ export default function PubMotion() {
     else setScreen({ kind: 'brief' });
   };
 
+  /**
+   * Vote anonyme. Le compte est toujours réel : `track` l'enregistre dans Vercel Web
+   * Analytics même sans webhook. Le webhook, quand il est configuré, ajoute une trace
+   * durable côté n8n. Aucune donnée personnelle dans les deux cas.
+   */
+  const sendVote = () => {
+    if (voted) return;
+    setVoted(true);
+    try {
+      window.localStorage.setItem(VOTE_KEY, '1');
+    } catch {
+      /* stockage indisponible : le vote part quand même */
+    }
+    track('pub_vote', { topic: VOTE.topic });
+    if (!VOTE_WEBHOOK) return;
+    void fetch(VOTE_WEBHOOK, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ source: 'pub-motion', topic: VOTE.topic, vote: 'oui', sentAt: new Date().toISOString() }),
+    }).catch(() => {
+      /* jamais bloquant : le vote est déjà compté côté analytics */
+    });
+  };
+
+  const voteBlock = (
+    <div className="card dark pub-vote">
+      <div className="eyebrow">{VOTE.eyebrow}</div>
+      <h3>{VOTE.title}</h3>
+      <p>{VOTE.body}</p>
+      <div className="actions">
+        {voted ? (
+          <span className="pub-voted">{VOTE.done}</span>
+        ) : (
+          <Button onClick={sendVote}>{VOTE.cta}</Button>
+        )}
+      </div>
+      <p className="ana-hint">{VOTE.note}</p>
+    </div>
+  );
+
   const sendLead = async () => {
     if (!lead.email.trim() || !lead.consent) return;
     setLeadState('sending');
@@ -413,20 +467,21 @@ export default function PubMotion() {
 
   if (screen.kind === 'guide') {
     return shell(
-      <>
+      <div className="pub-guide">
         <section className="hero ana-hero">
           <div className="eyebrow">Ressource · gratuite</div>
           <h1 className="display h1 ana-h1">La pub en dix minutes.</h1>
           <p className="lead">
-            Pas d’agence, pas de monteur, pas de logiciel de montage. Une page web, un programme de seize lignes qui la
-            filme, et un brief que tu écris toi-même. Voici comment, et ce que les dix minutes couvrent vraiment.
+            Pas d’agence, pas de monteur, pas de logiciel de montage. Tu décris ta pub, la machine la fabrique. Voici
+            comment, ce que les dix minutes couvrent vraiment, et les deux choses à exiger pour que le résultat soit
+            diffusable.
           </p>
         </section>
 
         <div className="card ana-card pub-honesty">
           <div className="eyebrow">D’abord, l’honnêteté</div>
           <h2 className="display section-title" style={{ marginTop: 8 }}>
-            Dix minutes, oui. Mais pour le décor.
+            Dix minutes, oui. Mais pour l’animation.
           </h2>
           <p className="lead" style={{ fontSize: 18 }}>
             {HONESTY.note}
@@ -451,6 +506,20 @@ export default function PubMotion() {
           </div>
         </div>
 
+        <div className="card dark ana-card">
+          <div className="eyebrow">Avant que tu te sauves</div>
+          <h2 className="display section-title" style={{ marginTop: 8 }}>
+            Tu n’as pas besoin de savoir coder.
+          </h2>
+          <ul className="pub-list no">
+            {NOT_NEEDED.no.map((x) => (
+              <li key={x}>{x}</li>
+            ))}
+          </ul>
+          <p className="lead pub-yes-line">{NOT_NEEDED.yes}</p>
+          <p>{NOT_NEEDED.why}</p>
+        </div>
+
         <div className="card ana-card">
           <div className="eyebrow">Avant de commencer</div>
           <h2 className="display section-title" style={{ marginTop: 8 }}>
@@ -461,6 +530,7 @@ export default function PubMotion() {
               <div className="card" key={p.label}>
                 <h3>{p.label}</h3>
                 <p>{p.why}</p>
+                {p.command && <pre className="pub-command">{p.command}</pre>}
               </div>
             ))}
           </div>
@@ -486,19 +556,21 @@ export default function PubMotion() {
         </div>
 
         <div className="card dark ana-card">
-          <div className="eyebrow">Les deux réglages</div>
+          <div className="eyebrow">Les deux exigences</div>
           <h2 className="display section-title" style={{ marginTop: 8 }}>
             Ce qui sépare le pro de l’amateur.
           </h2>
           <p className="lead" style={{ fontSize: 18 }}>
-            Deux lignes. Elles n’ont l’air de rien, et ce sont elles qui décident si ta pub est diffusable.
+            {SETTINGS_INTRO}
           </p>
-          {SETTINGS.map((s) => (
-            <div className="pub-setting" key={s.code}>
-              <code className="pub-code">{s.code}</code>
-              <h3>{s.title}</h3>
-              <p className="pub-symptom">{s.symptom}</p>
-              <p>{s.why}</p>
+          {SETTINGS.map((x) => (
+            <div className="pub-setting" key={x.code}>
+              <h3>{x.demand}</h3>
+              <p className="pub-symptom">{x.symptom}</p>
+              <p>{x.why}</p>
+              <p className="pub-code-line">
+                <span>La ligne exacte, si tu veux vérifier :</span> <code className="pub-code">{x.code}</code>
+              </p>
             </div>
           ))}
         </div>
@@ -509,13 +581,13 @@ export default function PubMotion() {
             Deux fichiers, pour voir le circuit une fois.
           </h2>
           <p className="lead" style={{ fontSize: 18 }}>
-            Trois scènes, quinze secondes, et le programme qui les filme. Ouvre la page, tape <code>render(5)</code> dans la
-            console, change une couleur, lance le rendu. Ne cherche pas à faire ta pub tout de suite : fais le tour complet
-            une fois, pour que le circuit devienne familier.
+            Une pub de démonstration, trois scènes, quinze secondes, et le programme qui la filme. Ouvre-la, change une
+            couleur, lance le rendu. Ne cherche pas à faire ta vraie pub tout de suite : fais le tour complet une fois,
+            pour que le circuit devienne familier.
           </p>
           <div className="actions">
             <a className="btn" href="/gabarit-pub/index.html" target="_blank" rel="noopener">
-              Ouvrir l’animation
+              Voir l’animation
             </a>
             <a className="btn light" href="/gabarit-pub/index.html" download="index.html">
               index.html
@@ -528,15 +600,15 @@ export default function PubMotion() {
             </a>
           </div>
           <p className="ana-hint">
-            Mets les trois fichiers dans le même dossier vide. Le gabarit utilise les polices du système pour marcher tout
-            de suite : c’est en mettant les tiennes que le premier réglage devient indispensable.
+            Mets les trois fichiers dans un même dossier vide. Le gabarit utilise les polices de ton ordinateur pour
+            marcher tout de suite : c’est en mettant les tiennes que la première exigence devient indispensable.
           </p>
         </div>
 
         <div className="card ana-card">
           <div className="eyebrow">Ce qui rate</div>
           <h2 className="display section-title" style={{ marginTop: 8 }}>
-            Les quatre erreurs que je vois le plus.
+            Les cinq erreurs que je vois le plus.
           </h2>
           <ul className="pub-list no">
             {FAILURES.map((f) => (
@@ -548,11 +620,11 @@ export default function PubMotion() {
         <div className="card ana-card ana-start">
           <div className="eyebrow">À toi</div>
           <h2 className="display section-title" style={{ marginTop: 8 }}>
-            Écris ton brief maintenant.
+            Décris ta pub maintenant.
           </h2>
           <p className="lead" style={{ fontSize: 18 }}>
-            Quatre écrans : ta pub, ton format, tes scènes, ta charte. À la fin tu repars avec un brief en Markdown, prêt à
-            coller dans Claude Code. Tout reste dans ton navigateur.
+            Quatre écrans : ta pub, son format, tes scènes, tes couleurs. À la fin tu repars avec un brief prêt à coller
+            dans Claude Code. Tout reste dans ton navigateur.
           </p>
           <div className="soul-nav">
             <span className="ana-note">Environ cinq minutes. Tu peux t’arrêter et revenir.</span>
@@ -579,7 +651,7 @@ export default function PubMotion() {
             </div>
           </div>
         </div>
-      </>,
+      </div>,
     );
   }
 
@@ -701,7 +773,7 @@ export default function PubMotion() {
 
         <div className="card dark pub-next ana-print-hide">
           <div className="eyebrow">La suite</div>
-          <h3>Le décor est fait. Le reste demande un système.</h3>
+          <h3>L’animation est faite. Le reste demande un système.</h3>
           <p>
             Une pub, c’est une pièce. Si tu veux savoir laquelle de tes tâches mérite vraiment d’être automatisée avant de
             faire des pubs, commence par la carte de ton entreprise.
@@ -878,7 +950,9 @@ export default function PubMotion() {
     return (
       <>
         <p className="lead" style={{ fontSize: 18 }}>
-          Ces valeurs seront écrites comme fixes dans le brief. La machine n’a pas le droit de les améliorer.
+          Ce sont tes couleurs et tes polices. Elles seront écrites comme fixes dans le brief : la machine n’a pas le
+          droit de les « améliorer ». Si tu n’en as pas encore, mets ce que tu utilises déjà ailleurs, et garde les mêmes
+          partout.
         </p>
         <div className="pub-swatches">
           <Swatch id="pub-accent" label="Accent" value={draft.accent} onChange={(v) => setDraft({ accent: v })} />
@@ -919,6 +993,7 @@ export default function PubMotion() {
             area
           />
         </div>
+        {voteBlock}
       </>
     );
   };
