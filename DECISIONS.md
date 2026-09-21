@@ -198,3 +198,55 @@ s'ajoutent ici.
   les pages vues fonctionnent dans tous les cas.
 - **Conséquence** : Claude (Cowork) peut lire les chiffres via le MCP Vercel et les
   intégrer au brief. Aucun tracker tiers, pas de consentement à gérer.
+
+---
+
+## 2026-09-21 — Ressource « La pub en dix minutes » (Claude Code)
+
+### D-020 — Guide + générateur de brief sur `/resources/pub-motion`, atelier à part du parcours
+- **Contexte** : plusieurs personnes ont demandé à Dennis comment il avait produit la pub
+  Maya en motion design. Demande exprimée, pas devinée. Il veut y répondre par un Reel
+  (mot-clé PUB) qui renvoie vers un guide, et le guide doit exister avant le Reel : si les
+  gens commentent et qu'il n'y a rien à envoyer, on perd exactement les gens qu'on visait.
+- **Périmètre honnête** : les dix minutes couvrent **le décor seul**, du brief à l'animation
+  rendue en MP4. La pub Maya complète (voix off, tournage réel, son, charte vérifiée) a pris
+  deux jours, et `~/Documents/DKM/LearningHub/01-pub-ia/00-STRUCTURE.md` le dit noir sur
+  blanc. Le premier bloc de la page dit ce que les dix minutes couvrent et ce qu'elles ne
+  couvrent pas, avant tout le reste. Se contredire publiquement coûte plus cher qu'un hook.
+- **Décision** : implémenter la ressource comme **page 100 % client** sur `/resources/pub-motion`
+  (`src/resources/PubMotion.tsx`, contenu et moteur dans `pub-motion-data.ts`, brief dans
+  `pub-motion-brief.ts`), sur le modèle d'Anatomie (D-018) : un guide court lisible, puis un
+  générateur en quatre étapes (la pub, le format, les scènes, la charte), brouillon persisté
+  en `localStorage`, export **Markdown** par Blob / presse-papier / impression.
+  Le cœur est le **tableau des scènes** (libellé, seconde de début, seconde de fin, ce qu'on
+  voit) et son **moteur de vérification** (`checkTiming`) qui signale chevauchements, trous et
+  scènes trop courtes. Raccourci partageable `/pub` → `/resources/pub-motion`, comme `/anatomie`.
+- **Ligne gratuit / payant** : la ressource livre un **gabarit de départ neutre**
+  (`public/gabarit-pub/`, trois scènes, quinze secondes) et non le vrai `index.html` de la pub
+  Maya (dix scènes), ni le brief réel de quatre pages, ni `RAPPORT_MONTAGE.md`, qui restent la
+  matière du produit 01 payant. `render.py` est livré tel quel : ses seize lignes sont déjà
+  racontées publiquement dans le Reel.
+- **Placement** : pas une « Étape 3 ». Anatomie et Soul Document forment un parcours « ton
+  système » ; celle-ci est un **atelier de création**, présenté dans une section distincte sous
+  le parcours en deux étapes. La fin du brief renvoie vers `/resources/anatomie`.
+- **Navigation** : contrairement à Anatomie qui reste en mode autonome (`STANDALONE = true`),
+  cette page garde la navigation vers le Hub. Son rôle est d'alimenter l'entonnoir depuis le
+  Reel, une page sans issue ne le ferait pas. À réexaminer si Dennis veut aligner les deux.
+- **Capture courriel** : conforme à D-017 et D-018, **aucun faux formulaire**. L'écran n'existe
+  que si `VITE_PUB_WEBHOOK_URL` est défini au build ; il envoie prénom, courriel, consentement
+  et un **résumé de format** (durée, nombre de scènes, plateforme), jamais le contenu de la pub.
+  L'utilisateur peut toujours passer. Création du webhook n8n déléguée à Hermès (cf. `HANDOFF.md`).
+- **Mesure** (D-019) : `pub_start`, `pub_resume`, `pub_brief`, `pub_download`, `pub_copy`,
+  `pub_print`, `pub_lead`, `pub_lead_skip`. Aucune donnée personnelle.
+- **Conséquence** : zéro dépendance ajoutée, aucun backend, aucun secret. Deux mots-clés actifs
+  côté contenu, ANATOMIE et PUB ; SOUL reste accessible mais n'est plus promu.
+
+#### Deux pièges corrigés dans le gabarit, vérifiés au rendu
+1. **Fondu enchaîné, pas fondu au noir.** La première version laissait une image entièrement
+   noire à chaque transition, et faisait partir la première image du noir. Sur un Reel la
+   première image sert de vignette et la dernière porte l'appel à l'action. La scène entrante
+   arrive maintenant par dessus la sortante, et il n'y a aucun fondu aux deux bouts.
+2. **`-pix_fmt yuv420p` ne suffit pas avec un pipe JPEG.** ffmpeg conservait la plage de
+   couleur pleine et sortait du `yuvj420p` en ignorant le réglage. La conversion
+   `-vf scale=in_range=full:out_range=tv` est ajoutée avant l'encodage. Vérifié : le rendu sort
+   en `yuv420p`, `color_range=tv`, 1080×1920, 30 i/s, 450 images, 15,000 s.

@@ -40,8 +40,15 @@ Le flux automatisé s'arrête à `status = 'structured'` + notification. La suit
 
 Le repo héberge aussi le **Learning Hub** : un mini-LMS (Vite + React + TS, **sans
 backend**) qui sert le cours **Architecture IA** (3 tomes, 20 modules, 15 démos
-interactives, examen) et des ressources comme le **Soul Document** (générateur de
-mémoire business pour une IA, export markdown, 100 % côté navigateur).
+interactives, examen) et trois ressources, toutes 100 % côté navigateur avec export
+markdown :
+
+- **L'anatomie de ton entreprise** (`/resources/anatomie`, raccourci `/anatomie`) : audit
+  guidé des 7 fonctions, rapport IA-ready. Cf. D-018.
+- **Soul Document** (`/resources/soul-document`) : générateur de mémoire business. Cf. D-016.
+- **La pub en dix minutes** (`/resources/pub-motion`, raccourci `/pub`) : guide de production
+  d'une pub motion design, puis générateur de brief exécutable par Claude Code. Gabarit de
+  départ dans `public/gabarit-pub/`. Cf. D-020.
 
 ```bash
 npm install
@@ -90,7 +97,7 @@ Conventions frontend : voir [`CLAUDE.md`](CLAUDE.md). Décisions produit/design 
 │   ├── nav.ts                  # helper de navigation
 │   ├── components/             # primitives UI (Brand, Button, Nav, ...)
 │   ├── demos/                  # démos interactives (15)
-│   ├── resources/              # Soul Document generator
+│   ├── resources/              # Anatomie, Soul Document, La pub en dix minutes
 │   ├── content/                # cours en JSON (généré — ne pas éditer)
 │   └── styles.css              # DA pilotée par tokens
 ├── index.html

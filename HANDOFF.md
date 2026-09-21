@@ -2,6 +2,22 @@
 
 Journal de coordination entre Dennis, Claude Code et Hermès.
 
+## 2026-09-21 — Claude Code (ressource « La pub en dix minutes »)
+
+- Nouvelle ressource sur `/resources/pub-motion` (raccourci `/pub`) : guide court, puis
+  générateur de brief de pub motion design en quatre étapes, export `.md`. Décision **D-020**.
+- Fichiers : `src/resources/PubMotion.tsx`, `pub-motion-data.ts`, `pub-motion-brief.ts`,
+  gabarit de départ dans `public/gabarit-pub/` (`index.html`, `render.py`, `LISEZ-MOI.md`),
+  câblage dans `src/App.tsx`, bloc CSS `.pub-*` dans `src/styles.css`.
+- **Vérifié pour de vrai** : `npm run build` vert, parcours complet en navigateur (guide →
+  4 étapes → brief de 4 347 caractères), détection de chevauchement et de trou dans le
+  chronométrage, raccourci `/pub`, et **rendu MP4 réel du gabarit** (450 images, 15,000 s,
+  1080×1920, `yuv420p`, `color_range=tv`), première et dernière image lisibles.
+- Deux pièges corrigés en cours de route, détaillés dans D-020 : fondu au noir entre les
+  scènes, et `-pix_fmt yuv420p` silencieusement ignoré à cause du pipe JPEG.
+- Aucune dépendance ajoutée, aucun backend, aucun secret.
+- **Action infra en attente** : webhook de capture, voir la section en bas de ce fichier.
+
 ## 2026-08-12 — Claude Code (polish mobile — PR 1/3 du plan UX)
 
 - **Audit mobile complet au viewport réel** (Playwright, 360/390/430/530/560/768px)
@@ -379,3 +395,41 @@ Note 2026-06-25 : pour la partie site/mini-LMS, voir maintenant `docs/product-we
   `VITE_ANATOMIE_WEBHOOK_URL` sur Vercel (Production + Preview) avec l'URL de production
   affichée dans le nœud Webhook, puis redéployer ; supprimer la ligne de test
   « Test Claude » dans Notion.
+
+---
+
+## Handoff pour Hermès · webhook « Pub motion » (capture courriel de `/resources/pub-motion`)
+
+- **Contexte** : la ressource « La pub en dix minutes » (D-020) suit exactement le modèle
+  d'Anatomie. L'écran de capture **n'existe que si** `VITE_PUB_WEBHOOK_URL` est défini au
+  build. Sans la variable, la ressource fonctionne entièrement, sans formulaire. Aucun faux
+  formulaire, conformément à D-017.
+- **Fichiers concernés** : `src/resources/PubMotion.tsx` (fonction `sendLead`),
+  `src/resources/pub-motion-brief.ts` (`buildLeadSummary`), `.env.example`, `src/vite-env.d.ts`.
+- **Action attendue** :
+  1. Dupliquer le workflow n8n « DKM — Anatomie Lead Capture » sous le nom
+     « DKM — Pub Motion Lead Capture », chemin `/webhook/pub-motion-lead`, POST JSON, CORS `*`.
+  2. Corps reçu :
+     `{ source: 'pub-motion', name, email, consent: true, summary: { brand, product,
+     platform, format, fps, duration, sceneCount, issues }, sentAt }`.
+     Le **contenu de la pub n'est jamais transmis** : ni les scènes, ni la promesse, ni la
+     charte. Seulement le format.
+  3. Stocker le lead dans la même base Notion « Soul Document — Leads »
+     (id `1c55b3e3fe6f412aa48096726c2e5089`), avec `Source = pub-motion`. Ajouter au besoin
+     les propriétés Format, Durée, Scènes. Vérifier l'état réel de la base, ne rien supposer.
+  4. Répondre `200` avec `{ ok: true }` ; toute autre réponse affiche « l'envoi n'a pas
+     fonctionné » côté client, sans bloquer l'accès au brief.
+  5. Définir `VITE_PUB_WEBHOOK_URL` dans les variables Vercel (Production + Preview),
+     puis redéployer.
+- **Tests** : POST de test depuis la preview ; vérifier la ligne Notion ; vérifier que
+  l'écran de capture disparaît après un envoi réussi (clé `dkm.pub-motion.lead` en
+  localStorage) ; vérifier le parcours complet **sans** la variable définie.
+- **Risques** : CORS mal configuré = échec silencieux côté client (message non bloquant) ;
+  ne jamais committer l'URL du webhook si elle contient un secret.
+- **Note pour Dennis** : `VITE_ANATOMIE_WEBHOOK_URL` n'est toujours pas définie sur Vercel
+  d'après l'état noté le 2026-09-14. Tant qu'elle ne l'est pas, l'écran de capture d'Anatomie
+  n'apparaît pas non plus. Les deux variables se posent au même endroit, autant les faire
+  ensemble.
+- **Ordre à respecter** : la ressource doit être en ligne **avant** la publication du Reel
+  « PUB ». Le webhook, lui, peut arriver après : sans lui la ressource marche, elle ne
+  capture simplement rien.

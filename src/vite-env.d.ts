@@ -3,6 +3,8 @@
 interface ImportMetaEnv {
   /** Webhook (n8n) recevant le courriel + résumé de l'outil Anatomie. Absent = pas de capture. */
   readonly VITE_ANATOMIE_WEBHOOK_URL?: string;
+  /** Webhook (n8n) recevant le courriel + résumé de la ressource « La pub en dix minutes ». Absent = pas de capture. */
+  readonly VITE_PUB_WEBHOOK_URL?: string;
 }
 
 interface ImportMeta {

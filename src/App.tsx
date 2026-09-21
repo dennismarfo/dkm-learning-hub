@@ -5,10 +5,22 @@ import { Brand, Button, Nav, Pill, QuizBlock } from './components';
 import { go } from './nav';
 import SoulDocument from './resources/SoulDocument';
 import Anatomie from './resources/Anatomie';
+import PubMotion from './resources/PubMotion';
 import Projects from './Projects';
 import './styles.css';
 
-type View = 'home' | 'courses' | 'course' | 'resources' | 'soul' | 'anatomie' | 'lesson' | 'exam' | 'projects' | 'about';
+type View =
+  | 'home'
+  | 'courses'
+  | 'course'
+  | 'resources'
+  | 'soul'
+  | 'anatomie'
+  | 'pub'
+  | 'lesson'
+  | 'exam'
+  | 'projects'
+  | 'about';
 
 function parseRoute() {
   const path = window.location.pathname.replace(/\/+$/, '') || '/';
@@ -19,10 +31,15 @@ function parseRoute() {
   if (path === '/courses') return { view: 'courses' as View };
   if (parts[0] === 'resources' && parts[1] === 'soul-document') return { view: 'soul' as View };
   if (parts[0] === 'resources' && parts[1] === 'anatomie') return { view: 'anatomie' as View };
-  // Raccourci partageable (reels, bio) : /anatomie → canonique /resources/anatomie
+  if (parts[0] === 'resources' && parts[1] === 'pub-motion') return { view: 'pub' as View };
+  // Raccourcis partageables (reels, bio) : /anatomie et /pub → routes canoniques
   if (path === '/anatomie') {
     window.history.replaceState({}, '', '/resources/anatomie');
     return { view: 'anatomie' as View };
+  }
+  if (path === '/pub') {
+    window.history.replaceState({}, '', '/resources/pub-motion');
+    return { view: 'pub' as View };
   }
   if (path === '/resources') return { view: 'resources' as View };
   if (path === '/projects') return { view: 'projects' as View };
@@ -577,12 +594,12 @@ function Resources() {
       <Nav />
       <section className="band band-ink">
         <div className="wrap hero">
-          <div className="eyebrow">Ressources · Deux outils, un système</div>
+          <div className="eyebrow">Ressources · Un parcours, un atelier</div>
           <h1 className="display h1">Vois ton entreprise, puis donne-la à ton IA.</h1>
           <p className="lead">
             D’abord la carte : sept fonctions, ce que tu fais vraiment, où part ton temps, par où commencer. Ensuite la
-            mémoire : le Soul Document que toute IA doit connaître avant de t’aider. Sans compte, tout reste dans ton
-            navigateur.
+            mémoire : le Soul Document que toute IA doit connaître avant de t’aider. À côté du parcours, un atelier : la
+            pub en dix minutes. Sans compte, tout reste dans ton navigateur.
           </p>
           <div className="actions">
             <Button onClick={() => go('/resources/anatomie')}>Faire l’anatomie de mon entreprise</Button>
@@ -629,6 +646,32 @@ function Resources() {
           </div>
         </section>
         <section className="section">
+          <div className="eyebrow">Atelier · à part du parcours</div>
+          <h2 className="display section-title">La pub en dix minutes.</h2>
+          <div className="grid grid2">
+            <div className="card">
+              <h2 className="display section-title">Une page web, seize lignes, un MP4.</h2>
+              <p>
+                Pas d’agence, pas de monteur, pas de logiciel de montage. Le guide montre comment le décor d’une pub motion
+                design se fabrique, et les deux réglages qui décident si elle est diffusable. Ensuite tu écris ton brief,
+                scène par scène, et tu repars avec un <strong>.md</strong> à coller dans Claude Code.
+              </p>
+              <div className="actions">
+                <Button onClick={() => go('/resources/pub-motion')}>Lire le guide, écrire mon brief</Button>
+              </div>
+            </div>
+            <div className="card dark">
+              <div className="eyebrow">Ce que couvrent les dix minutes</div>
+              <h2>Le décor, pas la pub entière.</h2>
+              <p>
+                Dix minutes pour passer du brief à l’animation rendue. La voix off, le tournage réel, le son et la charte
+                vérifiée sont un autre travail, et il est plus long. C’est écrit en haut de la ressource, avant tout le
+                reste.
+              </p>
+            </div>
+          </div>
+        </section>
+        <section className="section">
           <div className="eyebrow">Bientôt</div>
           <h2 className="display section-title">D’autres ressources arrivent</h2>
           <div className="grid grid3">
@@ -661,6 +704,7 @@ export default function App() {
   if (route.view === 'about') return <About />;
   if (route.view === 'soul') return <SoulDocument />;
   if (route.view === 'anatomie') return <Anatomie />;
+  if (route.view === 'pub') return <PubMotion />;
   if (route.view === 'exam') return <ExamFlow />;
   if (route.view === 'lesson') return <Lesson moduleId={route.moduleId} />;
   return <Home />;
