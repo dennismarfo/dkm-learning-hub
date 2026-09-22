@@ -150,6 +150,60 @@ export const GUIDE: GuideStep[] = [
   },
 ];
 
+/**
+ * L'échange type avec Claude Code.
+ *
+ * C'est le moment de peur maximale d'un débutant : il a son brief, il ne sait pas ce qui
+ * l'attend derrière. Montrer l'échange enlève la surprise, et surtout il enseigne la vraie
+ * compétence : juger une proposition. Le dernier tour est volontairement un aveu d'échec
+ * de la machine, parce que c'est exactement ce qu'on lui demande dans le brief.
+ */
+export const EXCHANGE = {
+  intro:
+    'Tu n’as jamais fait ça, donc tu ne sais pas à quoi t’attendre. Voilà l’échange, en vrai. Il ressemble à une conversation, parce que c’en est une.',
+  turns: [
+    {
+      who: 'Toi',
+      text: 'Tu ouvres Claude Code dans un dossier vide, tu colles ton brief, tu envoies. Tu n’ajoutes rien : la consigne est déjà écrite dedans.',
+      aside: true,
+    },
+    {
+      who: 'Claude',
+      text: `Voici le découpage que je propose pour tes 15 secondes.
+
+1. L’accroche, 0 à 3 s : le téléphone posé sur la table, 21 h à l’écran, une notification qui arrive.
+2. La preuve, 3 à 11 s : le formulaire se remplit, le chrono démarre, le téléphone sonne.
+3. L’appel, 11 à 15 s : ton numéro et ta phrase, en gros, fixes jusqu’à la dernière image.
+
+Deux choses avant que je commence.
+
+Ton accroche dure 3 secondes et demande de montrer l’heure, le téléphone et la notification. C’est serré. Je propose 4 secondes, prises sur la preuve.
+
+Tu ne dis pas ce qu’on voit pendant que le téléphone sonne. Je peux le dessiner, ou tu me donnes une capture de ton vrai écran. Le vrai est toujours plus convaincant.
+
+Je construis ?`,
+    },
+    {
+      who: 'Toi',
+      text: 'Non, garde 3 secondes pour l’accroche : je retire la notification. Dessine le téléphone, je n’ai pas de capture sous la main.',
+    },
+    {
+      who: 'Claude',
+      text: `C’est noté. J’écris les deux fichiers.
+
+C’est prêt. Une chose à te signaler : je n’avais pas ta police Outfit, j’ai utilisé celle du système pour ne pas bloquer. Dépose le fichier dans un dossier fonts/ et je recâble, ça prend dix secondes.`,
+    },
+  ],
+  checksTitle: 'Ce que tu dois regarder dans sa réponse',
+  checks: [
+    'Est-ce que les trois premières secondes donnent déjà une raison de rester ? Si la première chose intéressante arrive à la huitième, personne ne la verra.',
+    'Est-ce que la dernière étape garde au moins trois secondes, et reste à l’écran jusqu’au bout ? C’est elle qui porte l’appel à l’action.',
+    'Est-ce qu’il te signale ce qu’il n’a pas pu faire ? S’il ne signale jamais rien, méfie-toi : il a probablement inventé quelque chose en silence.',
+  ],
+  closing:
+    'Tu n’as pas à savoir si son code est bon. Tu dois savoir si sa proposition raconte bien ta pub. C’est une compétence que tu as déjà.',
+};
+
 export const SETTINGS_INTRO =
   'Tu n’as pas à retenir ces deux lignes : le générateur les écrit dans ton brief à ta place. Mais tu dois savoir à quoi elles servent, parce que c’est ce qui te permet de voir quand la machine s’est trompée.';
 

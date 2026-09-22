@@ -3,6 +3,7 @@ import { go } from '../nav';
 import { Brand, Button } from '../components';
 import {
   DURATIONS,
+  EXCHANGE,
   FAILURES,
   FPS,
   GUIDE,
@@ -674,6 +675,37 @@ export default function PubMotion() {
               </div>
             </div>
           ))}
+        </div>
+
+        <div className="card ana-card pub-exchange">
+          <div className="eyebrow">Et ensuite ?</div>
+          <h2 className="display section-title" style={{ marginTop: 8 }}>
+            Ce qui se passe quand tu colles ton brief.
+          </h2>
+          <p className="lead" style={{ fontSize: 18 }}>
+            {EXCHANGE.intro}
+          </p>
+          <div className="pub-turns">
+            {EXCHANGE.turns.map((t, k) => (
+              <div key={k} className={`pub-turn ${t.who === 'Claude' ? 'them' : 'you'} ${'aside' in t && t.aside ? 'aside' : ''}`}>
+                <span className="pub-who">{t.who}</span>
+                <div className="pub-said">
+                  {t.text.split('\n\n').map((para, j) => (
+                    <p key={j}>{para}</p>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="pub-checks">
+            <div className="eyebrow">{EXCHANGE.checksTitle}</div>
+            <ul className="pub-list yes">
+              {EXCHANGE.checks.map((c) => (
+                <li key={c}>{c}</li>
+              ))}
+            </ul>
+            <p className="pub-closing">{EXCHANGE.closing}</p>
+          </div>
         </div>
 
         <div className="card dark ana-card">

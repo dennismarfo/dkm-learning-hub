@@ -428,6 +428,22 @@ a.btn{text-decoration:none}
 .pub-plan-steps p{margin:0;color:var(--ink-70);line-height:1.55}
 .pub-time-tag{display:inline-block;margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--terracotta);background:var(--sand-60);border-radius:999px;padding:5px 11px}
 
+/* L'échange type avec Claude Code. Une conversation lisible, pas une capture d'écran. */
+.pub-turns{display:grid;gap:16px;margin:26px 0 8px}
+.pub-turn{border-radius:20px;padding:20px 22px;border:1px solid var(--rule)}
+.pub-turn .pub-who{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;margin-bottom:10px}
+.pub-turn .pub-said p{margin:0 0 12px;line-height:1.6;white-space:pre-wrap}
+.pub-turn .pub-said p:last-child{margin-bottom:0}
+.pub-turn.you{background:var(--surface-2);border-color:transparent;margin-right:clamp(0px,6vw,64px)}
+.pub-turn.you .pub-who{color:var(--terracotta)}
+.pub-turn.them{background:var(--ink);border-color:var(--ink);margin-left:clamp(0px,6vw,64px)}
+.pub-turn.them .pub-who{color:var(--sand)}
+.pub-turn.them .pub-said p{color:rgba(255,253,244,.82)}
+.pub-turn.aside{background:transparent;border:1px dashed var(--rule);margin-right:0}
+.pub-turn.aside .pub-said p{color:var(--ink-70);font-size:15px}
+.pub-checks{margin-top:28px;padding-top:24px;border-top:1px solid var(--rule)}
+.pub-closing{margin-top:20px;font-size:19px;line-height:1.5;color:var(--ink);font-weight:600}
+
 /* Les modèles de pub : on choisit une forme, on ne part jamais d'une page blanche. */
 .pub-templates{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:10px}
 .pub-template{display:block;width:100%;text-align:left;padding:16px 18px;border-radius:18px;border:1px solid var(--rule);background:var(--white);cursor:pointer;transition:border-color .15s,background .15s}

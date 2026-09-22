@@ -375,3 +375,53 @@ s'ajoutent ici.
   le rendu en entier sans couper, donc de tenir la promesse « sans coupure ».
 - **Conséquence** : la vidéo devient la première chose que voit un débutant, et elle sert
   aussi de contenu YouTube autonome. La page reste utilisable sans elle.
+
+---
+
+## 2026-09-22 — Vidéo abandonnée, effort reporté sur le Reel et la ressource (Claude Code)
+
+### D-027 — La démonstration filmée est abandonnée. D-026 est révoquée.
+- **Contexte** : Dennis revient sur sa décision de la veille. Le temps qu'exige un tournage
+  ne se justifie pas pour cette ressource ; il préfère mettre l'effort sur le Reel qu'il va
+  publier et sur la ressource elle-même.
+- **Décision** : aucun tournage, aucune vidéo. Le code reste en place mais **inerte** :
+  `VIDEO.youtubeId` est vide, donc aucun bloc n'est rendu et aucune requête ne part. Le
+  laisser coûte zéro à l'affichage et le retirer puis le réécrire serait du mouvement pour
+  rien. Le plan de tournage reste dans `01-pub-ia/scripts/VIDEO-demo-pub-motion.md` au cas où.
+- **Conséquence** : ce que la vidéo devait apporter, « voir comment ça se passe », doit être
+  porté par le texte. C'est l'objet de D-029.
+- Les deux tâches Notion correspondantes ont été fermées et renommées « Abandonné · … ».
+
+### D-028 — Nouvel angle du Reel : « Je ne l'ai pas montée, je l'ai décrite »
+- **Contexte** : le script précédent avait deux défauts devenus visibles après D-025.
+  Sa minuterie prévoyait d'afficher « le tableau des scènes », qui n'existe plus dans le
+  parcours. Et il contenait « c'est une page web, et un programme de seize lignes qui la
+  filme », exactement le travers de langue que Dennis avait reproché à la ressource.
+- **Décision** : nouvel angle, choisi par Dennis. L'accroche devient **« Cette pub, je ne
+  l'ai pas montée. Je l'ai décrite. »**, suivie du détail que personne ne croit : *je n'ai
+  même pas choisi les secondes, la machine les a proposées, j'ai validé*.
+  « Dix minutes » passe en quatrième position : ça conclut, ça n'accroche pas, parce que
+  tout le monde promet de la vitesse et que ça ne distingue rien.
+- **Structure** : preuve, méthode, preuve. La pub ouvre et ferme ; au milieu on coupe sur
+  l'écran du générateur. Plus aucun plan sur le visage, plus aucune mention technique.
+- **Conséquence** : le Reel et la ressource disent enfin la même chose. Le Reel ne vend pas
+  la technique, il vend le fait qu'il n'en faut pas.
+
+### D-029 — L'échange type avec Claude Code, en remplacement de la vidéo
+- **Contexte** : sans vidéo, il reste un trou. Le débutant sait maintenant quoi remplir,
+  mais pas ce qui l'attend une fois le brief collé dans Claude Code. C'est le moment de peur
+  maximale : il n'a jamais vu à quoi ressemble la réponse, ni ce qu'il est censé répondre.
+  L'exemple de brief rempli, lui, est moins critique : le générateur produit le sien.
+- **Décision** : un bloc **« Ce qui se passe quand tu colles ton brief »** (`EXCHANGE` dans
+  `pub-motion-data.ts`), placé entre « La méthode » et « Les deux exigences ». Quatre tours
+  de conversation réalistes : Claude propose un découpage **et discute deux points**, Dennis
+  refuse l'un et accepte l'autre, puis Claude construit **et signale un échec** (la police
+  manquante).
+- **Le dernier tour est délibéré** : il montre la machine en train d'avouer plutôt que
+  d'inventer, ce que le brief exige d'elle. C'est la thèse en action, pas en théorie.
+- **Ce que ça enseigne** : la section « Ce que tu dois regarder dans sa réponse » donne trois
+  critères qu'un non-technique peut appliquer, dont le plus important : *s'il ne signale
+  jamais rien, méfie-toi*. Et la phrase de clôture lève le dernier doute : « tu n'as pas à
+  savoir si son code est bon, tu dois savoir si sa proposition raconte bien ta pub ».
+- **Conséquence** : la compétence enseignée devient explicite, juger une proposition. C'est
+  exactement la thèse du produit 01, rendue praticable sans une seconde de vidéo.
