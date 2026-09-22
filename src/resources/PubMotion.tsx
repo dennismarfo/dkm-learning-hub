@@ -13,6 +13,7 @@ import {
   SETTINGS,
   SETTINGS_INTRO,
   STORAGE_KEY,
+  VIDEO,
   TEMPLATES,
   VOTE,
   WHAT_YOU_DO,
@@ -219,6 +220,65 @@ function Swatch({ id, label, value, onChange }: { id: string; label: string; val
           spellCheck={false}
         />
       </div>
+    </div>
+  );
+}
+
+/**
+ * Lecteur YouTube en façade : tant qu'on n'a pas cliqué, aucune requête ne part chez
+ * YouTube et aucun cookie n'est posé. Au clic, on insère l'iframe en mode nocookie.
+ * Zéro dépendance, et la page reste légère pour ceux qui ne regardent pas.
+ */
+function VideoBlock() {
+  const [playing, setPlaying] = useState(false);
+  if (!VIDEO.youtubeId) return null;
+  // Vignette locale : rien ne part chez Google avant le clic. Sinon on retombe sur celle
+  // de YouTube, servie par i.ytimg.com, et la mention sous le lecteur le dit honnêtement.
+  const local = !!VIDEO.poster;
+  const poster = VIDEO.poster || `https://i.ytimg.com/vi/${VIDEO.youtubeId}/maxresdefault.jpg`;
+
+  return (
+    <div className="card ana-card pub-video">
+      <div className="eyebrow">La démonstration</div>
+      <h2 className="display section-title" style={{ marginTop: 8 }}>
+        {VIDEO.title}
+      </h2>
+      <p className="lead" style={{ fontSize: 18 }}>
+        {VIDEO.blurb}
+      </p>
+      <div className="pub-player">
+        {playing ? (
+          <iframe
+            src={`https://www.youtube-nocookie.com/embed/${VIDEO.youtubeId}?autoplay=1&rel=0`}
+            title={VIDEO.title}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+            allowFullScreen
+          />
+        ) : (
+          <button
+            type="button"
+            className="reset pub-play"
+            style={{ backgroundImage: `url(${poster})` }}
+            onClick={() => {
+              track('pub_video_play');
+              setPlaying(true);
+            }}
+            aria-label={`Lire la vidéo : ${VIDEO.title}`}
+          >
+            <span className="pub-play-icon" aria-hidden="true">
+              ▶
+            </span>
+            {VIDEO.duration && <span className="pub-play-time">{VIDEO.duration}</span>}
+          </button>
+        )}
+      </div>
+      {!playing && (
+        <p className="ana-hint">
+          {local
+            ? 'Le lecteur ne se charge qu’au clic : rien n’est demandé à YouTube tant que tu ne lances pas la vidéo.'
+            : 'Le lecteur YouTube ne se charge qu’au clic. Seule la vignette vient de leurs serveurs.'}
+        </p>
+      )}
     </div>
   );
 }
@@ -536,6 +596,8 @@ export default function PubMotion() {
             </Button>
           </div>
         </div>
+
+        <VideoBlock />
 
         <div className="card ana-card pub-honesty">
           <div className="eyebrow">D’abord, l’honnêteté</div>

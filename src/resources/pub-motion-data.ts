@@ -70,6 +70,30 @@ export const WHAT_YOU_DO = {
   ],
 };
 
+/**
+ * La démonstration filmée. C'est elle qui enlève le doute : voir quelqu'un le faire
+ * vaut mieux que n'importe quelle explication.
+ *
+ * `youtubeId` vide = aucun bloc affiché. On ne montre jamais un lecteur creux ni un
+ * « bientôt disponible » : tant que la vidéo n'existe pas, la page n'en parle pas.
+ * Pour la publier : coller l'identifiant YouTube ici, et rien d'autre à faire.
+ */
+export const VIDEO = {
+  youtubeId: '',
+  title: 'Je la fais en entier, sans coupure',
+  blurb:
+    'De la page blanche au fichier vidéo : les quatre écrans, le brief collé dans Claude Code, le découpage que je valide, le rendu qui tourne, et la pub qui s’ouvre à la fin. Rien n’est coupé, y compris les moments où j’attends.',
+  /** Affiché sur la vignette. Laisser vide si tu ne veux pas annoncer une durée. */
+  duration: '',
+  /**
+   * Vignette. Mets-en une locale (ex. '/pub-video/vignette.jpg', fichier dans public/) :
+   * rien ne part alors chez Google avant le clic, et tu choisis l'image d'appel.
+   * Laissée vide, on retombe sur la vignette YouTube, servie par i.ytimg.com, et la
+   * mention sous le lecteur le dit.
+   */
+  poster: '',
+};
+
 /** Le bloc qui rassure. La plupart des gens décrochent ici s'il n'est pas dit. */
 export const NOT_NEEDED = {
   no: [

@@ -353,3 +353,25 @@ s'ajoutent ici.
   faut produire » à **« ce qu'il faut savoir regarder »** : accroche trop tardive, appel à
   l'action trop court, première image noire. Le lecteur valide une proposition, il ne la
   fabrique pas.
+
+### D-026 — Démonstration filmée en haut de la ressource, lecteur en façade
+- **Contexte** : Dennis veut se filmer en train de faire la pub et publier ensuite la vidéo sur
+  YouTube. Voir quelqu'un faire règle le problème de compréhension mieux que n'importe quel texte.
+- **Décision** : un **seul film**, placé juste sous « Concrètement, tu fais quoi ? », avant le
+  bloc d'honnêteté. Configuration dans l'objet `VIDEO` de `pub-motion-data.ts`.
+  `youtubeId` vide = **aucun bloc affiché**. Pas de lecteur creux, pas de « bientôt disponible » :
+  tant que la vidéo n'existe pas, la page n'en parle pas.
+- **Lecteur en façade** : une vignette cliquable, et **l'iframe n'est insérée qu'au clic**
+  (`youtube-nocookie.com`). Rien ne se charge pour ceux qui ne regardent pas, et aucun cookie
+  YouTube n'est posé avant une action explicite. Zéro dépendance.
+- **Honnêteté de la mention** : vérifié en navigateur, la vignette par défaut est servie par
+  `i.ytimg.com`, un domaine Google. Écrire « rien n'est demandé à YouTube » serait donc faux
+  dans ce cas. La phrase sous le lecteur s'adapte : avec une vignette **locale** elle affirme
+  que rien ne part avant le clic, sans vignette locale elle précise que seule la vignette vient
+  de leurs serveurs. Le plan de tournage recommande la vignette locale.
+- **Mesure** : `pub_video_play` (D-019).
+- **Plan de tournage** : `~/Documents/DKM/LearningHub/01-pub-ia/scripts/VIDEO-demo-pub-motion.md`.
+  Contrainte retenue : **tourner une pub de 15 secondes**, seule durée qui permette de montrer
+  le rendu en entier sans couper, donc de tenir la promesse « sans coupure ».
+- **Conséquence** : la vidéo devient la première chose que voit un débutant, et elle sert
+  aussi de contenu YouTube autonome. La page reste utilisable sans elle.
