@@ -198,3 +198,23 @@ s'ajoutent ici.
   les pages vues fonctionnent dans tous les cas.
 - **Conséquence** : Claude (Cowork) peut lire les chiffres via le MCP Vercel et les
   intégrer au brief. Aucun tracker tiers, pas de consentement à gérer.
+
+### D-030 — « Checklist Loi 25 » : livrable du mot-clé LOI 25, 100 % client, sans capture
+- **Contexte** : le Reel Loi 25 (publié le 26 sept. 2026) promet une checklist à qui commente
+  « LOI 25 ». Il faut un lien à envoyer en DM le jour même, dans le même esprit que
+  l'Anatomie et le Soul Document.
+- **Décision** : ressource `/resources/loi25` (raccourci partageable `/loi25`, réécrit vers
+  l'URL canonique comme `/anatomie`). Dix affirmations formulées pour que « Oui » = conforme,
+  cinq sur l'outil IA (entraînement, hébergement hors Québec, conservation, accès du
+  fournisseur, entente écrite) et cinq sur l'entreprise (responsable publié, EFVP, information
+  à la collecte, décision automatisée, incidents), chacune avec l'article de la P-39.1, le
+  pourquoi, comment vérifier et quoi faire. Réponses Oui / Non / Je ne sais pas, résultat
+  X/10, liste « à régler » ordonnée (Non, puis Je ne sais pas, puis sans réponse), sanctions,
+  sources officielles (LégisQuébec, CAI), rapport **Markdown** avec prompt en tête, export
+  Blob / presse-papier / impression. Mention « pas un avis juridique » en haut et dans le
+  rapport. `STANDALONE = true` comme l'Anatomie. **Aucune capture courriel** (D-017) : la
+  page n'envoie rien hors du navigateur. Événements (D-019) : `loi25_start`,
+  `loi25_results` (oui, non, nsp), `loi25_download`, `loi25_copy`, `loi25_print`.
+- **Conséquence** : contenu juridique vérifié le 26 sept. 2026 dans `loi25-data.ts` ; toute
+  modification de la loi ou des montants de sanctions se corrige à cet endroit. Une carte
+  « Conformité · Loi 25 » s'ajoute à `/resources`. Zéro dépendance ajoutée.

@@ -5,10 +5,11 @@ import { Brand, Button, Nav, Pill, QuizBlock } from './components';
 import { go } from './nav';
 import SoulDocument from './resources/SoulDocument';
 import Anatomie from './resources/Anatomie';
+import Loi25 from './resources/Loi25';
 import Projects from './Projects';
 import './styles.css';
 
-type View = 'home' | 'courses' | 'course' | 'resources' | 'soul' | 'anatomie' | 'lesson' | 'exam' | 'projects' | 'about';
+type View = 'home' | 'courses' | 'course' | 'resources' | 'soul' | 'anatomie' | 'loi25' | 'lesson' | 'exam' | 'projects' | 'about';
 
 function parseRoute() {
   const path = window.location.pathname.replace(/\/+$/, '') || '/';
@@ -23,6 +24,12 @@ function parseRoute() {
   if (path === '/anatomie') {
     window.history.replaceState({}, '', '/resources/anatomie');
     return { view: 'anatomie' as View };
+  }
+  if (parts[0] === 'resources' && parts[1] === 'loi25') return { view: 'loi25' as View };
+  // Raccourci du mot-clé « LOI 25 » (reel) : /loi25 → canonique /resources/loi25
+  if (path === '/loi25') {
+    window.history.replaceState({}, '', '/resources/loi25');
+    return { view: 'loi25' as View };
   }
   if (path === '/resources') return { view: 'resources' as View };
   if (path === '/projects') return { view: 'projects' as View };
@@ -618,6 +625,19 @@ function Resources() {
           </div>
         </section>
         <section className="section">
+          <div className="card">
+            <div className="eyebrow">Conformité · Loi 25</div>
+            <h2 className="display section-title">Tes clients dans une IA : c’est conforme ?</h2>
+            <p>
+              Dix questions, cinq sur ton outil et cinq sur ton entreprise, avec l’article de loi derrière chacune. Tu repars
+              avec ce qui est à régler, quoi faire, et un rapport <strong>.md</strong> à garder comme trace.
+            </p>
+            <div className="actions">
+              <Button onClick={() => go('/resources/loi25')}>Faire la checklist</Button>
+            </div>
+          </div>
+        </section>
+        <section className="section">
           <div className="card dark">
             <div className="eyebrow">Pourquoi dans cet ordre</div>
             <h2>On ne délègue pas une tâche qu’on n’a jamais nommée.</h2>
@@ -661,6 +681,7 @@ export default function App() {
   if (route.view === 'about') return <About />;
   if (route.view === 'soul') return <SoulDocument />;
   if (route.view === 'anatomie') return <Anatomie />;
+  if (route.view === 'loi25') return <Loi25 />;
   if (route.view === 'exam') return <ExamFlow />;
   if (route.view === 'lesson') return <Lesson moduleId={route.moduleId} />;
   return <Home />;

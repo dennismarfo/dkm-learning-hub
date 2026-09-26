@@ -370,3 +370,29 @@
 @media(max-width:860px){.ana-q-2{grid-template-columns:1fr}.ana-bar{grid-template-columns:120px 1fr 80px}.ana-cand{grid-template-columns:30px 1fr auto;padding:12px 14px}.ana-seg button{padding:8px 10px;font-size:12.5px}.ana-card{padding:22px}}
 @media(max-width:520px){.ana-bar{grid-template-columns:1fr 84px}.ana-bar-track{grid-column:1/-1}.ana-task-head{align-items:flex-start}.ana-seg{width:100%}.ana-seg button{flex:1;text-align:center}}
 @media print{body{background:#fff}.nav,.ana-top,.ana-print-hide,.footer{display:none!important}.ana-shell{max-width:none;padding:0}.card{box-shadow:none;border:0;padding:0}.ana-md{max-height:none;overflow:visible;border:0;background:#fff;padding:0;font-size:11.5px}}
+
+/* ===== Checklist Loi 25 (réutilise les classes ana-*) ===== */
+.l25-disclaimer{margin-top:14px}
+.l25-opt{font-weight:500;color:var(--ink-70);font-size:12px;margin-left:6px}
+.l25-section{margin-top:22px}
+.l25-item .ana-task-label{flex-wrap:nowrap}
+.ana-seg button.on.s-oui{background:#2e7d5b;color:#fff}
+.ana-seg button.on.s-non{background:var(--terracotta);color:#fff}
+.ana-seg button.on.s-nsp{background:var(--ink);color:var(--sand)}
+.l25-item.a-oui{border-color:rgba(46,125,91,.45)}
+.l25-item.a-non{border-color:rgba(200,85,61,.45)}
+.l25-item.a-nsp{background:var(--sand-60);border-color:transparent}
+.l25-more{margin-top:10px;font-size:14px;color:var(--ink-70);line-height:1.5}
+.l25-more summary{cursor:pointer;font-weight:700;font-size:13px;color:var(--terracotta);width:max-content}
+.l25-more p{margin:8px 0 0}
+.l25-more b,.l25-fix b{color:var(--ink)}
+.l25-tag{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:4px 9px;border-radius:999px;white-space:nowrap}
+.l25-tag.t-non{background:var(--terracotta);color:#fff}
+.l25-tag.t-nsp{background:var(--ink);color:var(--sand)}
+.l25-tag.t-none{background:rgba(42,26,18,.1);color:var(--ink)}
+.l25-fix{font-size:14px;color:var(--ink-70);line-height:1.5;margin-top:8px}
+.l25-fix p{margin:6px 0 0}
+.l25-bottom{margin-bottom:22px}
+.l25-sources{margin:12px 0 0;padding-left:18px;line-height:1.5;font-size:14.5px}
+.l25-sources li{margin:6px 0}
+@media(max-width:860px){.l25-bottom{grid-template-columns:1fr}}
