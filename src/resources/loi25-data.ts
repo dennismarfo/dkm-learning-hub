@@ -268,6 +268,12 @@ export function buildReport(c: Check): string {
   for (const s of SANCTIONS) L.push(`- ${s}`);
   L.push('- Les plafonds visent les grandes entreprises, mais les obligations s’appliquent à toutes, peu importe la taille.');
   L.push('');
+  L.push('## Et après ?');
+  L.push('');
+  L.push(
+    'La conformité, c’est le cadre. Pour savoir quoi confier à l’IA en premier, fais l’anatomie de ton entreprise (gratuit, 30 minutes) : https://dkm-learning-hub.vercel.app/anatomie',
+  );
+  L.push('');
   L.push('## Sources');
   L.push('');
   for (const s of SOURCES) L.push(`- [${s.label}](${s.url})`);
