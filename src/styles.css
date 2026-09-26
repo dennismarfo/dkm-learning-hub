@@ -375,6 +375,7 @@
 .l25-disclaimer{margin-top:14px}
 .l25-opt{font-weight:500;color:var(--ink-70);font-size:12px;margin-left:6px}
 .l25-section{margin-top:22px}
+.l25-item .ana-task-label{flex-wrap:nowrap}
 .ana-seg button.on.s-oui{background:#2e7d5b;color:#fff}
 .ana-seg button.on.s-non{background:var(--terracotta);color:#fff}
 .ana-seg button.on.s-nsp{background:var(--ink);color:var(--sand)}

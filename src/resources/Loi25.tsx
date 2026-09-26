@@ -154,7 +154,7 @@ export default function Loi25() {
       <>
         <section className="hero ana-hero">
           <div className="eyebrow">Ressource · Loi 25 · gratuit</div>
-          <h1 className="display h1 ana-h1">Tu mets les données de tes clients dans une IA ?</h1>
+          <h1 className="display h1 ana-h1">Tu mets les données de tes clients dans une IA ?</h1>
           <p className="lead">
             Dix questions pour savoir si c’est conforme à la Loi 25 au Québec. Cinq sur ton outil, cinq sur ton entreprise.
             Dix minutes, sans compte, tes réponses restent dans ton navigateur.
