@@ -218,3 +218,6 @@ s'ajoutent ici.
 - **Conséquence** : contenu juridique vérifié le 26 sept. 2026 dans `loi25-data.ts` ; toute
   modification de la loi ou des montants de sanctions se corrige à cet endroit. Une carte
   « Conformité · Loi 25 » s'ajoute à `/resources`. Zéro dépendance ajoutée.
+- **Ajout (26 sept. 2026)** : l'écran de résultat et le rapport renvoient vers l'Anatomie
+  (« Et après ? »), seule autre page publique du Hub. Événement `loi25_to_anatomie`. Le mode
+  autonome reste en place : aucun lien vers le reste du site.

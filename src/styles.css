@@ -396,3 +396,5 @@
 .l25-sources{margin:12px 0 0;padding-left:18px;line-height:1.5;font-size:14.5px}
 .l25-sources li{margin:6px 0}
 @media(max-width:860px){.l25-bottom{grid-template-columns:1fr}}
+.l25-next{margin-bottom:22px}
+.l25-next p{max-width:720px}

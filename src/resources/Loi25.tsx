@@ -317,6 +317,28 @@ export default function Loi25() {
         </div>
       </div>
 
+      <div className="card dark ana-card l25-next ana-print-hide">
+        <div className="eyebrow">Et après ?</div>
+        <h2 className="display section-title" style={{ marginTop: 8 }}>
+          Savoir quoi confier à l’IA, c’est l’autre moitié.
+        </h2>
+        <p>
+          La Loi 25 te dit comment protéger les données de tes clients. Elle ne te dit pas par où commencer. L’anatomie de
+          ton entreprise te fait voir tes sept fonctions, où part ton temps et le premier processus à confier à l’IA. Trente
+          minutes, gratuit, sans compte.
+        </p>
+        <div className="actions">
+          <Button
+            onClick={() => {
+              track('loi25_to_anatomie');
+              go('/resources/anatomie');
+            }}
+          >
+            Faire l’anatomie de mon entreprise →
+          </Button>
+        </div>
+      </div>
+
       <div className="card ana-card ana-report">
         <div className="eyebrow">Ton rapport</div>
         <h2 className="display section-title" style={{ marginTop: 8 }}>
